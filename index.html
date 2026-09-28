@@ -767,7 +767,7 @@ var MAP_COORDS={
   "스웨덴":{x:492,y:96},"노르웨이":{x:480,y:90},"덴마크":{x:485,y:105},"핀란드":{x:504,y:93},
   "스위스":{x:478,y:130},"오스트리아":{x:490,y:127},"그리스":{x:506,y:148},"터키":{x:538,y:145},
   "이집트":{x:538,y:190},"남아프리카공화국":{x:522,y:365},"케냐":{x:556,y:280},"나이지리아":{x:498,y:260},
-  "사우디아라비아":{x:578,y:206},"이란":{x:612,y:186},"이라크":{x:576,y:180},"아랍에미리트":{x:618,y:212},
+  "사우디아라비아":{x:578,y:206},"이란":{x:612,y:186},"이라크":{x:576,y:180},"아랍에미리트":{x:618,y:212},"체코":{x:440,y:155},"헝가리":{x:452,y:160},"카자흐스탄":{x:600,y:155},
   "이스라엘":{x:546,y:176},"우크라이나":{x:528,y:115},"칠레":{x:232,y:352},"콜롬비아":{x:222,y:266},
   "페루":{x:218,y:296},"모로코":{x:450,y:172},
   "방글라데시":{x:744,y:216},"쿠바":{x:218,y:208},"베네수엘라":{x:238,y:252},
@@ -974,7 +974,8 @@ function renderQuestion(){
 function startTimer(){
   timerLeft=100;
   var fill=document.getElementById("g-timer");fill.style.width="100%";fill.style.background="var(--green)";
-  var sec=TIMER_SEC[gMode]||15;
+  var _dcfg=DIFF_CFG[gDifficulty2]||{timerMult:1};
+  var sec=Math.round((TIMER_SEC[gMode]||15)*_dcfg.timerMult);
   timerInterval=setInterval(function(){
     timerLeft-=(100/(sec*10));
     if(timerLeft<=0){timerLeft=0;fill.style.width="0%";clearInterval(timerInterval);if(!gAnswering)onTimeout();}
@@ -982,7 +983,7 @@ function startTimer(){
   },100);
 }
 function clearTimer(){clearInterval(timerInterval);timerInterval=null;}
-function onTimeout(){if(gAnswering)return;var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(시간초과)",ok:false,wrong:1});document.getElementById("feedback").textContent="⏱ 시간 초과! 정답: "+q.name;document.getElementById("feedback").className="feedback fail";sndWrong();gCombo=0;updateComboUI();gAnswering=true;setTimeout(nextQ,900);}
+function onTimeout(){if(gAnswering)return;var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(시간초과)",ok:false,wrong:1});document.getElementById("feedback").textContent="⏱ 시간 초과! 정답: "+q.name;document.getElementById("feedback").className="feedback fail";sndWrong();loseLife2();gCombo=0;updateComboUI();gAnswering=true;setTimeout(nextQ,900);}
 
 // ─── 초성 ───
 function showHints(){
@@ -1006,7 +1007,7 @@ function showHints(){
   });
   document.getElementById("hint-area").classList.add("visible");
 }
-function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1){document.getElementById("feedback").textContent="❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className="feedback fail";showHints();gHintsUsed=1;}else if(gWrong>=3){document.getElementById("feedback").textContent="💡 정답: "+q.name;document.getElementById("feedback").className="feedback info";gHistory.push({name:q.name,userAns:inp.value,ok:false,wrong:gWrong});clearTimer();gCombo=0;updateComboUI();gAnswering=true;setTimeout(nextQ,1200);return;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째) — 한 번 더!";document.getElementById("feedback").className="feedback fail";}renderWordHints(q);triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
+function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1){var _ac=DIFF_CFG[gDifficulty2];document.getElementById("feedback").textContent=_ac&&_ac.autoHint?"💡 쉬움 모드: 힌트 자동 표시!":"❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className=_ac&&_ac.autoHint?"feedback info":"feedback fail";showHints();gHintsUsed=1;}else if(gWrong>=3){document.getElementById("feedback").textContent="💡 정답: "+q.name;document.getElementById("feedback").className="feedback info";gHistory.push({name:q.name,userAns:inp.value,ok:false,wrong:gWrong});clearTimer();gCombo=0;updateComboUI();gAnswering=true;exitCardAnim(false,function(){nextQ();});return;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째) — 한 번 더!";document.getElementById("feedback").className="feedback fail";}renderWordHints(q);triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
 
 // ─── 국기 ───
 
@@ -1486,7 +1487,14 @@ function setDifficulty2(key){
   gDifficulty2=key;localStorage.setItem('difficulty',key);
   ['easy','normal','hard','expert'].forEach(function(k){var btn=document.getElementById('diff-'+k);if(btn)btn.classList.toggle('active',k===key);});
 }
-function loadDifficulty2(){var s=localStorage.getItem('difficulty')||'normal';setDifficulty2(s);}
+function loadDifficulty2(){
+  var s=localStorage.getItem('difficulty')||'normal';
+  setDifficulty2(s);
+  ['easy','normal','hard','expert'].forEach(function(k){
+    var btn=document.getElementById('diff-'+k);
+    if(btn)btn.classList.toggle('active',k===s);
+  });
+}
 
 // ── LIVES SYSTEM ──
 var gLives2=99;
