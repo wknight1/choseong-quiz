@@ -734,7 +734,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="result-title" id="r-title">퀴즈 완료!</div>
   <div class="star-row" id="star-row"></div>
   <div class="result-score-big" id="r-score">0</div>
-  <div class="result-score-label" id="r-label">/ 20 정답</div>
+  <div class="result-score-label" id="r-label">/ ? 정답</div>
   <div class="result-sub" id="r-sub"></div>
   <div class="result-coins-earned"><span>🪙</span><span id="r-coins-num">+0</span> 코인 획득!</div>
   <div id="r-xp-row" style="text-align:center;font-size:13px;color:var(--indigo);font-weight:700;margin-top:4px;min-height:18px;"></div>
@@ -890,7 +890,7 @@ var COUNTRIES=[
   ,{name:"슬로바키아",flag:"🇸🇰",capital:"브라티슬라바",continent:"europe",hint:"수도 브라티슬라바, 체코슬로바키아에서 1993년 평화적 분리 독립(벨벳 이혼)."}
   ,{name:"크로아티아",flag:"🇭🇷",capital:"자그레브",continent:"europe",hint:"수도 자그레브, 달마티아 해안과 플리트비체 국립공원으로 유명."}
   ,{name:"예멘",flag:"🇾🇪",capital:"사나",continent:"asia",hint:"수도 사나(세계 최고(最古) 도시 중 하나), 아라비아반도 남서 끝 위치."},
-  ,{name:"북마케도니아",flag:"🇲🇰",capital:"스코페",continent:"europe",hint:"수도 스코페, 알렉산더 대왕의 고향 논쟁으로 유명한 발칸반도의 내륙국. EU 가입 협상 진행 중."}
+  {name:"북마케도니아",flag:"🇲🇰",capital:"스코페",continent:"europe",hint:"수도 스코페, 알렉산더 대왕의 고향 논쟁으로 유명한 발칸반도의 내륙국. EU 가입 협상 진행 중."}
   ,{name:"몰도바",flag:"🇲🇩",capital:"키시나우",continent:"europe",hint:"수도 키시나우, 유럽에서 1인당 GDP가 가장 낮은 나라 중 하나. 와인 생산량이 세계 최고 수준."}
   ,{name:"가이아나",flag:"🇬🇾",capital:"조지타운",continent:"americas",hint:"수도 조지타운, 남미 유일의 영어 공용어 국가. 최근 대규모 해저 유전 발견으로 급성장 중."}
 ,{name:"투르크메니스탄",flag:"🇹🇲",capital:"아슈하바트",continent:"asia",hint:"수도 아슈하바트, 세계 최대 천연가스 매장국 중 하나. 카라쿰 사막 '지옥의 문' 천연가스 구덩이"}
@@ -963,7 +963,8 @@ var MAP_COORDS={
   ,"몰타":{x:514,y:212},"키프로스":{x:540,y:210},"리히텐슈타인":{x:490,y:165},"모나코":{x:492,y:177},"산마리노":{x:505,y:180},"지부티":{x:565,y:255},"에리트레아":{x:558,y:248}
 
   "감비아":{x:424,y:234},"카타르":{x:597,y:218},
-"동티모르":{x:838,y:320},"수리남":{x:300,y:310},"적도기니":{x:495,y:315},"몬테네그로":{x:530,y:188}
+"동티모르":{x:838,y:320},"수리남":{x:300,y:310},"적도기니":{x:495,y:315},"몬테네그로":{x:530,y:188},
+  "수단":{x:590,y:251}
 };
 
 var CHARACTERS=[
@@ -1016,6 +1017,7 @@ var COMBO_DATA=[
   {c:4,lbl:"불꽃!",emoji:"🌟",cls:"c4"},{c:5,lbl:"MAX!",emoji:"💥",cls:"c5"},
   {c:6,lbl:"GODLIKE!",emoji:"👑",cls:"c5"},{c:7,lbl:"전설!",emoji:"🌌",cls:"c5"},
   {c:8,lbl:"신급!",emoji:"🪐",cls:"c5"},{c:9,lbl:"우주적!",emoji:"☄️",cls:"c5"},
+  {name:"수단",flag:"🇸🇩",capital:"하르툼",continent:"africa",hint:"수도 하르툼, 아프리카 최대 면적 국가 중 하나. 나일강이 흐르고 고대 메로에 피라미드 보유"}
 ];
 var TOTAL_Q=20;
 
@@ -1418,6 +1420,7 @@ function endGame(){
   document.getElementById("r-title").textContent=title;
   document.getElementById("r-score").textContent=correct;
   document.getElementById("r-label").textContent="/ "+gQuestions.length+" 정답  ·  "+gScore+"점";
+  var tabAll=document.getElementById("rtab-all");if(tabAll)tabAll.textContent="전체 "+gQuestions.length;
   document.getElementById("r-sub").textContent=sub;
   document.getElementById("r-coins-num").textContent="+"+gCoins;
   // Mode badge
@@ -1499,7 +1502,7 @@ function resumeGame() {
     // Reuse a simple deterministic pool using today's date seed same as daily
     var seed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''));
     var arr = pool.slice(); // just shuffle fresh -- user already answered gIdx questions
-    gQuestions = shuffle(arr).slice(0, TOTAL_Q);
+    gQuestions = shuffle(arr).slice(0, snap.totalQ || TOTAL_Q);
     showScreen('game');
     document.getElementById('g-mode-badge').textContent = gMode==='flag'?'🚩 국기':gMode==='map'?'🗺️ 지도':gMode==='focus'?'🎯 집중':gMode==='daily'?'📅 데일리':'🔤 초성';
     document.getElementById('best-indicator').style.display = 'block';
