@@ -545,6 +545,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <button class="mode-btn primary" onclick="startGame('flag')" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🚩 국기 퀴즈 <span class="btn-badge">4지선다</span></button>
     <button class="mode-btn primary" onclick="startGame('map')" style="background:linear-gradient(135deg,#10b981,#0891b2)">🗺️ 지도 찾기 <span class="btn-badge">NEW</span></button>
     <button class="mode-btn primary" id="weak-mode-btn" onclick="startWeakSpotMode()" style="background:linear-gradient(135deg,#7c3aed,#c026d3);display:none;">🎯 약점 집중 <span class="btn-badge">맞춤</span></button>
+    <button class="mode-btn primary" onclick="showContinentPicker()" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">🌍 대륙별 퀴즈 <span class="btn-badge">신규</span></button>
     <button class="mode-btn secondary" onclick="showShop()">🏪 캐릭터 상점 <span style="font-size:11px;color:var(--muted)" id="shop-char-preview"></span></button>
   </div>
 
@@ -816,7 +817,6 @@ var COUNTRIES=[
   // 오세아니아
   {name:"호주",flag:"🇦🇺",hint:"수도 캔버라, 세계 최소 대륙. 캥거루·코알라 서식지",capital:"캔버라",continent:"oceania"},
   {name:"뉴질랜드",flag:"🇳🇿",hint:"수도 웰링턴, 반지의 제왕 촬영지. 마오리 원주민 문화",capital:"웰링턴",continent:"oceania"},
-  {name:"파푸아뉴기니",flag:"🇵🇬",hint:"수도 포트모르즈비, 세계 최다 언어(800개+) 보유국",capital:"포트모르즈비",continent:"oceania"},
   // 서유럽
   {name:"영국",flag:"🇬🇧",hint:"수도 런던, 잉글랜드·스코틀랜드·웨일스·북아일랜드 4개국 연합",capital:"런던",continent:"europe"},
   {name:"프랑스",flag:"🇫🇷",hint:"수도 파리, 에펠탑(324m). 세계 최다 관광객(연 9000만명) 나라",capital:"파리",continent:"europe"},
@@ -903,14 +903,14 @@ var COUNTRIES=[
   {name:"북마케도니아",flag:"🇲🇰",capital:"스코페",continent:"europe",hint:"수도 스코페, 알렉산더 대왕의 고향 논쟁으로 유명한 발칸반도의 내륙국. EU 가입 협상 진행 중."}
   ,{name:"몰도바",flag:"🇲🇩",capital:"키시나우",continent:"europe",hint:"수도 키시나우, 유럽에서 1인당 GDP가 가장 낮은 나라 중 하나. 와인 생산량이 세계 최고 수준."}
   ,{name:"가이아나",flag:"🇬🇾",capital:"조지타운",continent:"americas",hint:"수도 조지타운, 남미 유일의 영어 공용어 국가. 최근 대규모 해저 유전 발견으로 급성장 중."}
-,{name:"투르크메니스탄",flag:"🇹🇲",capital:"아슈하바트",continent:"asia",hint:"수도 아슈하바트, 세계 최대 천연가스 매장국 중 하나. 카라쿰 사막 '지옥의 문' 천연가스 구덩이"}
+
   ,{name:"마다가스카르",flag:"🇲🇬",capital:"안타나나리보",continent:"africa",hint:"수도 안타나나리보, 세계 4번째 큰 섬. 여우원숭이(여우원숭이 100종 이상) 서식하는 독특한 생태계"}
   ,{name:"리비아",flag:"🇱🇾",capital:"트리폴리",continent:"africa",hint:"수도 트리폴리, 북아프리카. 영토 90%가 사하라 사막이며 아프리카 최대 석유 매장국 중 하나"}
   ,{name:"차드",flag:"🇹🇩",capital:"은자메나",continent:"africa",hint:"수도 은자메나, 아프리카 중앙 내륙국. 차드호는 과거 세계 6번째 큰 호수였으나 기후변화로 90% 축소"}
   ,{name:"말리",flag:"🇲🇱",capital:"바마코",continent:"africa",hint:"수도 바마코, 서아프리카 내륙국. 팀북투(Timbuktu)는 중세 이슬람 학문의 중심지이자 사하라 황금 교역로"}
   ,{name:"부르키나파소",flag:"🇧🇫",capital:"와가두구",continent:"africa",hint:"수도 와가두구, 서아프리카 내륙국. 국명은 현지어로 '정직한 사람들의 나라'라는 뜻"}
   ,{name:"사모아",flag:"🇼🇸",capital:"아피아",continent:"oceania",hint:"수도 아피아, 남태평양 폴리네시아 화산섬. 세계에서 처음 새해를 맞는 나라 중 하나"}
-  ,{name:"통가",flag:"🇹🇴",capital:"누쿠알로파",continent:"oceania",hint:"수도 누쿠알로파, 태평양의 유일한 입헌군주국"}
+
   ,{name:"키리바시",flag:"🇰🇮",capital:"타라와",continent:"oceania",hint:"수도 타라와, 날짜변경선에 걸친 산호초 섬나라. 해수면 상승으로 수몰 위기"}
   ,{name:"팔라우",flag:"🇵🇼",capital:"응게룰무드",continent:"oceania",hint:"수도 응게룰무드, 미크로네시아 다이빙 천국. 해파리 호수로 유명"}
   ,{name:"마샬군도",flag:"🇲🇭",capital:"마주로",continent:"oceania",hint:"수도 마주로, 29개 환초로 이뤄진 태평양 섬나라. 비키니 환초 핵실험 지역"},
@@ -1055,7 +1055,13 @@ var LEVELS=[
   {level:17,min:17000,name:"지리 레전드",emoji:"👑"},{level:18,min:20500,name:"대지의 수호자",emoji:"🌿"},
   {level:19,min:24500,name:"전설의 탐험가",emoji:"🔱"},{level:20,min:29000,name:"지리 박사",emoji:"🎖️"},,
   {name:"아르메니아",flag:"🇦🇲",continent:"asia",capital:"예레반",hint:"수도 예레반, 세계 최초 기독교 공식 채택 국가(301년). 아라라트 산 자락의 코카서스 소국."},
-  {name:"알제리",flag:"🇩🇿",continent:"africa",capital:"알제",hint:"수도 알제, 아프리카 최대 면적 국가. 사하라 사막이 85%. 석유·가스 수출 대국."}
+  {name:"알제리",flag:"🇩🇿",continent:"africa",capital:"알제",hint:"수도 알제, 아프리카 최대 면적 국가. 사하라 사막이 85%. 석유·가스 수출 대국."},
+  {name:"세이셸",flag:"🇸🇨",continent:"africa",capital:"빅토리아",hint:"수도 빅토리아, 인도양 115개 섬 군도. 세계 최상위 럭셔리 관광지. 자이언트 육지거북 서식."},
+  {name:"베냉",flag:"🇧🇯",continent:"africa",capital:"포르토노보",hint:"수도 포르토노보, 서아프리카. 부두교(Voodoo)의 본고장. 다호메이 왕국 역사 유적지."},
+  {name:"토고",flag:"🇹🇬",continent:"africa",capital:"로메",hint:"수도 로메, 아프리카 최슬림국 중 하나. 로메는 대서양 직접 면한 유일한 서아프리카 수도."},
+  {name:"파푸아뉴기니",flag:"🇵🇬",continent:"oceania",capital:"포트모르즈비",hint:"수도 포트모르즈비, 세계 최다 언어(800개+). 뉴기니 섬 동쪽. 오세아니아 최대 면적·인구."},
+  {name:"통가",flag:"🇹🇴",continent:"oceania",capital:"누쿠알로파",hint:"수도 누쿠알로파, 태평양 왕국. 폴리네시아 유일 군주제 독립국. 2022년 해저화산 폭발."},
+  {name:"투르크메니스탄",flag:"🇹🇲",continent:"asia",capital:"아슈하바트",hint:"수도 아슈하바트, 세계 최고 백색 대리석 건물 밀도. 다르바자 가스 분화구(지옥문) 60년째 연소 중."}
 ];
 
 var DAILY_BONUS=[10,15,25,35,50,75,120];
@@ -2094,13 +2100,13 @@ function copyShareText2(){
 function _fallbackCopy(text){  try{navigator.clipboard.writeText(text).then(function(){showModal("📋","클립보드 복사!","친구에게 공유해보세요!",null,null,"확인",null);});}catch(e){showModal("📋","공유 텍스트",text,null,null,"닫기",null);}
 }
 
-function loadStats2(){var s=localStorage.getItem('quizStats2');if(s)try{return JSON.parse(s);}catch(e){}return {plays:0,totalCorrect:0,totalAnswered:0,maxCombo:0,bestScores:{choseong:0,flag:0,map:0,daily:0,focus:0,weakspot:0},wrongMap:{}};}
+function loadStats2(){var s=localStorage.getItem('quizStats2');if(s)try{return JSON.parse(s);}catch(e){}return {plays:0,totalCorrect:0,totalAnswered:0,maxCombo:0,bestScores:{choseong:0,flag:0,map:0,daily:0,focus:0,weakspot:0,continent:0},wrongMap:{}};}
 function saveStats2(st){localStorage.setItem('quizStats2',JSON.stringify(st));}
 function recordGameStats2(mode,score,history,maxCombo){
   var st=loadStats2();st.plays++;
   history.forEach(function(h){st.totalAnswered++;if(h.ok)st.totalCorrect++;else st.wrongMap[h.name]=(st.wrongMap[h.name]||0)+1;});
   if(maxCombo>(st.maxCombo||0))st.maxCombo=maxCombo;
-  var k=mode==='flag'?'flag':mode==='map'?'map':mode==='daily'?'daily':mode==='focus'?'focus':mode==='weakspot'?'weakspot':'choseong';
+  var k=mode==='flag'?'flag':mode==='map'?'map':mode==='daily'?'daily':mode==='focus'?'focus':mode==='weakspot'?'weakspot':(mode&&mode.indexOf('continent_')===0)?'continent':'choseong';
   if(score>(st.bestScores[k]||0))st.bestScores[k]=score;
   saveStats2(st);
 }
