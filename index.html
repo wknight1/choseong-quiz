@@ -298,6 +298,29 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 .settings-btn{flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:var(--sub);font-size:13px;font-weight:700;padding:10px 8px;cursor:pointer;-webkit-appearance:none;font-family:inherit;min-width:80px;text-align:center;}
 .map-zoom-btn{width:30px;height:30px;background:rgba(30,41,59,.9);border:1.5px solid var(--border);border-radius:8px;color:var(--fg);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;line-height:1;}
 #stats-screen{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto;padding:16px;}
+#encyclopedia-screen{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto;padding:16px;}
+.enc-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.enc-filter-btn{padding:5px 12px;border-radius:99px;border:1.5px solid var(--border);background:var(--card);color:var(--sub);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.enc-filter-btn.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+.enc-search{width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);color:var(--fg);font-size:14px;margin-bottom:10px;box-sizing:border-box;}
+.enc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.enc-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;transition:transform .15s,border-color .15s;}
+.enc-card:active{transform:scale(.97);}
+.enc-card.viewed{border-color:var(--indigo);}
+.enc-flag{font-size:30px;text-align:center;margin-bottom:4px;}
+.enc-name{font-size:13px;font-weight:800;text-align:center;color:var(--fg);}
+.enc-capital{font-size:10px;color:var(--sub);text-align:center;margin-top:2px;}
+.enc-continent-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 7px;border-radius:99px;background:rgba(99,102,241,.15);color:var(--indigo);margin-top:3px;}
+.enc-detail-overlay{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.7);align-items:center;justify-content:center;}
+.enc-detail-overlay.open{display:flex;}
+.enc-detail-card{background:var(--card);border-radius:20px;padding:24px;max-width:320px;width:90%;text-align:center;border:1.5px solid var(--border);}
+.enc-detail-flag{font-size:60px;margin-bottom:8px;}
+.enc-detail-name{font-size:22px;font-weight:900;color:var(--fg);}
+.enc-detail-capital{font-size:14px;color:var(--sub);margin:4px 0;}
+.enc-detail-hint{font-size:13px;color:var(--muted);margin:10px 0;line-height:1.5;}
+.enc-detail-stats{display:flex;gap:12px;justify-content:center;margin-top:12px;}
+.enc-detail-stat{background:var(--bg);border-radius:10px;padding:6px 14px;font-size:12px;font-weight:700;}
+.enc-progress{font-size:11px;color:var(--sub);text-align:center;margin-bottom:8px;}
 
 /* ══ SOUND PANEL ══ */
 .sound-panel{background:var(--card);border-radius:16px;padding:14px;margin-bottom:0;border:1.5px solid var(--border);display:none}
@@ -410,6 +433,39 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   </div>
 </div>
 
+<!-- ══ ENCYCLOPEDIA SCREEN ══ -->
+<div id="encyclopedia-screen">
+  <div style="max-width:480px;margin:0 auto;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <button onclick="closeEncyclopedia()" style="background:var(--card);border:1.5px solid var(--border);border-radius:10px;color:var(--fg);font-size:16px;padding:8px 14px;cursor:pointer;font-family:inherit;">← 뒤로</button>
+      <h2 style="font-size:20px;font-weight:900;">🌍 나라 도감</h2>
+    </div>
+    <input class="enc-search" id="enc-search" type="text" placeholder="🔍 나라 이름 검색..." oninput="filterEncyclopedia()" />
+    <div class="enc-filter-bar" id="enc-filter-bar">
+      <button class="enc-filter-btn active" onclick="setEncFilter('all',this)">전체</button>
+      <button class="enc-filter-btn" onclick="setEncFilter('asia',this)">🌏 아시아</button>
+      <button class="enc-filter-btn" onclick="setEncFilter('europe',this)">🌍 유럽</button>
+      <button class="enc-filter-btn" onclick="setEncFilter('americas',this)">🌎 아메리카</button>
+      <button class="enc-filter-btn" onclick="setEncFilter('africa',this)">🌍 아프리카</button>
+      <button class="enc-filter-btn" onclick="setEncFilter('oceania',this)">🌊 오세아니아</button>
+    </div>
+    <div class="enc-progress" id="enc-progress"></div>
+    <div class="enc-grid" id="enc-grid"></div>
+  </div>
+</div>
+
+<!-- ══ ENCYCLOPEDIA DETAIL OVERLAY ══ -->
+<div class="enc-detail-overlay" id="enc-detail-overlay" onclick="closeEncDetail(event)">
+  <div class="enc-detail-card" id="enc-detail-card">
+    <div class="enc-detail-flag" id="enc-detail-flag"></div>
+    <div class="enc-detail-name" id="enc-detail-name"></div>
+    <div class="enc-detail-capital" id="enc-detail-capital"></div>
+    <div class="enc-detail-hint" id="enc-detail-hint"></div>
+    <div class="enc-detail-stats" id="enc-detail-stats"></div>
+    <button onclick="closeEncDetail(null)" style="margin-top:14px;padding:8px 24px;border-radius:10px;background:var(--indigo);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;">닫기</button>
+  </div>
+</div>
+
 <!-- ══ CHALLENGE POPUP ══ -->
 <div class="challenge-popup" id="challenge-popup">
   <div class="challenge-card">
@@ -508,11 +564,12 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     </div>
   </div>
 
-  <!-- Bottom row: Stats / Daily / Sound -->
+  <!-- Bottom row: Stats / Daily / Sound / Encyclopedia -->
   <div class="home-bottom-row">
     <button class="home-icon-btn" onclick="openStats()">📊<br><span style="font-size:10px;">통계</span></button>
     <button class="home-icon-btn" id="daily-chal-main-btn" onclick="startDailyChallenge()">📅<br><span style="font-size:10px;">데일리</span></button>
     <button class="home-icon-btn" onclick="toggleSoundPanel()">🎵<br><span style="font-size:10px;">사운드</span></button>
+    <button class="home-icon-btn" onclick="openEncyclopedia()">🌍<br><span style="font-size:10px;">도감</span></button>
   </div>
 
   <!-- Sound panel (collapsed by default) -->
@@ -1768,6 +1825,111 @@ function openStats(){
   drawRadar(st);
 }
 function closeStats(){var el=document.getElementById('stats-screen');if(el)el.style.display='none';}
+
+// ═══════════════════════ ENCYCLOPEDIA ═══════════════════════
+var _encFilter = 'all';
+var CONT_LABEL = {asia:'🌏 아시아', europe:'🌍 유럽', americas:'🌎 아메리카', africa:'🌍 아프리카', oceania:'🌊 오세아니아', middleeast:'🕌 중동'};
+
+function openEncyclopedia() {
+  var el = document.getElementById('encyclopedia-screen');
+  if (!el) return;
+  el.style.display = 'block';
+  _encFilter = 'all';
+  var btns = document.querySelectorAll('.enc-filter-btn');
+  btns.forEach(function(b) { b.classList.remove('active'); });
+  if (btns[0]) btns[0].classList.add('active');
+  var si = document.getElementById('enc-search');
+  if (si) si.value = '';
+  renderEncyclopedia();
+}
+
+function closeEncyclopedia() {
+  var el = document.getElementById('encyclopedia-screen');
+  if (el) el.style.display = 'none';
+}
+
+function setEncFilter(filter, btn) {
+  _encFilter = filter;
+  document.querySelectorAll('.enc-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderEncyclopedia();
+}
+
+function filterEncyclopedia() { renderEncyclopedia(); }
+
+function renderEncyclopedia() {
+  var grid = document.getElementById('enc-grid');
+  var prog = document.getElementById('enc-progress');
+  if (!grid) return;
+  var q = (document.getElementById('enc-search') || {value:''}).value.toLowerCase().trim();
+  var wrongMap = getWrongMap() || {};
+  var st2 = loadStats2() || {};
+  var viewed = JSON.parse(localStorage.getItem('enc_viewed') || '{}');
+
+  var filtered = COUNTRIES.filter(function(c) {
+    if (_encFilter !== 'all' && c.continent !== _encFilter) return false;
+    if (q && !c.name.toLowerCase().includes(q) && !(c.capital||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  // Sort: wrongMap (most wrong first), then alphabetically
+  filtered.sort(function(a, b) {
+    var wa = wrongMap[a.name] || 0, wb = wrongMap[b.name] || 0;
+    if (wb !== wa) return wb - wa;
+    return a.name.localeCompare(b.name);
+  });
+
+  var viewedCount = Object.keys(viewed).length;
+  prog.textContent = '📖 ' + viewedCount + ' / ' + COUNTRIES.length + '개 나라 열람';
+
+  grid.innerHTML = filtered.map(function(c) {
+    var wc = wrongMap[c.name] || 0;
+    var isViewed = viewed[c.name];
+    var badge = wc >= 3 ? '<div style="font-size:9px;color:#f87171;font-weight:700;margin-top:2px;">❌ ' + wc + '회 오답</div>' :
+                wc >= 1 ? '<div style="font-size:9px;color:#fb923c;font-weight:700;margin-top:2px;">⚠️ ' + wc + '회 오답</div>' : '';
+    var contLabel = CONT_LABEL[c.continent] || c.continent || '';
+    return '<div class="enc-card' + (isViewed ? ' viewed' : '') + '" onclick="showEncDetail(\'' + c.name.replace(/'/g,"\\'") + '\')">' +
+      '<div class="enc-flag">' + (c.flag || '🌐') + '</div>' +
+      '<div class="enc-name">' + c.name + '</div>' +
+      '<div class="enc-capital">' + (c.capital ? '🏛️ ' + c.capital : '') + '</div>' +
+      '<div style="text-align:center"><span class="enc-continent-badge">' + contLabel + '</span></div>' +
+      badge +
+    '</div>';
+  }).join('');
+}
+
+function showEncDetail(name) {
+  var c = COUNTRIES.find(function(x){return x.name===name;});
+  if (!c) return;
+
+  // Mark as viewed
+  var viewed = JSON.parse(localStorage.getItem('enc_viewed') || '{}');
+  viewed[name] = true;
+  localStorage.setItem('enc_viewed', JSON.stringify(viewed));
+
+  var wm = getWrongMap() || {};
+  var wrongCount = wm[name] || 0;
+
+  document.getElementById('enc-detail-flag').textContent = c.flag || '🌐';
+  document.getElementById('enc-detail-name').textContent = c.name;
+  document.getElementById('enc-detail-capital').textContent = c.capital ? '🏛️ 수도: ' + c.capital : '';
+  document.getElementById('enc-detail-hint').textContent = c.hint || '';
+  document.getElementById('enc-detail-stats').innerHTML =
+    '<div class="enc-detail-stat" style="color:var(--sky);">' + (CONT_LABEL[c.continent] || c.continent || '?') + '</div>' +
+    (wrongCount > 0 ? '<div class="enc-detail-stat" style="color:#f87171;">❌ ' + wrongCount + '회 오답</div>' : '<div class="enc-detail-stat" style="color:#4ade80;">✅ 완벽</div>');
+
+  var ov = document.getElementById('enc-detail-overlay');
+  if (ov) ov.classList.add('open');
+
+  // Re-render to show viewed state
+  renderEncyclopedia();
+}
+
+function closeEncDetail(e) {
+  if (e && e.target !== document.getElementById('enc-detail-overlay')) return;
+  var ov = document.getElementById('enc-detail-overlay');
+  if (ov) ov.classList.remove('open');
+}
 function drawRadar(st){
   var svg=document.getElementById('radar-chart');if(!svg)return;
   var axes=[{label:'초성',value:Math.min(100,Math.round((st.bestScores.choseong||0)/5))},{label:'국기',value:Math.min(100,Math.round((st.bestScores.flag||0)/5))},{label:'지도',value:Math.min(100,Math.round((st.bestScores.map||0)/5))},{label:'정확도',value:st.totalAnswered?Math.round(st.totalCorrect/st.totalAnswered*100):0},{label:'콤보',value:Math.min(100,(st.maxCombo||0)*10)}];
