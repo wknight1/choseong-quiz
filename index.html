@@ -627,6 +627,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 
 <!-- ══ RESULT ══ -->
 <div class="screen" id="result">
+  <div id="r-mode-badge" style="display:inline-block;padding:4px 14px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:8px;background:rgba(56,189,248,0.15);color:var(--sky);border:1px solid var(--sky);"></div>
   <div class="result-emoji" id="r-emoji">🎉</div>
   <div class="result-title" id="r-title">퀴즈 완료!</div>
   <div class="star-row" id="star-row"></div>
@@ -634,6 +635,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="result-score-label" id="r-label">/ 20 정답</div>
   <div class="result-sub" id="r-sub"></div>
   <div class="result-coins-earned"><span>🪙</span><span id="r-coins-num">+0</span> 코인 획득!</div>
+  <div id="r-xp-row" style="text-align:center;font-size:13px;color:var(--indigo);font-weight:700;margin-top:4px;min-height:18px;"></div>
   <div class="result-tabs" id="result-tabs">
     <button class="rtab active" id="rtab-all" onclick="filterResult('all')">전체 20</button>
     <button class="rtab" id="rtab-ok" onclick="filterResult('ok')">✓ 정답</button>
@@ -752,7 +754,8 @@ var COUNTRIES=[
   {name:"파나마",flag:"🇵🇦",continent:"americas",capital:"파나마시티",hint:"🌎 대서양과 태평양을 잇는 운하의 나라"},
   {name:"조지아",flag:"🇬🇪",continent:"europe",capital:"트빌리시",hint:"🌍 캅카스 산맥의 와인 발상지"},
   {name:"우루과이",flag:"🇺🇾",continent:"americas",capital:"몬테비데오",hint:"🌎 남미 최소 국가 중 하나, 복지강국"},
-  {name:"오만",flag:"🇴🇲",continent:"asia",capital:"무스카트",hint:"🌏 아라비아 반도 동남부 술탄국"}
+  {name:"오만",flag:"🇴🇲",continent:"asia",capital:"무스카트",hint:"🌏 아라비아 반도 동남부 술탄국"},
+  {name:"코스타리카",flag:"🇨🇷",continent:"americas",capital:"산호세",hint:"🌎 세계에서 군대를 헌법으로 폐지한 나라, 커피의 나라"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -777,7 +780,7 @@ var MAP_COORDS={
   "미얀마":{x:772,y:218},,
     "아이슬란드":{x:300,y:65},"네팔":{x:728,y:202},"볼리비아":{x:250,y:328},
   "짐바브웨":{x:520,y:358},"파나마":{x:205,y:265},
-  "쿠바":{x:210,y:238},"조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238}
+  "쿠바":{x:210,y:238},"조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},"에티오피아":{x:363,y:268},"탄자니아":{x:367,y:307},"파키스탄":{x:484,y:214}
 };
 
 var CHARACTERS=[
@@ -1165,6 +1168,14 @@ function endGame(){
   document.getElementById("r-label").textContent="/ "+TOTAL_Q+" 정답  ·  "+gScore+"점";
   document.getElementById("r-sub").textContent=sub;
   document.getElementById("r-coins-num").textContent="+"+gCoins;
+  // Mode badge
+  var modeLabels={choseong:'🔤 초성 퀴즈',flag:'🚩 국기 퀴즈',map:'🗺️ 지도 퀴즈'};
+  var mb=document.getElementById('r-mode-badge');
+  if(mb)mb.textContent=modeLabels[gMode]||gMode;
+  // XP row: show XP gained (10 per correct + combo bonus)
+  var xpGained=correct*10+Math.min(ST.maxCombo,10)*5;
+  var xpEl=document.getElementById('r-xp-row');
+  if(xpEl)xpEl.textContent=xpGained>0?('✨ +'+xpGained+' XP 획득'):'';
   renderStarResult(correct,TOTAL_Q);
   gResultFilter = "fail"; renderResultList(); // show wrong answers by default
   showScreen("result");
@@ -1398,6 +1409,7 @@ function toggleSFX2(){
 }
 function toggleBGMBtn(){
   bgmEnabled=!bgmEnabled;
+  localStorage.setItem('bgmEnabled',bgmEnabled?'1':'0');
   var btn=document.getElementById('bgm-toggle');
   if(btn)btn.classList.toggle('on',bgmEnabled);
   if(bgmEnabled)startBGM();else stopBGM();
@@ -1669,6 +1681,36 @@ endGame = function() {
 loadTheme();
 loadDifficulty2();
 loadChoiceMode();
+
+// Restore sound/haptic settings from localStorage
+(function loadSoundSettings() {
+  // SFX
+  var sfx = localStorage.getItem('sfxEnabled');
+  if (sfx !== null) { sfxEnabled = sfx !== '0'; }
+  var sfxBtn = document.getElementById('sfx-toggle');
+  if (sfxBtn) sfxBtn.classList.toggle('on', sfxEnabled);
+  // Haptic
+  var hap = localStorage.getItem('hapticEnabled');
+  if (hap !== null) { hapticEnabled = hap !== '0'; }
+  var hapBtn = document.getElementById('haptic-toggle');
+  if (hapBtn) hapBtn.classList.toggle('on', hapticEnabled);
+  // BGM
+  var bgm = localStorage.getItem('bgmEnabled');
+  if (bgm === '1') { bgmEnabled = true; }
+  var bgmBtn = document.getElementById('bgm-toggle');
+  if (bgmBtn) bgmBtn.classList.toggle('on', bgmEnabled);
+  // BGM volume
+  var vol = localStorage.getItem('bgmVolume');
+  if (vol !== null) {
+    bgmVolume = parseFloat(vol) || 0.18;
+    var volSlider = document.getElementById('bgm-vol');
+    if (volSlider) volSlider.value = Math.round(bgmVolume * 100 / 0.4);
+  }
+  // Preset
+  var preset = localStorage.getItem('soundPreset');
+  if (preset) setPreset(preset);
+})();
+
 setTimeout(function(){ checkChallengeParam2(); updateDailyChalBtn(); }, 300);
 // Override startGame to init lives
 var _origStartGame = startGame;
