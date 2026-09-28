@@ -887,7 +887,10 @@ var COUNTRIES=[
   {name:"스리랑카",flag:"🇱🇰",capital:"스리자야와르데네푸라코테",continent:"asia",hint:"수도 콜롬보(행정). 인도양 섬나라, 실론티(홍차)와 보석 원산지. 세계 최대 차 수출국"},
   {name:"라오스",flag:"🇱🇦",capital:"비엔티안",continent:"asia",hint:"수도 비엔티안. 동남아 유일 내륙국. 메콩 강 따라 불교 사원과 열대우림"},
   {name:"아이티",flag:"🇭🇹",capital:"포르토프랭스",continent:"americas",hint:"수도 포르토프랭스. 중미 최빈국 중 하나. 세계 최초 노예 해방 독립국(1804)"}
-  {name:"바레인",flag:"🇧🇭",capital:"마나마",continent:"asia",hint:"수도 마나마, 페르시아만의 섬나라. 아랍 최초로 석유 발견(1932년), 세계 최대 알루미늄 제련소 보유"},
+  {name:"바레인",flag:"🇧🇭",capital:"마나마",continent:"asia",hint:"수도 마나마, 페르시아만의 섬나라. 아랍 최초로 석유 발견(1932년), 세계 최대 알루미늄 제련소 보유"}
+  ,{name:"슬로바키아",flag:"🇸🇰",capital:"브라티슬라바",continent:"europe",hint:"수도 브라티슬라바, 체코슬로바키아에서 1993년 평화적 분리 독립(벨벳 이혼)."}
+  ,{name:"크로아티아",flag:"🇭🇷",capital:"자그레브",continent:"europe",hint:"수도 자그레브, 달마티아 해안과 플리트비체 국립공원으로 유명."}
+  ,{name:"예멘",flag:"🇾🇪",capital:"사나",continent:"asia",hint:"수도 사나(세계 최고(最古) 도시 중 하나), 아라비아반도 남서 끝 위치."},
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -920,7 +923,7 @@ var MAP_COORDS={
   "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},
   "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
   "피지":{x:880,y:330},"바누아투":{x:862,y:320},"파라과이":{x:290,y:380},"쿠웨이트":{x:605,y:225},"요르단":{x:580,y:222},"튀니지":{x:495,y:188},"도미니카공화국":{x:257,y:255},
-  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270},"우간다":{x:540,y:305},"스리랑카":{x:700,y:275},"라오스":{x:770,y:248},"아이티":{x:215,y:248}
+  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270},"우간다":{x:540,y:305},"스리랑카":{x:700,y:275},"라오스":{x:770,y:248},"아이티":{x:215,y:248},"슬로바키아":{x:490,y:148},"크로아티아":{x:480,y:158},"예멘":{x:610,y:268}
 };
 
 var CHARACTERS=[
@@ -1106,11 +1109,11 @@ function renderQuestion(){
   clearTimer();_dangerActive=false;
   var q=gQuestions[gIdx];
   gWrong=0;gHintsUsed=0;gAnswering=false;gMapClicked=false;
-  document.getElementById("q-num").textContent=(gIdx+1)+" / "+TOTAL_Q;
+  document.getElementById("q-num").textContent=(gIdx+1)+" / "+gQuestions.length;
   document.getElementById("feedback").textContent="";
   document.getElementById("feedback").className="feedback";
   document.getElementById("q-badge").textContent="나라 이름 맞추기";
-  document.getElementById("g-prog").style.width=(gIdx/TOTAL_Q*100)+"%";
+  document.getElementById("g-prog").style.width=(gIdx/gQuestions.length*100)+"%";
   document.getElementById("choseong-mode").style.display="none";
   document.getElementById("flag-mode").style.display="none";
   document.getElementById("map-mode").style.display="none";
@@ -1323,7 +1326,7 @@ function onCorrect(el,cls,e){
   setTimeout(nextQ,700);
 }
 
-function nextQ(){gIdx++;if(gIdx>=TOTAL_Q){endGame();return;}autosave();renderQuestion();updateGameUI();}
+function nextQ(){gIdx++;if(gIdx>=gQuestions.length){endGame();return;}autosave();renderQuestion();updateGameUI();}
 
 function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);gAnswering=true;setTimeout(nextQ,700);}
 
@@ -1337,8 +1340,8 @@ function endGame(){
   clearTimer();_dangerActive=false;
   document.getElementById("best-indicator").style.display="none";
   var correct=gHistory.filter(function(h){return h.ok;}).length;
-  var isPerfect=correct===TOTAL_Q;if(isPerfect)ST.perfectGames++;
-  var pct=correct/TOTAL_Q;
+  var isPerfect=correct===gQuestions.length;if(isPerfect)ST.perfectGames++;
+  var pct=correct/gQuestions.length;
   var emoji="😢",title="아쉬워요!",sub="다시 한번 도전해보세요!";
   if(pct>=.9){emoji="🏆";title="완벽해요!";sub="나라 박사 인증! 대단해요 🌍";}
   else if(pct>=.7){emoji="🥳";title="잘하셨어요!";sub="훌륭한 실력이에요!";}
@@ -1366,7 +1369,7 @@ function endGame(){
   document.getElementById("r-emoji").textContent=emoji;
   document.getElementById("r-title").textContent=title;
   document.getElementById("r-score").textContent=correct;
-  document.getElementById("r-label").textContent="/ "+TOTAL_Q+" 정답  ·  "+gScore+"점";
+  document.getElementById("r-label").textContent="/ "+gQuestions.length+" 정답  ·  "+gScore+"점";
   document.getElementById("r-sub").textContent=sub;
   document.getElementById("r-coins-num").textContent="+"+gCoins;
   // Mode badge
@@ -1527,8 +1530,15 @@ function renderChoiceBtns() {
 // ═══════════════════════ WEAK SPOT MODE ═══════════════════════
 function getWrongMap() {
   try {
-    var stats = JSON.parse(localStorage.getItem('quizStats') || '{}');
-    return stats.wrongMap || {};
+    // Merge from both legacy quizStats and new quizStats2
+    var s1 = JSON.parse(localStorage.getItem('quizStats') || '{}');
+    var s2 = JSON.parse(localStorage.getItem('quizStats2') || '{}');
+    var m1 = s1.wrongMap || {};
+    var m2 = s2.wrongMap || {};
+    var merged = {};
+    Object.keys(m1).forEach(function(k){ merged[k] = (merged[k]||0) + m1[k]; });
+    Object.keys(m2).forEach(function(k){ merged[k] = (merged[k]||0) + m2[k]; });
+    return merged;
   } catch(e) { return {}; }
 }
 
