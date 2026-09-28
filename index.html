@@ -749,6 +749,14 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 <div class="screen" id="result">
   <div id="r-mode-badge" style="display:inline-block;padding:4px 14px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:8px;background:rgba(56,189,248,0.15);color:var(--sky);border:1px solid var(--sky);"></div>
   <div id="r-mode-best" style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;min-height:16px;"></div>
+  <div id="r-vs-bar" style="display:none;width:100%;max-width:320px;margin:0 auto 8px;padding:0 16px;">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;">
+      <span>이번</span><span id="r-vs-label">vs 최고</span>
+    </div>
+    <div style="background:var(--card2);border-radius:8px;height:8px;overflow:hidden;position:relative;">
+      <div id="r-vs-fill" style="height:100%;border-radius:8px;background:linear-gradient(90deg,#22d3ee,#818cf8);transition:width 1s ease-out;width:0%"></div>
+    </div>
+  </div>
   <div class="result-emoji" id="r-emoji">🎉</div>
   <div class="result-title" id="r-title">퀴즈 완료!</div>
   <div class="star-row" id="star-row"></div>
@@ -1606,7 +1614,7 @@ function onCorrect(el,cls,e){
 
 function nextQ(){gWrong=0;gIdx++;if(gIdx>=gQuestions.length){endGame();return;}autosave();renderQuestion();updateGameUI();}
 
-function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);gAnswering=true;setTimeout(nextQ,700);}
+function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0,skipped:true});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);showLearnCard(q);gAnswering=true;setTimeout(nextQ,1100);}
 
 function updateGameUI(){
   document.getElementById("g-coins").textContent=ST.coins+gCoins;
@@ -1657,7 +1665,7 @@ function endGame(){
   document.getElementById("r-score").textContent=correct;
   document.getElementById("r-label").textContent="/ "+gQuestions.length+" 정답  ·  "+gScore+"점";
   var tabAll=document.getElementById("rtab-all");if(tabAll)tabAll.textContent="전체 "+gQuestions.length;
-  document.getElementById("r-sub").textContent=sub;
+  document.getElementById("r-sub").textContent=sub;var _skipped=gHistory.filter(function(h){return h.skipped;}).length;if(_skipped>0)document.getElementById("r-sub").textContent+=(" | 건너뜀 "+_skipped+"회");
   document.getElementById("r-coins-num").textContent="+"+gCoins;
   // Animate coin count
   (function(){var el=document.getElementById("r-coins-num");var target=gCoins;var cur=0;var step=Math.max(1,Math.ceil(target/20));var iv=setInterval(function(){cur=Math.min(cur+step,target);el.textContent="+"+cur;if(cur>=target)clearInterval(iv);},40);})();
@@ -1669,7 +1677,10 @@ function endGame(){
   var xpGained=correct*10+Math.min(ST.maxCombo,10)*5;
   var xpEl=document.getElementById('r-xp-row');
   if(xpEl)xpEl.textContent=xpGained>0?('✨ +'+xpGained+' XP 획득'):'';
-  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점","continent_asia":"🌏 아시아","continent_europe":"🌍 유럽","continent_americas":"🌎 아메리카","continent_africa":"🌍 아프리카","continent_oceania":"🌊 오세아니아","continent_all":"🌐 전체","continent_asia_choseong":"🌏 아시아 초성","continent_asia_flag":"🌏 아시아 국기","continent_europe_choseong":"🌍 유럽 초성","continent_europe_flag":"🌍 유럽 국기","continent_americas_choseong":"🌎 아메리카 초성","continent_americas_flag":"🌎 아메리카 국기","continent_africa_choseong":"🌍 아프리카 초성","continent_africa_flag":"🌍 아프리카 국기","continent_oceania_choseong":"🌊 오세아니아 초성","continent_oceania_flag":"🌊 오세아니아 국기","continent_all_choseong":"🌐 전체 초성","continent_all_flag":"🌐 전체 국기"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=(_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점";
+  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점","continent_asia":"🌏 아시아","continent_europe":"🌍 유럽","continent_americas":"🌎 아메리카","continent_africa":"🌍 아프리카","continent_oceania":"🌊 오세아니아","continent_all":"🌐 전체","continent_asia_choseong":"🌏 아시아 초성","continent_asia_flag":"🌏 아시아 국기","continent_europe_choseong":"🌍 유럽 초성","continent_europe_flag":"🌍 유럽 국기","continent_americas_choseong":"🌎 아메리카 초성","continent_americas_flag":"🌎 아메리카 국기","continent_africa_choseong":"🌍 아프리카 초성","continent_africa_flag":"🌍 아프리카 국기","continent_oceania_choseong":"🌊 오세아니아 초성","continent_oceania_flag":"🌊 오세아니아 국기","continent_all_choseong":"🌐 전체 초성","continent_all_flag":"🌐 전체 국기"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=_modeBest>0?((_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점"):"";
+  // vs-bar
+  var vsBar=document.getElementById('r-vs-bar');var vsFill=document.getElementById('r-vs-fill');var vsLabel=document.getElementById('r-vs-label');
+  if(vsBar&&vsFill&&_modeBest>0){vsBar.style.display='block';vsLabel.textContent='vs 최고 '+_modeBest+'점';var _ratio=Math.min(gScore/_modeBest,1.5);var _pct=Math.min(_ratio/1.5*100,100);setTimeout(function(){vsFill.style.width=_pct+'%';vsFill.style.background=gScore>=_modeBest?'linear-gradient(90deg,#22c55e,#84cc16)':'linear-gradient(90deg,#22d3ee,#818cf8)';},300);}
   renderStarResult(correct,gQuestions.length);
   // New record badge
   var nrEl=document.getElementById('r-new-record');
