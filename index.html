@@ -5,535 +5,1194 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="초성퀴즈">
-<meta name="theme-color" content="#0f172a">
-<link rel="apple-touch-icon" href="icon.png">
-<title>🌍 나라 초성퀴즈</title>
+<meta name="apple-mobile-web-app-title" content="🌍 나라퀴즈">
+<meta name="theme-color" content="#0a0e1a">
+<title>🌍 나라퀴즈 — 초성 & 국기</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0e1a;--card:#131929;--card2:#1a2238;--border:#1f2d45;
+  --fg:#f1f5f9;--muted:#64748b;--sub:#94a3b8;
+  --sky:#38bdf8;--indigo:#818cf8;--gold:#fbbf24;--green:#4ade80;--red:#f87171;
+  --combo1:#6b7280;--combo2:#4ade80;--combo3:#f59e0b;--combo4:#ef4444;--combo5:#a855f7;
+}
+html{height:-webkit-fill-available}
+body{
+  font-family:-apple-system,'Apple SD Gothic Neo',sans-serif;
+  background:var(--bg);color:var(--fg);
+  min-height:100vh;min-height:-webkit-fill-available;
+  display:flex;flex-direction:column;align-items:center;
+  padding:env(safe-area-inset-top,16px) 16px env(safe-area-inset-bottom,16px);
+  user-select:none;-webkit-user-select:none;overflow-x:hidden;
+}
 
-  body {
-    font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif;
-    background: #0f172a;
-    color: #f1f5f9;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px;
-    padding-top: max(16px, env(safe-area-inset-top));
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-    user-select: none;
-    -webkit-user-select: none;
-  }
+/* ═══ SCREENS ═══ */
+.screen{display:none;width:100%;max-width:480px;flex-direction:column;align-items:center;gap:0}
+.screen.active{display:flex}
 
-  .header {
-    width: 100%;
-    max-width: 480px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    margin-bottom: 8px;
-  }
-  .title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-  .title span { color: #38bdf8; }
-  .score-box { display: flex; gap: 16px; }
-  .score-item { text-align: center; }
-  .score-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-  .score-num { font-size: 22px; font-weight: 700; color: #f1f5f9; }
-  .score-num.gold { color: #fbbf24; }
+/* ═══ HOME ═══ */
+#home{padding-top:24px;gap:16px}
+.home-logo{font-size:72px;margin-bottom:4px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.home-title{font-size:28px;font-weight:900;text-align:center;line-height:1.2}
+.home-title span{background:linear-gradient(135deg,var(--sky),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home-sub{font-size:14px;color:var(--sub);text-align:center}
 
-  .progress-bar {
-    width: 100%; max-width: 480px;
-    height: 6px; background: #1e293b; border-radius: 99px;
-    margin-bottom: 20px; overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8);
-    border-radius: 99px;
-    transition: width 0.4s ease;
-  }
+.stat-row{display:flex;gap:12px;width:100%;margin-top:4px}
+.stat-card{flex:1;background:var(--card);border-radius:16px;padding:14px;text-align:center;border:1px solid var(--border)}
+.stat-val{font-size:22px;font-weight:800;color:var(--gold)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
 
-  .card {
-    width: 100%; max-width: 480px;
-    background: #1e293b;
-    border-radius: 20px;
-    padding: 28px 24px 24px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 32px rgba(0,0,0,0.3);
-    position: relative;
-  }
+/* 데일리 보너스 */
+.daily-banner{
+  width:100%;background:linear-gradient(135deg,#1a1a2e,#16213e);
+  border:1.5px solid var(--gold);border-radius:16px;padding:14px 18px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  transition:opacity .15s;
+}
+.daily-banner:active{opacity:.8}
+.daily-banner .db-icon{font-size:28px}
+.daily-banner .db-text{flex:1}
+.daily-banner .db-title{font-size:13px;font-weight:700;color:var(--gold)}
+.daily-banner .db-sub{font-size:12px;color:var(--sub);margin-top:2px}
+.daily-banner .db-coins{font-size:20px;font-weight:900;color:var(--gold)}
 
-  .top-badge {
-    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-    background: #818cf8; color: #fff;
-    font-size: 11px; font-weight: 700;
-    padding: 4px 14px; border-radius: 99px;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-  }
+/* 레벨 HUD */
+.level-hud{
+  width:100%;display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:10px 14px;
+}
+.lv-badge{display:flex;flex-direction:column;align-items:center;min-width:44px}
+.lv-badge-emoji{font-size:1.5rem;line-height:1}
+.lv-badge-num{font-size:.65rem;font-weight:700;color:var(--gold);margin-top:2px}
+.lv-bar-wrap{flex:1}
+.lv-bar-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--sub);margin-bottom:4px}
+.lv-bar-bg{height:7px;background:var(--border);border-radius:100px;overflow:hidden}
+.lv-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold),#f97316);transition:width .6s cubic-bezier(.34,1.56,.64,1)}
 
-  .question-num {
-    font-size: 12px; color: #64748b; margin-bottom: 10px; text-align: center;
-  }
+/* 홈 버튼 */
+.mode-btns{display:flex;flex-direction:column;gap:10px;width:100%}
+.mode-btn{
+  width:100%;padding:18px;border:none;border-radius:18px;
+  font-size:17px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-family:inherit;transition:transform .1s,opacity .15s;
+}
+.mode-btn:active{transform:scale(.97);opacity:.9}
+.mode-btn.primary{background:linear-gradient(135deg,var(--sky),var(--indigo));color:#fff;box-shadow:0 4px 20px rgba(56,189,248,.3)}
+.mode-btn.secondary{background:var(--card2);color:var(--fg);border:1.5px solid var(--border)}
+.mode-btn .btn-badge{font-size:11px;background:rgba(255,255,255,.2);padding:3px 8px;border-radius:99px;font-weight:700}
 
-  .choseong {
-    font-size: 48px; font-weight: 900; text-align: center;
-    letter-spacing: 10px;
-    color: #f1f5f9;
-    margin: 8px 0 20px;
-    min-height: 60px;
-  }
+/* ═══ GAME SCREEN ═══ */
+#game{padding-top:12px}
+.game-header{
+  width:100%;display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;
+}
+.coin-display{
+  display:flex;align-items:center;gap:5px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:99px;padding:6px 14px;
+  font-size:15px;font-weight:800;color:var(--gold);
+}
+.coin-display span{font-size:16px}
+.score-display{
+  display:flex;align-items:center;gap:5px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:99px;padding:6px 14px;
+  font-size:15px;font-weight:800;color:var(--sky);
+}
 
-  .hint-area {
-    overflow: hidden;
-    max-height: 0;
-    opacity: 0;
-    transition: max-height 0.35s ease, opacity 0.3s ease;
-    margin-bottom: 0;
-  }
-  .hint-area.visible {
-    max-height: 120px;
-    opacity: 1;
-    margin-bottom: 4px;
-  }
-  .hint-chips {
-    display: flex; flex-wrap: wrap; gap: 6px;
-    justify-content: center;
-    padding: 2px 0 8px;
-  }
-  .hint-chip {
-    background: #0f172a; border: 1.5px solid #334155;
-    color: #94a3b8; font-size: 12px; font-weight: 600;
-    padding: 5px 12px; border-radius: 99px;
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, background 0.2s;
-    -webkit-appearance: none; font-family: inherit;
-  }
-  .hint-chip.revealed {
-    border-color: #854d0e; color: #fbbf24; background: #1c1000;
-    cursor: default;
-  }
-  .hint-chip:not(.revealed):active { opacity: 0.7; }
+/* 콤보 */
+.combo-zone{
+  width:100%;display:flex;justify-content:center;align-items:center;
+  height:42px;margin-bottom:8px;
+}
+.combo-badge{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 18px;border-radius:99px;
+  font-size:14px;font-weight:900;
+  background:var(--card2);border:1.5px solid var(--border);
+  transition:background .3s,border-color .3s;
+}
+.combo-badge .combo-num{font-size:22px;font-weight:900;transition:color .3s}
+.combo-badge.c1{background:#111827;border-color:#374151}.combo-badge.c1 .combo-num{color:var(--combo1)}
+.combo-badge.c2{background:#052e16;border-color:#166534}.combo-badge.c2 .combo-num{color:var(--combo2)}
+.combo-badge.c3{background:#1c1400;border-color:#854d0e}.combo-badge.c3 .combo-num{color:var(--combo3)}
+.combo-badge.c4{background:#1e0000;border-color:#991b1b}.combo-badge.c4 .combo-num{color:var(--combo4)}
+.combo-badge.c5,.combo-badge.c6{background:#1a0030;border-color:#7e22ce}.combo-badge.c5 .combo-num,.combo-badge.c6 .combo-num{color:var(--combo5)}
 
-  .input-row {
-    display: flex; gap: 8px; margin-top: 20px;
-  }
-  .answer-input {
-    flex: 1;
-    background: #0f172a; border: 2px solid #334155;
-    color: #f1f5f9; font-size: 17px; font-weight: 600;
-    padding: 14px 16px; border-radius: 14px;
-    outline: none;
-    -webkit-appearance: none; appearance: none;
-    transition: border-color 0.2s;
-    font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif;
-  }
-  .answer-input:focus { border-color: #38bdf8; }
-  .answer-input.correct { border-color: #4ade80; background: #052e16; }
-  .answer-input.wrong { border-color: #f87171; background: #2d0b0b; }
+/* 진행 바 */
+.progress-bar{width:100%;height:5px;background:var(--border);border-radius:99px;margin-bottom:14px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--indigo));border-radius:99px;transition:width .4s ease}
 
-  .submit-btn {
-    background: #38bdf8; color: #0f172a;
-    border: none; border-radius: 14px;
-    font-size: 17px; font-weight: 800;
-    padding: 14px 20px; cursor: pointer;
-    -webkit-appearance: none; appearance: none;
-    transition: opacity 0.15s, transform 0.1s;
-    font-family: inherit;
-  }
-  .submit-btn:active { opacity: 0.8; transform: scale(0.97); }
+/* 타이머 바 */
+.timer-bar{width:100%;height:4px;background:var(--border);border-radius:99px;margin-bottom:14px;overflow:hidden}
+.timer-fill{height:100%;border-radius:99px;background:var(--green);transition:width .1s linear,background .3s}
 
-  .feedback {
-    text-align: center; font-size: 15px; font-weight: 600;
-    min-height: 24px; margin-top: 8px;
-    transition: color 0.2s;
-  }
-  .feedback.ok { color: #4ade80; }
-  .feedback.fail { color: #f87171; }
-  .feedback.info { color: #94a3b8; }
+/* 문제 카드 */
+.q-card{
+  width:100%;background:var(--card);border-radius:22px;
+  padding:24px 22px 20px;margin-bottom:14px;
+  box-shadow:0 4px 32px rgba(0,0,0,.35);position:relative;
+  border:1px solid var(--border);
+}
+.q-badge{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--indigo);color:#fff;
+  font-size:11px;font-weight:700;padding:4px 14px;border-radius:99px;
+  white-space:nowrap;letter-spacing:.5px;
+}
+.q-num{font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px}
 
-  .action-row {
-    width: 100%; max-width: 480px;
-    display: flex; gap: 8px; margin-bottom: 4px;
-  }
-  .skip-btn {
-    flex: 1;
-    background: transparent; border: 1.5px solid #1e293b;
-    color: #475569; font-size: 13px; font-weight: 500;
-    padding: 11px; border-radius: 12px; cursor: pointer;
-    -webkit-appearance: none; font-family: inherit;
-    transition: color 0.2s;
-  }
-  .skip-btn:active { opacity: 0.5; }
+/* 초성 모드 */
+.choseong-display{
+  font-size:46px;font-weight:900;text-align:center;
+  letter-spacing:10px;color:var(--fg);
+  margin:6px 0 18px;min-height:56px;
+}
 
-  .result-screen {
-    width: 100%; max-width: 480px;
-    text-align: center; padding: 16px;
-    display: none; flex-direction: column; align-items: center; gap: 16px;
-  }
-  .result-screen.show { display: flex; }
-  .result-emoji { font-size: 72px; margin: 8px 0; }
-  .result-title { font-size: 28px; font-weight: 900; }
-  .result-sub { font-size: 15px; color: #94a3b8; line-height: 1.5; }
-  .result-score-big { font-size: 64px; font-weight: 900; color: #fbbf24; line-height: 1; }
-  .result-score-label { font-size: 14px; color: #64748b; margin-top: 2px; }
+/* 국기 모드 */
+.flag-display{
+  font-size:96px;text-align:center;line-height:1.1;
+  margin:6px 0 18px;min-height:110px;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.4));
+}
 
-  .result-list {
-    width: 100%; background: #1e293b; border-radius: 16px; overflow: hidden;
-  }
-  .result-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 18px; border-bottom: 1px solid #0f172a; font-size: 14px;
-  }
-  .result-item:last-child { border-bottom: none; }
-  .result-item .r-left { color: #94a3b8; }
-  .result-item .r-right { font-weight: 700; }
-  .result-item .r-right.ok2 { color: #4ade80; }
-  .result-item .r-right.fail2 { color: #f87171; }
+/* 힌트 */
+.hint-area{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s ease,opacity .3s ease}
+.hint-area.visible{max-height:120px;opacity:1;margin-bottom:4px}
+.hint-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:2px 0 8px}
+.hint-chip{
+  background:var(--bg);border:1.5px solid var(--border);
+  color:var(--sub);font-size:12px;font-weight:600;
+  padding:5px 12px;border-radius:99px;cursor:pointer;
+  transition:border-color .2s,color .2s,background .2s;
+  -webkit-appearance:none;font-family:inherit;
+}
+.hint-chip.revealed{border-color:#854d0e;color:var(--gold);background:#1c1000;cursor:default}
 
-  .restart-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #38bdf8, #818cf8);
-    color: #fff; border: none; border-radius: 16px;
-    font-size: 18px; font-weight: 800; padding: 18px;
-    cursor: pointer; -webkit-appearance: none; font-family: inherit;
-    box-shadow: 0 4px 20px rgba(56,189,248,0.3);
-    transition: opacity 0.15s, transform 0.1s;
-  }
-  .restart-btn:active { opacity: 0.85; transform: scale(0.98); }
+/* 초성 입력 */
+.input-row{display:flex;gap:8px;margin-top:18px}
+.answer-input{
+  flex:1;background:var(--bg);border:2px solid var(--border);
+  color:var(--fg);font-size:17px;font-weight:600;
+  padding:14px 16px;border-radius:14px;outline:none;
+  -webkit-appearance:none;appearance:none;transition:border-color .2s;
+  font-family:-apple-system,'Apple SD Gothic Neo',sans-serif;
+}
+.answer-input:focus{border-color:var(--sky)}
+.answer-input.correct{border-color:var(--green);background:#052e16}
+.answer-input.wrong{border-color:var(--red);background:#2d0b0b}
+.submit-btn{
+  background:var(--sky);color:#0a0e1a;border:none;border-radius:14px;
+  font-size:17px;font-weight:800;padding:14px 20px;cursor:pointer;
+  -webkit-appearance:none;transition:opacity .15s,transform .1s;font-family:inherit;
+}
+.submit-btn:active{opacity:.8;transform:scale(.97)}
 
-  .game-wrap { width: 100%; max-width: 480px; }
+/* 국기 4지선다 */
+.flag-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.choice-btn{
+  background:var(--bg);border:2px solid var(--border);
+  color:var(--fg);font-size:15px;font-weight:700;
+  padding:16px 12px;border-radius:16px;cursor:pointer;
+  text-align:center;-webkit-appearance:none;font-family:inherit;
+  transition:border-color .2s,background .2s,transform .1s;
+  line-height:1.3;
+}
+.choice-btn:active{transform:scale(.97)}
+.choice-btn.correct-choice{border-color:var(--green);background:#052e16;color:var(--green)}
+.choice-btn.wrong-choice{border-color:var(--red);background:#2d0b0b;color:var(--red)}
+.choice-btn.reveal-choice{border-color:var(--green);background:#052e16;color:var(--green);opacity:.7}
 
-  @keyframes shake {
-    0%,100%{transform:translateX(0)}
-    20%{transform:translateX(-6px)}
-    40%{transform:translateX(6px)}
-    60%{transform:translateX(-6px)}
-    80%{transform:translateX(6px)}
-  }
-  .shake { animation: shake 0.35s ease; }
+/* 피드백 */
+.feedback{
+  text-align:center;font-size:15px;font-weight:600;
+  min-height:24px;margin-top:8px;transition:color .2s;
+}
+.feedback.ok{color:var(--green)}
+.feedback.fail{color:var(--red)}
+.feedback.info{color:var(--sub)}
 
-  @keyframes pop {
-    0%{transform:scale(1)}
-    50%{transform:scale(1.08)}
-    100%{transform:scale(1)}
-  }
-  .pop { animation: pop 0.25s ease; }
+/* 액션 */
+.action-row{width:100%;display:flex;gap:8px;margin-bottom:8px}
+.skip-btn{
+  flex:1;background:transparent;border:1.5px solid var(--card2);
+  color:var(--muted);font-size:13px;font-weight:500;
+  padding:11px;border-radius:12px;cursor:pointer;
+  -webkit-appearance:none;font-family:inherit;
+}
 
-  @keyframes fadeIn {
-    from{opacity:0;transform:translateY(-4px)}
-    to{opacity:1;transform:translateY(0)}
-  }
-  .fadein { animation: fadeIn 0.3s ease forwards; }
+/* ═══ RESULT ═══ */
+#result{padding:16px;gap:16px;text-align:center}
+.result-emoji{font-size:72px;margin:8px 0}
+.result-title{font-size:28px;font-weight:900}
+.result-sub{font-size:15px;color:var(--sub);line-height:1.5}
+.result-score-big{font-size:64px;font-weight:900;color:var(--gold);line-height:1}
+.result-score-label{font-size:14px;color:var(--muted);margin-top:2px}
+.result-coins-earned{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:18px;font-weight:700;color:var(--gold);
+  background:var(--card);border-radius:14px;padding:12px 24px;
+}
+.result-list{width:100%;background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--border)}
+.result-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:11px 18px;border-bottom:1px solid var(--bg);font-size:13px;
+}
+.result-item:last-child{border-bottom:none}
+.result-item .r-left{color:var(--sub)}
+.result-item .r-right{font-weight:700}
+.result-item .r-right.ok2{color:var(--green)}
+.result-item .r-right.fail2{color:var(--red)}
+.restart-btn{
+  width:100%;background:linear-gradient(135deg,var(--sky),var(--indigo));
+  color:#fff;border:none;border-radius:16px;
+  font-size:18px;font-weight:800;padding:18px;cursor:pointer;
+  -webkit-appearance:none;font-family:inherit;
+  box-shadow:0 4px 20px rgba(56,189,248,.3);transition:opacity .15s,transform .1s;
+}
+.restart-btn:active{opacity:.85;transform:scale(.98)}
+.home-btn2{
+  width:100%;background:var(--card2);border:1.5px solid var(--border);
+  color:var(--fg);font-size:15px;font-weight:700;padding:14px;border-radius:16px;
+  cursor:pointer;-webkit-appearance:none;font-family:inherit;
+}
+
+/* ═══ SHOP ═══ */
+#shop{padding:16px;gap:14px}
+.shop-header{width:100%;display:flex;justify-content:space-between;align-items:center}
+.shop-title{font-size:20px;font-weight:900}
+.shop-coins{display:flex;align-items:center;gap:5px;font-size:16px;font-weight:800;color:var(--gold)}
+.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.char-card{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:18px;padding:16px 12px;text-align:center;
+  cursor:pointer;transition:border-color .2s,transform .1s;
+  position:relative;
+}
+.char-card:active{transform:scale(.97)}
+.char-card.owned{border-color:#166534}
+.char-card.equipped{border-color:var(--gold);background:#1c1000}
+.char-card.locked{opacity:.7}
+.char-emoji{font-size:36px;margin-bottom:6px;display:block}
+.char-name{font-size:13px;font-weight:700;margin-bottom:4px}
+.char-price{font-size:12px;color:var(--gold);font-weight:700}
+.char-price.free{color:var(--green)}
+.char-effect{font-size:10px;color:var(--sub);margin-top:3px;line-height:1.4}
+.char-status{
+  position:absolute;top:8px;right:8px;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;
+}
+.char-status.owned-badge{background:#166534;color:var(--green)}
+.char-status.eq-badge{background:#854d0e;color:var(--gold)}
+.char-status.lock-badge{background:var(--border);color:var(--muted)}
+.close-btn{
+  width:100%;background:var(--card2);border:1.5px solid var(--border);
+  color:var(--fg);font-size:15px;font-weight:700;padding:14px;border-radius:16px;
+  cursor:pointer;-webkit-appearance:none;font-family:inherit;
+}
+
+/* ═══ MODAL ═══ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  display:flex;align-items:center;justify-content:center;
+  z-index:500;padding:24px;
+}
+.modal-box{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:24px;padding:28px 24px;width:100%;max-width:360px;
+  text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-emoji{font-size:52px;margin-bottom:10px}
+.modal-title{font-size:20px;font-weight:900;margin-bottom:6px}
+.modal-body{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:18px}
+.modal-btns{display:flex;gap:10px}
+.modal-btn{
+  flex:1;padding:14px;border:none;border-radius:14px;
+  font-size:15px;font-weight:700;cursor:pointer;
+  -webkit-appearance:none;font-family:inherit;
+}
+.modal-btn.confirm{background:linear-gradient(135deg,var(--sky),var(--indigo));color:#fff}
+.modal-btn.cancel{background:var(--card2);border:1.5px solid var(--border);color:var(--fg)}
+
+/* ═══ ACHIEVEMENT POPUP ═══ */
+.ach-popup{
+  position:fixed;top:-120px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,#1a1a2e,#16213e);
+  border:2px solid var(--gold);border-radius:18px;
+  padding:14px 24px;color:#fff;font-weight:700;
+  text-align:center;z-index:600;
+  box-shadow:0 8px 32px rgba(255,215,0,.3);white-space:nowrap;
+  transition:top .45s cubic-bezier(.34,1.56,.64,1);
+}
+.ach-popup.show{top:max(20px,env(safe-area-inset-top,20px))}
+.ach-popup .ap-label{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+.ach-popup .ap-body{font-size:15px;margin-top:2px}
+
+/* ═══ LEVEL UP OVERLAY ═══ */
+.lvup-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:flex;align-items:center;justify-content:center;
+  z-index:700;padding:24px;
+  animation:fadeIn .2s ease;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.lvup-card{
+  background:linear-gradient(145deg,#0f3460,#e94560);
+  border-radius:24px;padding:40px 48px;text-align:center;
+  color:#fff;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.lvup-card .lv-emoji2{font-size:56px;margin-bottom:8px}
+.lvup-card .lv-label2{font-size:.85rem;opacity:.8;text-transform:uppercase;letter-spacing:2px}
+.lvup-card .lv-name2{font-size:22px;font-weight:900;margin:8px 0 4px}
+.lvup-card .lv-num2{font-size:14px;opacity:.7;margin-bottom:20px}
+.lvup-card .lv-ok{
+  padding:12px 36px;background:var(--gold);color:#111;
+  border:none;border-radius:100px;font-size:15px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+}
+
+/* ═══ PARTICLES ═══ */
+.particle{position:fixed;pointer-events:none;z-index:800;font-size:1.4rem;animation:pfly var(--dur,.9s) ease-out forwards}
+@keyframes pfly{0%{transform:translate(0,0) scale(1) rotate(0);opacity:1}100%{transform:translate(var(--tx,0px),var(--ty,-120px)) scale(.3) rotate(var(--rot,180deg));opacity:0}}
+.coin-fly{position:fixed;pointer-events:none;z-index:800;font-size:1.5rem;animation:cfly .7s cubic-bezier(.17,.67,.51,1.2) forwards}
+@keyframes cfly{0%{transform:translate(0,0) scale(1);opacity:1}60%{opacity:1}100%{transform:translate(var(--cx,0px),-160px) scale(.5);opacity:0}}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}70%{transform:translateY(-4px)}}
+@keyframes comboBump{0%{transform:scale(1)}30%{transform:scale(1.6) rotate(-5deg)}60%{transform:scale(1.3) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 rgba(56,189,248,0)}50%{box-shadow:0 0 24px 4px rgba(56,189,248,.25)}}
+.shake{animation:shake .4s ease}
+.bounce-anim{animation:bounce .45s ease}
+.combo-bump{animation:comboBump .35s cubic-bezier(.36,.07,.19,.97)}
+.pop-anim{animation:pop .25s ease}
+.glow-anim{animation:glowPulse .6s ease}
+
+/* mode tab */
+.mode-tab{
+  width:100%;display:flex;background:var(--card);border-radius:14px;padding:4px;
+  margin-bottom:12px;border:1px solid var(--border);
+}
+.tab-btn{
+  flex:1;padding:10px;border:none;background:transparent;
+  color:var(--muted);font-size:14px;font-weight:700;
+  border-radius:10px;cursor:pointer;font-family:inherit;
+  transition:background .2s,color .2s;
+}
+.tab-btn.active{background:var(--indigo);color:#fff}
 </style>
 </head>
 <body>
 
-<div class="game-wrap" id="gameWrap">
-  <div class="header">
-    <div class="title">🌍 <span>초성</span>퀴즈</div>
-    <div class="score-box">
-      <div class="score-item">
-        <div class="score-label">정답</div>
-        <div class="score-num gold" id="scoreNum">0</div>
-      </div>
-      <div class="score-item">
-        <div class="score-label">문제</div>
-        <div class="score-num" id="totalNum">0</div>
-      </div>
+<!-- ══ HOME ══ -->
+<div class="screen active" id="home">
+  <div class="home-logo">🌍</div>
+  <div class="home-title">나라 <span>퀴즈마스터</span></div>
+  <div class="home-sub">초성 & 국기로 세계를 정복하라!</div>
+
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-val" id="h-coins">0</div><div class="stat-lbl">🪙 코인</div></div>
+    <div class="stat-card"><div class="stat-val" id="h-best">0</div><div class="stat-lbl">🏆 최고점</div></div>
+    <div class="stat-card"><div class="stat-val" id="h-streak">0</div><div class="stat-lbl">🔥 스트릭</div></div>
+  </div>
+
+  <div class="level-hud">
+    <div class="lv-badge"><div class="lv-badge-emoji" id="h-lv-emoji">🗺️</div><div class="lv-badge-num" id="h-lv-num">Lv.1</div></div>
+    <div class="lv-bar-wrap">
+      <div class="lv-bar-label"><span id="h-lv-name">지도 초보</span><span id="h-lv-pct">0%</span></div>
+      <div class="lv-bar-bg"><div class="lv-bar-fill" id="h-lv-bar" style="width:0%"></div></div>
     </div>
   </div>
 
-  <div class="progress-bar">
-    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  <div id="daily-banner" class="daily-banner" onclick="claimDaily()">
+    <div class="db-icon">🎁</div>
+    <div class="db-text">
+      <div class="db-title">데일리 보너스</div>
+      <div class="db-sub" id="daily-sub">오늘의 보너스를 받으세요!</div>
+    </div>
+    <div class="db-coins" id="daily-coins">+10🪙</div>
   </div>
 
-  <div class="card">
-    <div class="top-badge" id="topBadge">나라 이름 맞추기</div>
-    <div class="question-num" id="questionNum">1 / 20</div>
-    <div class="choseong" id="choseong">ㄷㅎㅁㄱ</div>
+  <div class="mode-btns">
+    <button class="mode-btn primary" onclick="startGame('choseong')">
+      🔤 초성 퀴즈 <span class="btn-badge">클래식</span>
+    </button>
+    <button class="mode-btn primary" onclick="startGame('flag')" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
+      🚩 국기 퀴즈 <span class="btn-badge">신규</span>
+    </button>
+    <button class="mode-btn secondary" onclick="showShop()">
+      🏪 캐릭터 상점 <span style="font-size:11px;color:var(--muted)" id="shop-char-preview"></span>
+    </button>
+  </div>
+</div>
 
-    <div class="hint-area" id="hintArea">
-      <div class="hint-chips" id="hintChips"></div>
+<!-- ══ GAME ══ -->
+<div class="screen" id="game">
+  <div class="game-header">
+    <div class="coin-display"><span>🪙</span><span id="g-coins">0</span></div>
+    <div id="g-mode-badge" style="font-size:13px;color:var(--sub);font-weight:600"></div>
+    <div class="score-display"><span>✦</span><span id="g-score">0</span></div>
+  </div>
+
+  <div class="combo-zone">
+    <div class="combo-badge c1" id="combo-badge">
+      <span id="combo-emoji">▶️</span>
+      <span class="combo-num" id="combo-num">0</span>
+      <span id="combo-label" style="font-size:12px;color:var(--muted)">콤보</span>
+    </div>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="g-prog" style="width:0%"></div></div>
+  <div class="timer-bar"><div class="timer-fill" id="g-timer" style="width:100%"></div></div>
+
+  <div class="q-card" id="q-card">
+    <div class="q-badge" id="q-badge">나라 이름 맞추기</div>
+    <div class="q-num" id="q-num">1 / 20</div>
+
+    <!-- 초성 모드 -->
+    <div id="choseong-mode">
+      <div class="choseong-display" id="q-choseong">ㄷㅎㅁㄱ</div>
+      <div class="hint-area" id="hint-area">
+        <div class="hint-chips" id="hint-chips"></div>
+      </div>
+      <div class="input-row">
+        <input class="answer-input" id="ans-input" type="text"
+          placeholder="나라 이름 입력…"
+          autocomplete="off" autocorrect="off" autocapitalize="none"
+          spellcheck="false" inputmode="text">
+        <button class="submit-btn" onclick="submitChoseong()">→</button>
+      </div>
     </div>
 
-    <div class="input-row">
-      <input class="answer-input" id="answerInput" type="text"
-        placeholder="나라 이름 입력…"
-        autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
-        inputmode="text"
-      >
-      <button class="submit-btn" onclick="submitAnswer()">→</button>
+    <!-- 국기 모드 -->
+    <div id="flag-mode" style="display:none">
+      <div class="flag-display" id="q-flag">🇰🇷</div>
+      <div class="flag-choices" id="flag-choices"></div>
     </div>
+
     <div class="feedback" id="feedback"></div>
   </div>
 
   <div class="action-row">
     <button class="skip-btn" onclick="skipQuestion()">⏭ 건너뛰기</button>
+    <button class="skip-btn" onclick="goHome()" style="max-width:80px">🏠</button>
   </div>
 </div>
 
-<div class="result-screen" id="resultScreen">
-  <div class="result-emoji" id="resultEmoji">🎉</div>
-  <div class="result-title" id="resultTitle">퀴즈 완료!</div>
-  <div class="result-score-big" id="resultBig">0</div>
-  <div class="result-score-label" id="resultLabel">/ 20 정답</div>
-  <div class="result-sub" id="resultSub">수고하셨습니다!</div>
-  <div class="result-list" id="resultList"></div>
-  <button class="restart-btn" onclick="restartGame()">🔄 다시 시작</button>
+<!-- ══ RESULT ══ -->
+<div class="screen" id="result">
+  <div class="result-emoji" id="r-emoji">🎉</div>
+  <div class="result-title" id="r-title">퀴즈 완료!</div>
+  <div class="result-score-big" id="r-score">0</div>
+  <div class="result-score-label" id="r-label">/ 20 정답</div>
+  <div class="result-sub" id="r-sub"></div>
+  <div class="result-coins-earned" id="r-coins"><span>🪙</span><span id="r-coins-num">+0</span> 코인 획득!</div>
+  <div class="result-list" id="r-list"></div>
+  <button class="restart-btn" onclick="restartSameMode()">🔄 다시 하기</button>
+  <button class="home-btn2" onclick="goHome()">🏠 홈으로</button>
+</div>
+
+<!-- ══ SHOP ══ -->
+<div class="screen" id="shop">
+  <div class="shop-header">
+    <div class="shop-title">🏪 캐릭터 상점</div>
+    <div class="shop-coins"><span>🪙</span><span id="s-coins">0</span></div>
+  </div>
+  <div class="char-grid" id="char-grid"></div>
+  <button class="close-btn" onclick="closeShop()">← 돌아가기</button>
+</div>
+
+<!-- Achievement popup -->
+<div class="ach-popup" id="ach-popup">
+  <div class="ap-label">🏆 업적 달성!</div>
+  <div class="ap-body" id="ach-body"></div>
 </div>
 
 <script>
-const COUNTRIES = [
-  { name:"대한민국", hint:"🌏 동아시아 반도", capital:"서울" },
-  { name:"일본", hint:"🌏 동아시아 섬나라", capital:"도쿄" },
-  { name:"중국", hint:"🌏 동아시아 최다 인구(과거)", capital:"베이징" },
-  { name:"미국", hint:"🌎 북아메리카 초강대국", capital:"워싱턴 D.C." },
-  { name:"브라질", hint:"🌎 남아메리카 최대 국가", capital:"브라질리아" },
-  { name:"프랑스", hint:"🌍 서유럽 에펠탑", capital:"파리" },
-  { name:"독일", hint:"🌍 중부유럽 자동차 강국", capital:"베를린" },
-  { name:"영국", hint:"🌍 서유럽 섬나라", capital:"런던" },
-  { name:"이탈리아", hint:"🌍 남유럽 장화 모양", capital:"로마" },
-  { name:"스페인", hint:"🌍 남유럽 투우", capital:"마드리드" },
-  { name:"러시아", hint:"🌍🌏 세계 최대 면적", capital:"모스크바" },
-  { name:"캐나다", hint:"🌎 북아메리카 단풍잎 국기", capital:"오타와" },
-  { name:"호주", hint:"🌏 오세아니아 캥거루", capital:"캔버라" },
-  { name:"인도", hint:"🌏 남아시아 세계 1위 인구", capital:"뉴델리" },
-  { name:"멕시코", hint:"🌎 북아메리카 선인장", capital:"멕시코시티" },
-  { name:"아르헨티나", hint:"🌎 남아메리카 탱고", capital:"부에노스아이레스" },
-  { name:"이집트", hint:"🌍 북아프리카 피라미드", capital:"카이로" },
-  { name:"남아프리카공화국", hint:"🌍 아프리카 최남단", capital:"프리토리아" },
-  { name:"터키", hint:"🌍🌏 두 대륙에 걸친 나라", capital:"앙카라" },
-  { name:"사우디아라비아", hint:"🌏 중동 석유 왕국", capital:"리야드" },
-  { name:"태국", hint:"🌏 동남아시아 사원", capital:"방콕" },
-  { name:"베트남", hint:"🌏 동남아시아 S자 형태", capital:"하노이" },
-  { name:"인도네시아", hint:"🌏 동남아시아 섬 17000개", capital:"자카르타" },
-  { name:"필리핀", hint:"🌏 동남아시아 7000개 섬", capital:"마닐라" },
-  { name:"포르투갈", hint:"🌍 남유럽 대항해시대", capital:"리스본" },
-  { name:"네덜란드", hint:"🌍 서유럽 풍차 튤립", capital:"암스테르담" },
-  { name:"스위스", hint:"🌍 중부유럽 알프스", capital:"베른" },
-  { name:"그리스", hint:"🌍 남유럽 민주주의 발상지", capital:"아테네" },
-  { name:"노르웨이", hint:"🌍 북유럽 피오르드", capital:"오슬로" },
-  { name:"스웨덴", hint:"🌍 북유럽 노벨상", capital:"스톡홀름" },
-  { name:"핀란드", hint:"🌍 북유럽 산타마을", capital:"헬싱키" },
-  { name:"덴마크", hint:"🌍 북유럽 동화 나라", capital:"코펜하겐" },
-  { name:"폴란드", hint:"🌍 동유럽 자유의 땅", capital:"바르샤바" },
-  { name:"체코", hint:"🌍 중부유럽 프라하 성", capital:"프라하" },
-  { name:"헝가리", hint:"🌍 중부유럽 온천 왕국", capital:"부다페스트" },
-  { name:"오스트리아", hint:"🌍 중부유럽 음악의 나라", capital:"빈" },
-  { name:"벨기에", hint:"🌍 서유럽 와플 초콜릿", capital:"브뤼셀" },
-  { name:"이란", hint:"🌏 중동 페르시아 제국", capital:"테헤란" },
-  { name:"이라크", hint:"🌏 중동 메소포타미아", capital:"바그다드" },
-  { name:"파키스탄", hint:"🌏 남아시아 이슬람 국가", capital:"이슬라마바드" },
-  { name:"방글라데시", hint:"🌏 남아시아 벵골만", capital:"다카" },
-  { name:"미얀마", hint:"🌏 동남아시아 불교 국가", capital:"네피도" },
-  { name:"말레이시아", hint:"🌏 동남아시아 쌍둥이 빌딩", capital:"쿠알라룸푸르" },
-  { name:"싱가포르", hint:"🌏 동남아시아 도시 국가", capital:"싱가포르" },
-  { name:"뉴질랜드", hint:"🌏 오세아니아 키위새", capital:"웰링턴" },
-  { name:"칠레", hint:"🌎 남아메리카 가늘고 긴 나라", capital:"산티아고" },
-  { name:"콜롬비아", hint:"🌎 남아메리카 커피", capital:"보고타" },
-  { name:"페루", hint:"🌎 남아메리카 잉카 제국", capital:"리마" },
-  { name:"모로코", hint:"🌍 북아프리카 사하라 입구", capital:"라바트" },
-  { name:"케냐", hint:"🌍 동아프리카 사바나", capital:"나이로비" },
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+var COUNTRIES = [
+  {name:"대한민국",flag:"🇰🇷",hint:"🌏 동아시아 반도",capital:"서울",continent:"asia"},
+  {name:"일본",flag:"🇯🇵",hint:"🌏 동아시아 섬나라",capital:"도쿄",continent:"asia"},
+  {name:"중국",flag:"🇨🇳",hint:"🌏 동아시아",capital:"베이징",continent:"asia"},
+  {name:"미국",flag:"🇺🇸",hint:"🌎 북아메리카 초강대국",capital:"워싱턴 D.C.",continent:"americas"},
+  {name:"영국",flag:"🇬🇧",hint:"🌍 서유럽 섬나라",capital:"런던",continent:"europe"},
+  {name:"프랑스",flag:"🇫🇷",hint:"🌍 서유럽 에펠탑",capital:"파리",continent:"europe"},
+  {name:"독일",flag:"🇩🇪",hint:"🌍 중부유럽 자동차",capital:"베를린",continent:"europe"},
+  {name:"이탈리아",flag:"🇮🇹",hint:"🌍 남유럽 장화 모양",capital:"로마",continent:"europe"},
+  {name:"스페인",flag:"🇪🇸",hint:"🌍 남유럽 투우",capital:"마드리드",continent:"europe"},
+  {name:"포르투갈",flag:"🇵🇹",hint:"🌍 남유럽 대항해",capital:"리스본",continent:"europe"},
+  {name:"브라질",flag:"🇧🇷",hint:"🌎 남아메리카 최대",capital:"브라질리아",continent:"americas"},
+  {name:"아르헨티나",flag:"🇦🇷",hint:"🌎 남아메리카 탱고",capital:"부에노스아이레스",continent:"americas"},
+  {name:"캐나다",flag:"🇨🇦",hint:"🌎 북아메리카 단풍",capital:"오타와",continent:"americas"},
+  {name:"멕시코",flag:"🇲🇽",hint:"🌎 북아메리카 선인장",capital:"멕시코시티",continent:"americas"},
+  {name:"호주",flag:"🇦🇺",hint:"🌏 오세아니아 캥거루",capital:"캔버라",continent:"oceania"},
+  {name:"뉴질랜드",flag:"🇳🇿",hint:"🌏 오세아니아 키위새",capital:"웰링턴",continent:"oceania"},
+  {name:"인도",flag:"🇮🇳",hint:"🌏 남아시아 1위 인구",capital:"뉴델리",continent:"asia"},
+  {name:"파키스탄",flag:"🇵🇰",hint:"🌏 남아시아 이슬람",capital:"이슬라마바드",continent:"asia"},
+  {name:"인도네시아",flag:"🇮🇩",hint:"🌏 동남아 섬 17000개",capital:"자카르타",continent:"asia"},
+  {name:"태국",flag:"🇹🇭",hint:"🌏 동남아 사원",capital:"방콕",continent:"asia"},
+  {name:"베트남",flag:"🇻🇳",hint:"🌏 동남아 S자 형태",capital:"하노이",continent:"asia"},
+  {name:"필리핀",flag:"🇵🇭",hint:"🌏 동남아 7000개 섬",capital:"마닐라",continent:"asia"},
+  {name:"말레이시아",flag:"🇲🇾",hint:"🌏 동남아 쌍둥이 빌딩",capital:"쿠알라룸푸르",continent:"asia"},
+  {name:"싱가포르",flag:"🇸🇬",hint:"🌏 동남아 도시 국가",capital:"싱가포르",continent:"asia"},
+  {name:"러시아",flag:"🇷🇺",hint:"🌍🌏 세계 최대 면적",capital:"모스크바",continent:"europe"},
+  {name:"폴란드",flag:"🇵🇱",hint:"🌍 동유럽",capital:"바르샤바",continent:"europe"},
+  {name:"네덜란드",flag:"🇳🇱",hint:"🌍 서유럽 풍차",capital:"암스테르담",continent:"europe"},
+  {name:"벨기에",flag:"🇧🇪",hint:"🌍 서유럽 와플",capital:"브뤼셀",continent:"europe"},
+  {name:"스웨덴",flag:"🇸🇪",hint:"🌍 북유럽 노벨상",capital:"스톡홀름",continent:"europe"},
+  {name:"노르웨이",flag:"🇳🇴",hint:"🌍 북유럽 피오르드",capital:"오슬로",continent:"europe"},
+  {name:"덴마크",flag:"🇩🇰",hint:"🌍 북유럽 동화",capital:"코펜하겐",continent:"europe"},
+  {name:"핀란드",flag:"🇫🇮",hint:"🌍 북유럽 산타",capital:"헬싱키",continent:"europe"},
+  {name:"스위스",flag:"🇨🇭",hint:"🌍 중부유럽 알프스",capital:"베른",continent:"europe"},
+  {name:"오스트리아",flag:"🇦🇹",hint:"🌍 중부유럽 음악",capital:"빈",continent:"europe"},
+  {name:"그리스",flag:"🇬🇷",hint:"🌍 남유럽 민주주의",capital:"아테네",continent:"europe"},
+  {name:"터키",flag:"🇹🇷",hint:"🌍🌏 두 대륙",capital:"앙카라",continent:"asia"},
+  {name:"이집트",flag:"🇪🇬",hint:"🌍 북아프리카 피라미드",capital:"카이로",continent:"africa"},
+  {name:"남아프리카공화국",flag:"🇿🇦",hint:"🌍 아프리카 최남단",capital:"프리토리아",continent:"africa"},
+  {name:"케냐",flag:"🇰🇪",hint:"🌍 동아프리카 사바나",capital:"나이로비",continent:"africa"},
+  {name:"나이지리아",flag:"🇳🇬",hint:"🌍 서아프리카 최다인구",capital:"아부자",continent:"africa"},
+  {name:"사우디아라비아",flag:"🇸🇦",hint:"🌏 중동 석유 왕국",capital:"리야드",continent:"asia"},
+  {name:"이란",flag:"🇮🇷",hint:"🌏 중동 페르시아",capital:"테헤란",continent:"asia"},
+  {name:"이라크",flag:"🇮🇶",hint:"🌏 중동 메소포타미아",capital:"바그다드",continent:"asia"},
+  {name:"UAE",flag:"🇦🇪",hint:"🌏 중동 두바이",capital:"아부다비",continent:"asia"},
+  {name:"이스라엘",flag:"🇮🇱",hint:"🌏 중동 성지",capital:"예루살렘",continent:"asia"},
+  {name:"우크라이나",flag:"🇺🇦",hint:"🌍 동유럽",capital:"키이우",continent:"europe"},
+  {name:"칠레",flag:"🇨🇱",hint:"🌎 남아메리카 세로",capital:"산티아고",continent:"americas"},
+  {name:"콜롬비아",flag:"🇨🇴",hint:"🌎 남아메리카 커피",capital:"보고타",continent:"americas"},
+  {name:"페루",flag:"🇵🇪",hint:"🌎 남아메리카 잉카",capital:"리마",continent:"americas"},
+  {name:"모로코",flag:"🇲🇦",hint:"🌍 북아프리카 사하라",capital:"라바트",continent:"africa"},
 ];
 
-function getChoseong(str) {
-  const CH_START = 0xAC00;
-  const JAMO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-  return [...str].map(c => {
-    const code = c.charCodeAt(0);
-    if (code >= 0xAC00 && code <= 0xD7A3) return JAMO[Math.floor((code - CH_START) / 588)];
-    return c;
-  }).join('');
+var CHARACTERS = [
+  {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터. 언제나 함께!",effect:"없음",effectType:"none"},
+  {id:"rocket",name:"로켓맨",emoji:"🚀",price:100,desc:"정답 시 🚀 파티클",effect:"파티클 업그레이드",effectType:"animation"},
+  {id:"wizard",name:"마법사",emoji:"🧙",price:300,desc:"힌트 1개 추가",effect:"hint_bonus +1",effectType:"hint_bonus",effectValue:1},
+  {id:"fire",name:"불꽃전사",emoji:"🔥",price:500,desc:"콤보 3부터 1.5배",effect:"combo_boost",effectType:"combo_multiplier",effectValue:1.5,comboThreshold:3},
+  {id:"star",name:"별빛요정",emoji:"⭐",price:800,desc:"정답 시 코인 +2",effect:"coin_bonus +2",effectType:"coin_bonus",effectValue:2},
+  {id:"diamond",name:"다이아",emoji:"💎",price:1200,desc:"오답 방어막 1회",effect:"shield x1",effectType:"shield",effectValue:1},
+  {id:"dragon",name:"드래곤",emoji:"🐉",price:1600,desc:"콤보 5부터 2배 + 이펙트",effect:"combo_boost x2",effectType:"combo_multiplier",effectValue:2.0,comboThreshold:5},
+  {id:"galaxy",name:"갤럭시신",emoji:"🌌",price:2000,desc:"힌트+2, 코인+3, 콤보x2",effect:"ultimate",effectType:"ultimate",effectValue:{hint:2,coin:3,multiplier:2.0}},
+];
+
+var ACHIEVEMENTS = [
+  {id:"first",name:"첫 발걸음 🌱",cond:"정답 1개",check:function(s){return s.totalCorrect>=1},coins:10},
+  {id:"combo5",name:"불꽃 콤보 🔥",cond:"5콤보 달성",check:function(s){return s.maxCombo>=5},coins:20},
+  {id:"perfect",name:"퍼펙트! 💯",cond:"20문제 전정답",check:function(s){return s.perfectGames>=1},coins:50},
+  {id:"streak7",name:"7일의 기적 📅",cond:"7일 연속",check:function(s){return s.dailyStreakCount>=7},coins:70},
+  {id:"correct100",name:"세계 마스터 🌍",cond:"정답 100개",check:function(s){return s.totalCorrect>=100},coins:100},
+  {id:"coins500",name:"코인 부자 💰",cond:"코인 500개",check:function(s){return s.coins>=500},coins:0},
+  {id:"nohint50",name:"힌트 거부자 🙅",cond:"노힌트 정답 50개",check:function(s){return s.noHintCorrect>=50},coins:60},
+  {id:"legend",name:"전설의 퀴즈왕 👑",cond:"세션 1500점",check:function(s){return s.bestScore>=1500},coins:150},
+];
+
+var LEVELS = [
+  {level:1,min:0,name:"지도 초보",emoji:"🗺️"},
+  {level:2,min:100,name:"동네 탐험가",emoji:"🚶"},
+  {level:3,min:250,name:"길잡이",emoji:"🧭"},
+  {level:4,min:450,name:"지역 전문가",emoji:"📍"},
+  {level:5,min:700,name:"지도 마니아",emoji:"📊"},
+  {level:6,min:1000,name:"여행 고수",emoji:"✈️"},
+  {level:7,min:1400,name:"지리 연구원",emoji:"🔬"},
+  {level:8,min:1900,name:"세계 탐험가",emoji:"🌍"},
+  {level:9,min:2500,name:"지리 석사",emoji:"🎓"},
+  {level:10,min:3200,name:"지도 장인",emoji:"🏅"},
+  {level:11,min:4200,name:"대륙 정복자",emoji:"🌐"},
+  {level:12,min:5500,name:"지형 분석가",emoji:"⛰️"},
+  {level:13,min:7000,name:"역사 지리학자",emoji:"📜"},
+  {level:14,min:9000,name:"지구 탐정",emoji:"🔍"},
+  {level:15,min:11500,name:"전략 지도가",emoji:"🎯"},
+  {level:16,min:14000,name:"세계 석학",emoji:"🏛️"},
+  {level:17,min:17000,name:"지리 레전드",emoji:"👑"},
+  {level:18,min:20500,name:"대지의 수호자",emoji:"🌿"},
+  {level:19,min:24500,name:"전설의 탐험가",emoji:"🔱"},
+  {level:20,min:29000,name:"지리 박사",emoji:"🎖️"},
+];
+
+var DAILY_BONUS = [10,15,25,35,50,75,120];
+var COMBO_DATA = [
+  {c:0,lbl:"",emoji:"▶️",cls:"c1"},
+  {c:1,lbl:"시작",emoji:"▶️",cls:"c1"},
+  {c:2,lbl:"웜업!",emoji:"🔥",cls:"c2"},
+  {c:3,lbl:"연속!",emoji:"⚡",cls:"c3"},
+  {c:4,lbl:"불꽃!",emoji:"🌟",cls:"c4"},
+  {c:5,lbl:"MAX!",emoji:"💥",cls:"c5"},
+];
+var TOTAL_Q = 20;
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+var SK = "quizmaster_v1";
+var ST; // global state
+
+function defaultState(){
+  return {
+    coins:0, totalScore:0, bestScore:0,
+    streak:0, lastPlayedDate:null,
+    dailyBonusLastClaim:null, dailyStreakCount:0,
+    ownedCharacters:["basic"], equippedCharacter:"basic",
+    achievements:{},
+    gamesPlayed:0, totalCorrect:0, noHintCorrect:0,
+    maxCombo:0, perfectGames:0,
+  };
+}
+function save(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
+function load(){
+  try{
+    var r=localStorage.getItem(SK);
+    if(!r)return defaultState();
+    var s=JSON.parse(r);
+    var d=defaultState();
+    var m=Object.assign({},d,s);
+    if(!Array.isArray(m.ownedCharacters))m.ownedCharacters=["basic"];
+    if(m.ownedCharacters.indexOf("basic")<0)m.ownedCharacters.unshift("basic");
+    return m;
+  }catch(e){return defaultState();}
+}
+function today(){
+  var d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function daysBetween(a,b){
+  if(!a||!b)return 999;
+  return Math.round(Math.abs(new Date(b)-new Date(a))/(86400000));
 }
 
-function normalize(s) {
-  return s.replace(/\s/g,'').replace(/[·•\-]/g,'');
+// ═══════════════════════════════════════════════
+// SOUND
+// ═══════════════════════════════════════════════
+var AC=null;
+function getAC(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
+function tone(freq,type,start,dur,peak,detune){
+  var ctx=getAC();if(!ctx)return;
+  var o=ctx.createOscillator(),g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);
+  o.type=type||"sine";o.frequency.setValueAtTime(freq,start);
+  if(detune)o.detune.setValueAtTime(detune,start);
+  g.gain.setValueAtTime(0,start);
+  g.gain.linearRampToValueAtTime(peak||.4,start+.01);
+  g.gain.exponentialRampToValueAtTime(.001,start+dur);
+  o.start(start);o.stop(start+dur+.05);
 }
+function sndCorrect(){var t=getAC();if(!t)return;var n=t.currentTime;[523,659,784].forEach(function(f,i){tone(f,"triangle",n+i*.08,.25,.45);});}
+function sndWrong(){var t=getAC();if(!t)return;var n=t.currentTime;tone(180,"sawtooth",n,.3,.4);tone(140,"sawtooth",n+.18,.3,.35);}
+function sndCombo(c){var t=getAC();if(!t)return;var n=t.currentTime;[523,587,659,740,831].slice(0,Math.min(c,5)).forEach(function(f,i){tone(f,"square",n+i*.07,.18,.3+i*.04);});}
+function sndCoin(){var t=getAC();if(!t)return;var n=t.currentTime;[[1319,.08,.5],[1568,.12,.4],[2093,.2,.3]].forEach(function(x,i){tone(x[0],"sine",n+i*.05,x[1],x[2]);});}
+function sndLevelup(){var t=getAC();if(!t)return;var n=t.currentTime;[523,659,784,1047].forEach(function(f,i){tone(f,"triangle",n+i*.12,.2,.5);});[1047,1319,1568].forEach(function(f){tone(f,"triangle",n+.52,.6,.3);});}
+document.addEventListener("touchstart",function(){getAC();},{once:true,passive:true});
+document.addEventListener("click",function(){getAC();},{once:true});
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length-1; i>0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
+// ═══════════════════════════════════════════════
+// PARTICLES
+// ═══════════════════════════════════════════════
+var PARTS=["⭐","✨","🌟","💫","🎉","🎊","💥"];
+function burst(x,y,n){
+  n=n||10;
+  for(var i=0;i<n;i++){
+    (function(i){
+      var el=document.createElement("span");
+      el.className="particle";
+      el.textContent=PARTS[Math.floor(Math.random()*PARTS.length)];
+      var ang=(Math.PI*2/n)*i+(Math.random()-.5)*.5;
+      var d=70+Math.random()*80;
+      var dur=.7+Math.random()*.5;
+      el.style.cssText="left:"+x+"px;top:"+y+"px;--tx:"+(Math.cos(ang)*d)+"px;--ty:"+(Math.sin(ang)*d-60)+"px;--dur:"+dur+"s;--rot:"+((Math.random()-.5)*540)+"deg";
+      document.body.appendChild(el);
+      setTimeout(function(){el.remove();},(dur*1000)+100);
+    })(i);
   }
-  return a;
 }
-
-const TOTAL = 20;
-let questions = [], idx = 0, score = 0;
-let wrongCount = 0;
-let history = [];
-let answering = false;
-
-function getHints(q) {
-  return [
-    { label: '💡 수도', value: q.capital },
-    { label: '🔤 글자 수', value: q.name.length + '글자' },
-    { label: '🔑 첫 글자', value: '"' + q.name[0] + '"' },
-  ];
-}
-
-function startGame() {
-  questions = shuffle(COUNTRIES).slice(0, TOTAL);
-  idx = 0; score = 0; wrongCount = 0; history = []; answering = false;
-  document.getElementById('gameWrap').style.display = '';
-  document.getElementById('resultScreen').classList.remove('show');
-  renderQuestion();
-  updateScore();
-}
-
-function renderQuestion() {
-  const q = questions[idx];
-  wrongCount = 0;
-  answering = false;
-  document.getElementById('questionNum').textContent = (idx+1) + ' / ' + TOTAL;
-  document.getElementById('choseong').textContent = getChoseong(q.name);
-  document.getElementById('answerInput').value = '';
-  document.getElementById('answerInput').className = 'answer-input';
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('feedback').className = 'feedback';
-  document.getElementById('topBadge').textContent = '나라 이름 맞추기';
-  const hintArea = document.getElementById('hintArea');
-  const hintChips = document.getElementById('hintChips');
-  hintArea.classList.remove('visible');
-  hintChips.innerHTML = '';
-  updateProgress();
-  setTimeout(function(){ document.getElementById('answerInput').focus(); }, 50);
-}
-
-function showHintArea() {
-  const q = questions[idx];
-  const hintArea = document.getElementById('hintArea');
-  const hintChips = document.getElementById('hintChips');
-  const hints = getHints(q);
-  if (!hintArea.classList.contains('visible')) {
-    hintChips.innerHTML = '';
-    hints.forEach(function(h, i) {
-      const btn = document.createElement('button');
-      btn.className = 'hint-chip fadein';
-      btn.textContent = h.label;
-      btn.addEventListener('click', function() {
-        if (this.classList.contains('revealed')) return;
-        this.classList.add('revealed');
-        this.textContent = h.label + ': ' + h.value;
-      });
-      hintChips.appendChild(btn);
-    });
-    hintArea.classList.add('visible');
-    document.getElementById('topBadge').textContent = '💡 힌트 탭해서 열기';
+function flyCoins(x,y,n){
+  for(var i=0;i<(n||3);i++){
+    (function(i){
+      setTimeout(function(){
+        var el=document.createElement("span");
+        el.className="coin-fly";el.textContent="🪙";
+        var cx=(Math.random()-.5)*60;
+        el.style.cssText="left:"+(x+cx)+"px;top:"+y+"px;--cx:"+cx+"px";
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove();},800);
+      },i*120);
+    })(i);
   }
 }
-
-function updateScore() {
-  document.getElementById('scoreNum').textContent = score;
-  document.getElementById('totalNum').textContent = idx;
+function anim(el,cls,ms){
+  if(!el)return;
+  el.classList.remove("shake","bounce-anim","combo-bump","pop-anim","glow-anim");
+  void el.offsetWidth;
+  el.classList.add(cls);
+  setTimeout(function(){el.classList.remove(cls);},(ms||500));
 }
 
-function updateProgress() {
-  document.getElementById('progressFill').style.width = ((idx/TOTAL)*100) + '%';
+// ═══════════════════════════════════════════════
+// ACHIEVEMENT
+// ═══════════════════════════════════════════════
+var achTimer=null;
+function showAch(txt){
+  var p=document.getElementById("ach-popup");
+  document.getElementById("ach-body").textContent=txt;
+  clearTimeout(achTimer);
+  p.classList.remove("show");void p.offsetWidth;p.classList.add("show");
+  achTimer=setTimeout(function(){p.classList.remove("show");},3200);
 }
-
-function submitAnswer() {
-  if (answering) return;
-  const input = document.getElementById('answerInput');
-  const val = normalize(input.value.trim());
-  if (!val) return;
-  const q = questions[idx];
-  const ok = val === normalize(q.name);
-
-  if (ok) {
-    answering = true;
-    input.className = 'answer-input correct';
-    document.getElementById('feedback').textContent = '🎉 정답!';
-    document.getElementById('feedback').className = 'feedback ok';
-    document.getElementById('choseong').classList.add('pop');
-    history.push({ name: q.name, userAns: input.value.trim(), ok: true, wrongCount: wrongCount });
-    score++;
-    updateScore();
-    setTimeout(function() {
-      document.getElementById('choseong').classList.remove('pop');
-      nextQuestion();
-    }, 700);
-  } else {
-    wrongCount++;
-    input.className = 'answer-input wrong';
-    input.classList.add('shake');
-    if (wrongCount === 1) {
-      document.getElementById('feedback').textContent = '❌ 틀렸어요! 힌트를 확인해보세요.';
-      document.getElementById('feedback').className = 'feedback fail';
-      showHintArea();
-    } else {
-      document.getElementById('feedback').textContent = '❌ 오답 (' + wrongCount + '번째)';
-      document.getElementById('feedback').className = 'feedback fail';
+function checkAch(){
+  ACHIEVEMENTS.forEach(function(a){
+    if(ST.achievements[a.id])return;
+    if(a.check(ST)){
+      ST.achievements[a.id]=true;
+      if(a.coins)ST.coins+=a.coins;
+      save();
+      setTimeout(function(){showAch(a.name+" ("+a.coins+"🪙 획득!)");},300);
     }
-    setTimeout(function() {
-      input.classList.remove('shake');
-      input.value = '';
-      input.className = 'answer-input';
-      if (!answering) input.focus();
-    }, 500);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// LEVEL
+// ═══════════════════════════════════════════════
+function getLevel(score){
+  var cur=LEVELS[0];
+  for(var i=0;i<LEVELS.length;i++){if(score>=LEVELS[i].min)cur=LEVELS[i];else break;}
+  return cur;
+}
+function getLevelProgress(score){
+  var cur=getLevel(score);
+  var idx=LEVELS.indexOf(cur);
+  var nxt=LEVELS[idx+1];
+  if(!nxt)return{pct:100,cur:cur,nxt:null};
+  return{pct:Math.round((score-cur.min)/(nxt.min-cur.min)*100),cur:cur,nxt:nxt};
+}
+function updateLevelHUD(prefix){
+  var p=getLevelProgress(ST.totalScore);
+  var pe=prefix||"h";
+  var e=document.getElementById(pe+"-lv-emoji");var n=document.getElementById(pe+"-lv-num");
+  var nm=document.getElementById(pe+"-lv-name");var pct=document.getElementById(pe+"-lv-pct");
+  var bar=document.getElementById(pe+"-lv-bar");
+  if(e)e.textContent=p.cur.emoji;
+  if(n)n.textContent="Lv."+p.cur.level;
+  if(nm)nm.textContent=p.cur.name;
+  if(pct)pct.textContent=p.pct+"%";
+  if(bar)bar.style.width=p.pct+"%";
+}
+function checkLevelUp(prevScore,newScore){
+  var prev=getLevel(prevScore);
+  var next=getLevel(newScore);
+  if(next.level>prev.level){
+    sndLevelup();
+    var ov=document.createElement("div");ov.className="lvup-overlay";
+    ov.innerHTML='<div class="lvup-card"><div class="lv-emoji2">'+next.emoji+'</div><div class="lv-label2">레벨 업!</div><div class="lv-name2">'+next.name+'</div><div class="lv-num2">Lv.'+next.level+'</div><button class="lv-ok" onclick="this.closest(\'.lvup-overlay\').remove()">계속하기 🚀</button></div>';
+    document.body.appendChild(ov);
   }
 }
 
-function skipQuestion() {
-  if (answering) return;
-  const q = questions[idx];
-  history.push({ name: q.name, userAns: '(건너뜀)', ok: false, wrongCount: wrongCount });
-  document.getElementById('feedback').textContent = '⏭ 정답: ' + q.name;
-  document.getElementById('feedback').className = 'feedback info';
-  answering = true;
-  setTimeout(nextQuestion, 700);
+// ═══════════════════════════════════════════════
+// DAILY BONUS
+// ═══════════════════════════════════════════════
+function updateDailyBanner(){
+  var t=today();var td=document.getElementById("daily-sub");var tc=document.getElementById("daily-coins");var b=document.getElementById("daily-banner");
+  if(ST.dailyBonusLastClaim===t){
+    td.textContent="내일 또 방문하면 보너스!";tc.textContent="완료✓";
+    b.style.opacity=".5";b.style.cursor="default";
+    return;
+  }
+  var streak=ST.dailyStreakCount||0;
+  var bonus=DAILY_BONUS[Math.min(streak,DAILY_BONUS.length-1)];
+  td.textContent=streak>0?"연속 "+(streak+1)+"일째!":"오늘의 보너스를 받으세요!";
+  tc.textContent="+"+bonus+"🪙";
+}
+function claimDaily(){
+  var t=today();
+  if(ST.dailyBonusLastClaim===t)return;
+  var diff=daysBetween(ST.dailyBonusLastClaim,t);
+  var newStreak=(ST.dailyBonusLastClaim&&diff===1)?(ST.dailyStreakCount||0)+1:1;
+  var bonus=DAILY_BONUS[Math.min(newStreak-1,DAILY_BONUS.length-1)];
+  var equip=getEquipped();
+  if(equip.id==="galaxy"||equip.effectType==="ultimate")bonus*=2;
+  ST.dailyBonusLastClaim=t;ST.dailyStreakCount=newStreak;ST.coins+=bonus;
+  ST.streak=newStreak;
+  save();
+  updateHomeUI();
+  showModal("🎁","데일리 보너스!","🪙 "+bonus+"코인 획득!\n"+(newStreak)+"일 연속 접속 보너스!",null,null,"확인",null);
 }
 
-function nextQuestion() {
-  idx++;
-  updateScore();
-  if (idx >= TOTAL) { showResult(); return; }
+// ═══════════════════════════════════════════════
+// CHARACTER / SHOP
+// ═══════════════════════════════════════════════
+function getEquipped(){return CHARACTERS.find(function(c){return c.id===ST.equippedCharacter;})||CHARACTERS[0];}
+function renderShop(){
+  document.getElementById("s-coins").textContent=ST.coins;
+  var grid=document.getElementById("char-grid");grid.innerHTML="";
+  CHARACTERS.forEach(function(c){
+    var owned=ST.ownedCharacters.indexOf(c.id)>=0;
+    var equipped=ST.equippedCharacter===c.id;
+    var div=document.createElement("div");
+    div.className="char-card"+(owned?" owned":"")+(equipped?" equipped":"")+((!owned)?" locked":"");
+    var badge=equipped?'<div class="char-status eq-badge">장착중</div>':owned?'<div class="char-status owned-badge">보유</div>':'<div class="char-status lock-badge">🔒</div>';
+    div.innerHTML=badge+'<div class="char-emoji">'+c.emoji+'</div><div class="char-name">'+c.name+'</div><div class="char-price '+(c.price===0?"free":"")+'">'+( c.price===0?"무료":"🪙 "+c.price)+'</div><div class="char-effect">'+c.desc+'</div>';
+    div.onclick=function(){onCharTap(c,owned,equipped);};
+    grid.appendChild(div);
+  });
+}
+function onCharTap(c,owned,equipped){
+  if(equipped)return;
+  if(owned){ST.equippedCharacter=c.id;save();renderShop();document.getElementById("shop-char-preview").textContent=c.emoji;return;}
+  if(ST.coins<c.price){
+    anim(document.getElementById("s-coins").parentElement,"shake",400);
+    showModal("💸","코인 부족!","필요: 🪙"+c.price+"\n보유: 🪙"+ST.coins+"\n\n퀴즈를 풀어 코인을 모으세요!",null,null,"확인",null);
+    return;
+  }
+  showModal(c.emoji,"\""+c.name+"\" 구매?","🪙 "+c.price+"코인을 사용합니다.\n\n효과: "+c.desc,function(){
+    ST.coins-=c.price;ST.ownedCharacters.push(c.id);ST.equippedCharacter=c.id;
+    save();sndCoin();renderShop();updateHomeUI();
+  },null,"구매!","취소");
+}
+function showShop(){showScreen("shop");renderShop();}
+function closeShop(){showScreen("home");}
+
+// ═══════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════
+function showModal(emoji,title,body,onConfirm,onCancel,confirmTxt,cancelTxt){
+  var ov=document.createElement("div");ov.className="modal-overlay";
+  var btns='<button class="modal-btn confirm" id="_mc">'+(confirmTxt||"확인")+'</button>';
+  if(cancelTxt)btns='<button class="modal-btn cancel" id="_mx">'+(cancelTxt||"취소")+'</button>'+btns;
+  ov.innerHTML='<div class="modal-box"><div class="modal-emoji">'+emoji+'</div><div class="modal-title">'+title+'</div><div class="modal-body">'+body.replace(/\n/g,"<br>")+'</div><div class="modal-btns">'+btns+'</div></div>';
+  document.body.appendChild(ov);
+  var mc=ov.querySelector("#_mc");var mx=ov.querySelector("#_mx");
+  if(mc)mc.onclick=function(){ov.remove();if(onConfirm)onConfirm();};
+  if(mx)mx.onclick=function(){ov.remove();if(onCancel)onCancel();};
+}
+
+// ═══════════════════════════════════════════════
+// HOME UI
+// ═══════════════════════════════════════════════
+function updateHomeUI(){
+  document.getElementById("h-coins").textContent=ST.coins;
+  document.getElementById("h-best").textContent=ST.bestScore;
+  document.getElementById("h-streak").textContent=ST.streak;
+  updateLevelHUD("h");
+  updateDailyBanner();
+  var eq=getEquipped();
+  document.getElementById("shop-char-preview").textContent=eq.emoji;
+}
+
+// ═══════════════════════════════════════════════
+// SCREEN
+// ═══════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+function goHome(){clearTimer();showScreen("home");updateHomeUI();}
+
+// ═══════════════════════════════════════════════
+// GAME LOGIC
+// ═══════════════════════════════════════════════
+var gMode="choseong";
+var gQuestions=[],gIdx=0,gScore=0,gCombo=0,gCoins=0;
+var gWrong=0,gHintsUsed=0,gAnswering=false;
+var gHistory=[];
+var gShield=false;
+var timerInterval=null,timerLeft=100;
+var TIMER_SEC=15;
+
+function shuffle(a){var b=[].concat(a);for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+function getCS(str){
+  var s=0xAC00,J=["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+  return Array.from(str).map(function(c){var code=c.charCodeAt(0);return(code>=0xAC00&&code<=0xD7A3)?J[Math.floor((code-s)/588)]:c;}).join("");
+}
+function norm(s){return s.replace(/\s/g,"").replace(/[·•\-]/g,"");}
+
+function startGame(mode){
+  gMode=mode||"choseong";
+  gQuestions=shuffle(COUNTRIES).slice(0,TOTAL_Q);
+  gIdx=0;gScore=0;gCombo=0;gCoins=0;gHistory=[];gAnswering=false;gShield=false;
+  // character effects
+  var eq=getEquipped();
+  if(eq.effectType==="shield")gShield=true;
+  showScreen("game");
+  document.getElementById("g-mode-badge").textContent=gMode==="flag"?"🚩 국기 퀴즈":"🔤 초성 퀴즈";
   renderQuestion();
+  updateGameUI();
+}
+function renderQuestion(){
+  clearTimer();
+  var q=gQuestions[gIdx];
+  gWrong=0;gHintsUsed=0;gAnswering=false;
+  document.getElementById("q-num").textContent=(gIdx+1)+" / "+TOTAL_Q;
+  document.getElementById("feedback").textContent="";
+  document.getElementById("feedback").className="feedback";
+  document.getElementById("q-badge").textContent="나라 이름 맞추기";
+  document.getElementById("g-prog").style.width=(gIdx/TOTAL_Q*100)+"%";
+  // mode switch
+  if(gMode==="choseong"){
+    document.getElementById("choseong-mode").style.display="";
+    document.getElementById("flag-mode").style.display="none";
+    document.getElementById("q-choseong").textContent=getCS(q.name);
+    var ha=document.getElementById("hint-area");var hc=document.getElementById("hint-chips");
+    ha.classList.remove("visible");hc.innerHTML="";
+    var inp=document.getElementById("ans-input");inp.value="";inp.className="answer-input";
+    setTimeout(function(){inp.focus();},60);
+  } else {
+    document.getElementById("choseong-mode").style.display="none";
+    document.getElementById("flag-mode").style.display="";
+    document.getElementById("q-flag").textContent=q.flag;
+    renderFlagChoices(q);
+  }
+  startTimer();
+}
+function startTimer(){
+  timerLeft=100;
+  var fill=document.getElementById("g-timer");fill.style.width="100%";fill.style.background="var(--green)";
+  timerInterval=setInterval(function(){
+    timerLeft-=(100/(TIMER_SEC*10));
+    if(timerLeft<=0){timerLeft=0;fill.style.width="0%";clearInterval(timerInterval);if(!gAnswering)onTimeout();}
+    else{
+      fill.style.width=timerLeft+"%";
+      if(timerLeft<30)fill.style.background="var(--red)";
+      else if(timerLeft<60)fill.style.background="var(--gold)";
+    }
+  },100);
+}
+function clearTimer(){clearInterval(timerInterval);timerInterval=null;}
+function onTimeout(){
+  if(gAnswering)return;
+  var q=gQuestions[gIdx];
+  gHistory.push({name:q.name,userAns:"(시간초과)",ok:false,wrong:gWrong});
+  document.getElementById("feedback").textContent="⏱ 시간 초과! 정답: "+q.name;
+  document.getElementById("feedback").className="feedback fail";
+  sndWrong();gCombo=0;updateComboUI();gAnswering=true;
+  setTimeout(nextQ,900);
 }
 
-function showResult() {
-  document.getElementById('gameWrap').style.display = 'none';
-  const rs = document.getElementById('resultScreen');
-  rs.classList.add('show');
-  const pct = score / TOTAL;
-  let emoji = '😢', title = '아쉬워요!', sub = '다시 한 번 도전해보세요!';
-  if (pct >= 0.9) { emoji='🏆'; title='완벽해요!'; sub='나라 박사 인증! 정말 대단해요 🌍'; }
-  else if (pct >= 0.7) { emoji='🥳'; title='잘하셨어요!'; sub='훌륭한 실력이에요. 조금만 더!'; }
-  else if (pct >= 0.5) { emoji='😊'; title='절반 이상!'; sub='꽤 잘 아시네요. 계속 도전하세요!'; }
-  else if (pct >= 0.3) { emoji='😅'; title='조금 더!'; sub='세계 나라들을 더 공부해봐요!'; }
-  document.getElementById('resultEmoji').textContent = emoji;
-  document.getElementById('resultTitle').textContent = title;
-  document.getElementById('resultBig').textContent = score;
-  document.getElementById('resultLabel').textContent = '/ ' + TOTAL + ' 정답';
-  document.getElementById('resultSub').textContent = sub;
-  const list = document.getElementById('resultList');
-  list.innerHTML = '';
-  history.forEach(function(h) {
-    const div = document.createElement('div');
-    div.className = 'result-item';
-    const cho = getChoseong(h.name);
-    const rightText = h.ok
-      ? ('✓ ' + (h.wrongCount > 0 ? '힌트 후 정답' : '정답'))
-      : (h.userAns === '(건너뜀)' ? '⏭ 건너뜀' : ('✗ ' + (h.userAns||'?')));
-    div.innerHTML = '<span class="r-left">' + cho + ' → <b style="color:#f1f5f9">' + h.name + '</b></span>'
-      + '<span class="r-right ' + (h.ok?'ok2':'fail2') + '">' + rightText + '</span>';
+// ─── 초성 모드 ───
+function showHints(){
+  var q=gQuestions[gIdx];
+  var ha=document.getElementById("hint-area");
+  if(ha.classList.contains("visible"))return;
+  var hc=document.getElementById("hint-chips");hc.innerHTML="";
+  var eq=getEquipped();
+  var hints=[
+    {label:"💡 수도",val:q.capital},
+    {label:"🔤 글자",val:q.name.length+"글자"},
+    {label:"🔑 첫 글자",val:'"'+q.name[0]+'"'},
+  ];
+  if(eq.effectType==="hint_bonus"||eq.effectType==="ultimate"){
+    hints.push({label:"🌏 대륙",val:q.hint});
+  }
+  hints.forEach(function(h){
+    var btn=document.createElement("button");
+    btn.className="hint-chip";btn.textContent=h.label;
+    btn.onclick=function(){
+      if(this.classList.contains("revealed"))return;
+      this.classList.add("revealed");
+      this.textContent=h.label+": "+h.val;
+    };
+    hc.appendChild(btn);
+  });
+  ha.classList.add("visible");
+  document.getElementById("q-badge").textContent="💡 힌트 탭해서 열기";
+}
+function submitChoseong(){
+  if(gAnswering)return;
+  var inp=document.getElementById("ans-input");
+  var val=norm(inp.value.trim());if(!val)return;
+  var q=gQuestions[gIdx];
+  var ok=val===norm(q.name);
+  if(ok){
+    onCorrect(inp,"ans-input");
+  } else {
+    gWrong++;
+    inp.className="answer-input wrong";anim(inp,"shake",400);
+    if(gWrong===1){
+      document.getElementById("feedback").textContent="❌ 틀렸어요! 힌트를 확인해보세요.";
+      document.getElementById("feedback").className="feedback fail";
+      showHints();gHintsUsed=1;
+    } else {
+      document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째)";
+      document.getElementById("feedback").className="feedback fail";
+    }
+    sndWrong();
+    setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);
+  }
+}
+
+// ─── 국기 모드 ───
+function renderFlagChoices(q){
+  var fc=document.getElementById("flag-choices");fc.innerHTML="";
+  var same=COUNTRIES.filter(function(c){return c.continent===q.continent&&c.name!==q.name;});
+  var others=COUNTRIES.filter(function(c){return c.continent!==q.continent&&c.name!==q.name;});
+  var pool=shuffle(same).concat(shuffle(others));
+  var choices=shuffle([q].concat(pool.slice(0,3)));
+  choices.forEach(function(c){
+    var btn=document.createElement("button");btn.className="choice-btn";
+    btn.textContent=c.name;
+    btn.onclick=function(e){onFlagChoice(c,q,btn,e);};
+    fc.appendChild(btn);
+  });
+}
+function onFlagChoice(chosen,correct,btn,e){
+  if(gAnswering)return;
+  var ok=chosen.name===correct.name;
+  if(ok){
+    btn.classList.add("correct-choice");
+    onCorrect(btn,"",e);
+  } else {
+    btn.classList.add("wrong-choice");anim(btn,"shake",400);
+    // reveal correct
+    var btns=document.querySelectorAll(".choice-btn");
+    btns.forEach(function(b){if(b.textContent===correct.name)b.classList.add("reveal-choice");});
+    gWrong++;
+    if(gWrong===1){showHintFlagBadge();}
+    if(gShield&&gWrong===1){
+      gShield=false;
+      document.getElementById("feedback").textContent="🛡 방어막 발동! 콤보 유지!";
+      document.getElementById("feedback").className="feedback info";
+      sndWrong();
+      setTimeout(function(){
+        document.getElementById("flag-choices").innerHTML="";
+        renderFlagChoices(correct);
+        document.getElementById("feedback").textContent="";
+      },800);
+      return;
+    }
+    gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});
+    document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;
+    document.getElementById("feedback").className="feedback fail";
+    sndWrong();gCombo=0;updateComboUI();gAnswering=true;
+    btns.forEach(function(b){b.disabled=true;});
+    setTimeout(nextQ,1000);
+  }
+}
+function showHintFlagBadge(){document.getElementById("q-badge").textContent="💡 힌트: "+gQuestions[gIdx].hint;}
+
+// ─── 정답 공통 ───
+function onCorrect(el,cls,e){
+  gAnswering=true;clearTimer();
+  var q=gQuestions[gIdx];
+  var speedBonus=timerLeft>66?50:(timerLeft>50?30:(timerLeft>33?10:0));
+  var hintPenalty=gHintsUsed>0?30:0;
+  var basePts=100-hintPenalty+speedBonus;
+  gCombo++;
+  var eq=getEquipped();
+  var mult=1;
+  if(eq.effectType==="combo_multiplier"&&gCombo>=eq.comboThreshold)mult=eq.effectValue;
+  if(eq.effectType==="ultimate")mult=eq.effectValue.multiplier;
+  if(gCombo>=5)mult=Math.max(mult,3);
+  else if(gCombo>=4)mult=Math.max(mult,2);
+  else if(gCombo>=3)mult=Math.max(mult,1.5);
+  else if(gCombo>=2)mult=Math.max(mult,1.2);
+  var pts=Math.round(basePts*mult);
+  var coinEarned=gHintsUsed===0?2:1;
+  if(eq.effectType==="coin_bonus")coinEarned+=eq.effectValue;
+  if(eq.effectType==="ultimate")coinEarned+=eq.effectValue.coin;
+  if(gCombo>=5)coinEarned+=5;
+  gScore+=pts;gCoins+=coinEarned;
+  if(gHintsUsed===0)ST.noHintCorrect++;
+  gHistory.push({name:q.name,userAns:q.name,ok:true,wrong:gWrong,pts:pts,coins:coinEarned});
+  document.getElementById("feedback").textContent="🎉 정답! +"+pts+"점 🪙×"+coinEarned;
+  document.getElementById("feedback").className="feedback ok";
+  if(cls)el.className=cls+" correct";
+  anim(document.getElementById("q-card"),"glow-anim",600);
+  sndCorrect();
+  if(gCombo>=2)sndCombo(gCombo);
+  var ex=e||{clientX:window.innerWidth/2,clientY:window.innerHeight/2};
+  var eq2=getEquipped();
+  var n=8+gCombo*2;if(eq2.id==="rocket"||eq2.id==="dragon"||eq2.id==="galaxy")n+=8;
+  burst(ex.clientX,ex.clientY,n);
+  flyCoins(ex.clientX,ex.clientY,Math.min(coinEarned,5));sndCoin();
+  updateComboUI();updateGameUI();
+  ST.totalCorrect++;
+  if(ST.maxCombo<gCombo)ST.maxCombo=gCombo;
+  setTimeout(nextQ,700);
+}
+function nextQ(){
+  gIdx++;
+  if(gIdx>=TOTAL_Q){endGame();return;}
+  renderQuestion();updateGameUI();
+}
+function skipQuestion(){
+  if(gAnswering)return;clearTimer();
+  var q=gQuestions[gIdx];
+  gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:gWrong});
+  document.getElementById("feedback").textContent="⏭ 정답: "+q.name;
+  document.getElementById("feedback").className="feedback info";
+  gCombo=0;updateComboUI();gAnswering=true;
+  setTimeout(nextQ,700);
+}
+function updateGameUI(){
+  document.getElementById("g-coins").textContent=ST.coins+gCoins;
+  document.getElementById("g-score").textContent=gScore;
+}
+function updateComboUI(){
+  var c=gCombo;var d=COMBO_DATA[Math.min(c,5)];
+  var b=document.getElementById("combo-badge");
+  b.className="combo-badge "+(d?d.cls:"c1");
+  document.getElementById("combo-emoji").textContent=d?d.emoji:"▶️";
+  document.getElementById("combo-num").textContent=c>0?c:"";
+  document.getElementById("combo-label").textContent=d&&c>0?d.lbl:"콤보";
+  if(c>0)anim(b,"combo-bump",400);
+}
+
+// ─── GAME END ───
+function endGame(){
+  clearTimer();
+  var correct=gHistory.filter(function(h){return h.ok;}).length;
+  var isPerfect=correct===TOTAL_Q;
+  if(isPerfect)ST.perfectGames++;
+  var pct=correct/TOTAL_Q;
+  var emoji="😢",title="아쉬워요!",sub="다시 한번 도전해보세요!";
+  if(pct>=.9){emoji="🏆";title="완벽해요!";sub="나라 박사 인증! 대단해요 🌍";}
+  else if(pct>=.7){emoji="🥳";title="잘하셨어요!";sub="훌륭한 실력이에요!";}
+  else if(pct>=.5){emoji="😊";title="절반 이상!";sub="계속 도전하세요!";}
+  else if(pct>=.3){emoji="😅";title="조금 더!";sub="세계 나라를 더 공부해봐요!";}
+
+  var prevScore=ST.totalScore;
+  ST.totalScore+=gScore;
+  if(gScore>ST.bestScore)ST.bestScore=gScore;
+  ST.coins+=gCoins;ST.gamesPlayed++;
+  var t2=today();var diff=daysBetween(ST.lastPlayedDate,t2);
+  if(diff===1)ST.streak++;else if(diff>1)ST.streak=1;
+  ST.lastPlayedDate=t2;
+  save();checkLevelUp(prevScore,ST.totalScore);checkAch();
+
+  document.getElementById("r-emoji").textContent=emoji;
+  document.getElementById("r-title").textContent=title;
+  document.getElementById("r-score").textContent=correct;
+  document.getElementById("r-label").textContent="/ "+TOTAL_Q+" 정답  ·  "+gScore+"점";
+  document.getElementById("r-sub").textContent=sub;
+  document.getElementById("r-coins-num").textContent="+"+gCoins;
+  var list=document.getElementById("r-list");list.innerHTML="";
+  gHistory.forEach(function(h){
+    var div=document.createElement("div");div.className="result-item";
+    var cho=gMode==="choseong"?getCS(h.name)+"→ ":gQuestions[gHistory.indexOf(h)]?(gQuestions[gHistory.indexOf(h)].flag||"")+" ":"";
+    var rt=h.ok?"✓ "+h.pts+"점":h.userAns==="(건너뜀)"?"⏭":h.userAns==="(시간초과)"?"⏱":"✗ "+(h.userAns||"?");
+    div.innerHTML='<span class="r-left">'+cho+'<b style="color:var(--fg)">'+h.name+'</b></span><span class="r-right '+(h.ok?"ok2":"fail2")+'">'+rt+'</span>';
     list.appendChild(div);
   });
-  document.getElementById('progressFill').style.width = '100%';
+  showScreen("result");
 }
+function restartSameMode(){startGame(gMode);}
 
-function restartGame() { startGame(); }
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+ST=load();
+updateHomeUI();
 
-document.getElementById('answerInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') { e.preventDefault(); submitAnswer(); }
+document.getElementById("ans-input").addEventListener("keydown",function(e){
+  if(e.key==="Enter"){e.preventDefault();submitChoseong();}
 });
-
-startGame();
 </script>
 </body>
 </html>
