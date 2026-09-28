@@ -529,7 +529,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 
 
   <!-- 일일 미션 패널 -->
-  <div id="daily-missions-panel" style="width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:8px;display:block;">
+  <div id="daily-missions-panel" style="width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:8px;display:none;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <span style="font-size:13px;font-weight:800;color:var(--fg);">📋 오늘의 미션</span>
       <span id="mission-reset-time" style="font-size:10px;color:var(--muted);">자정 초기화</span>
@@ -765,6 +765,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 <div class="screen" id="result">
   <div id="r-mode-badge" style="display:inline-block;padding:4px 14px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:8px;background:rgba(56,189,248,0.15);color:var(--sky);border:1px solid var(--sky);"></div>
   <div id="r-mode-best" style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;min-height:16px;"></div>
+<div id="r-max-combo" style="font-size:11px;color:var(--muted);min-height:14px;"></div>
   <div id="r-vs-bar" style="display:none;width:100%;max-width:320px;margin:0 auto 8px;padding:0 16px;">
     <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;">
       <span>이번</span><span id="r-vs-label">vs 최고</span>
@@ -1118,8 +1119,6 @@ var MAP_COORDS={
   "에리트레아":{x:558,y:230},"에콰도르":{x:246,y:286},"요르단":{x:548,y:188},"우간다":{x:542,y:286},"우루과이":{x:264,y:340},
   "적도기니":{x:472,y:322},"코스타리카":{x:188,y:240},"코트디부아르":{x:468,y:274},"쿠웨이트":{x:576,y:195},"크로아티아":{x:500,y:148},
   "키프로스":{x:538,y:163},"타지키스탄":{x:676,y:188},"투르크메니스탄":{x:640,y:180},"튀니지":{x:488,y:170},"피지":{x:926,y:340},
-
-,
   "세인트루시아":{x:27.4,y:54.5},
   "세인트키츠네비스":{x:26.8,y:52.8},
   "도미니카":{x:27.1,y:53.2}
@@ -1376,6 +1375,7 @@ var DAILY_MISSION_DEFS = [
   {id:'correct15', label:'정답 15개 맞추기', icon:'✅', goal:15, reward:20, track:'sessionCorrect', daily:true},
   {id:'combo5', label:'5콤보 달성', icon:'🔥', goal:5, reward:25, track:'maxComboToday', daily:true},
   {id:'flag5', label:'국기 퀴즈 5문제', icon:'🚩', goal:5, reward:15, track:'flagCorrect', daily:true},
+{id:'map3', label:'지도 퀴즈 3문제', icon:'🗺️', goal:3, reward:15, track:'mapCorrect', daily:true},
 ];
 var _dmProgress = {}; // 오늘의 미션 진행
 
@@ -1719,7 +1719,7 @@ function onMapClick(evt){
   if(!ST.perCountry)ST.perCountry={};
   if(!ST.perCountry[q.name])ST.perCountry[q.name]={ans:0,corr:0};
   ST.perCountry[q.name].ans++;
-  if(ok){gCombo++;ST.totalCorrect++;ST.perCountry[q.name].corr++;_sessionCorrect++;updateMissionProgress('sessionCorrect',1);if(gMode==='flag'||gMode.endsWith('_flag')){_flagCorrectToday++;updateMissionProgress('flagCorrect',1);}if(gCombo>_maxComboToday){_maxComboToday=gCombo;updateMissionProgress('maxComboToday', gCombo - Math.max(0, _maxComboToday - 1));}}else{gCombo=0;loseLife2();}
+  if(ok){gCombo++;ST.totalCorrect++;ST.perCountry[q.name].corr++;_sessionCorrect++;updateMissionProgress('sessionCorrect',1);if(gMode==='flag'||gMode.endsWith('_flag')){_flagCorrectToday++;updateMissionProgress('flagCorrect',1);}if(gCombo>_maxComboToday){updateMissionProgress('maxComboToday', gCombo - _maxComboToday);_maxComboToday=gCombo;}}else{gCombo=0;loseLife2();}
   if(ST.maxCombo<gCombo)ST.maxCombo=gCombo;
   // Apply combo multiplier like choseong/flag modes
   var mapMult=1;
@@ -1739,7 +1739,7 @@ function onMapClick(evt){
   document.getElementById("feedback").className="feedback "+(ok?"ok":grade===2?"info":"fail");
   updateGameUI();updateComboUI();updateStreakFire(gCombo);updateBestIndicator(gScore);hapticComboFn(gCombo);
   triggerHitEffect(ok,gCombo,pts,document.getElementById("q-card"),evt);
-  if(ok){burst(evt.clientX,evt.clientY,8+gCombo*2);flyCoins(evt.clientX,evt.clientY,Math.min(coinEarned,4));sndCoin();showLearnCard(q);}else if(grade===3&&gShield){
+  if(ok){burst(evt.clientX,evt.clientY,8+gCombo*2);flyCoins(evt.clientX,evt.clientY,Math.min(coinEarned,4));sndCoin();showLearnCard(q);updateMissionProgress('mapCorrect',1);_sessionCorrect++;updateMissionProgress('sessionCorrect',1);}else if(grade===3&&gShield){
     // 방어막: 지도 모드 완전 빗나감(grade 3) 시 방어막 소모
     gShield=false;
     document.getElementById('feedback').textContent='🛡 방어막! 다시 클릭하세요!';
@@ -1808,7 +1808,7 @@ function updateGameUI(){
 
 // Combo milestone check - called from onCorrect
 function checkComboMilestone(combo) {
-  if(combo===3)showToast('🔥 3콤보 시작!');
+  if(combo===3){showToast('🔥 3콤보!');var el=document.getElementById('g-score');if(el){el.style.animation='none';void el.offsetWidth;el.style.animation='shake 0.4s ease';}}
   else if(combo===5)showToast('🔥🔥 5콤보! 점수 x3!');
   else if(combo===10)showToast('💥 10콤보!! 전설!');
   else if(combo===20)showToast('⚡ 20콤보!!! 신의 경지!!!');
@@ -1875,6 +1875,9 @@ function endGame(){
   // New record badge
   var nrEl=document.getElementById('r-new-record');
   if(nrEl)nrEl.style.display=isNewRecord?'block':'none';
+  // Show session max combo
+  var rMCEl=document.getElementById('r-max-combo');
+  if(rMCEl){var sMC=gHistory.length>0?Math.max.apply(Math,gHistory.map(function(h){return h.combo||gCombo||0}).concat([0])):0;rMCEl.textContent=sMC>2?'🔥 이번 최대 '+sMC+'콤보':'';}  
   // Show continent picker button for continent quiz modes
   var contPickBtn=document.getElementById('btn-continent-pick');
   var restartBtn=document.getElementById('restart-btn-main');
