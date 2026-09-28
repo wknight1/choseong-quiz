@@ -568,6 +568,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <button class="mode-btn primary" onclick="startGame('choseong')">🔤 초성 퀴즈 <span class="btn-badge">클래식</span></button>
     <button class="mode-btn primary" onclick="startGame('flag')" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🚩 국기 퀴즈 <span class="btn-badge">4지선다</span></button>
     <button class="mode-btn primary" onclick="startGame('map')" style="background:linear-gradient(135deg,#10b981,#0891b2)">🗺️ 지도 찾기 <span class="btn-badge">NEW</span></button>
+    <button class="mode-btn" onclick="startSpeedQuiz()" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">⚡ 스피드 <span class="btn-badge">30초</span></button>
     <button class="mode-btn primary" id="weak-mode-btn" onclick="startWeakSpotMode()" style="background:linear-gradient(135deg,#7c3aed,#c026d3);display:none;">🎯 약점 집중 <span class="btn-badge">맞춤</span></button>
     <button class="mode-btn primary" onclick="showContinentPicker()" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">🌍 대륙별 퀴즈 <span class="btn-badge">신규</span></button>
     <button class="mode-btn secondary" onclick="showShop()">🏪 캐릭터 상점 <span style="font-size:11px;color:var(--muted)" id="shop-char-preview"></span></button>
@@ -2061,7 +2062,7 @@ function endGame(){
   var xpGained=correct*10+Math.min(ST.maxCombo,10)*5;
   var xpEl=document.getElementById('r-xp-row');
   if(xpEl)xpEl.textContent=xpGained>0?('✨ +'+xpGained+' XP 획득'):'';
-  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점","continent_asia":"🌏 아시아","continent_europe":"🌍 유럽","continent_americas":"🌎 아메리카","continent_africa":"🌍 아프리카","continent_oceania":"🌊 오세아니아","continent_all":"🌐 전체","continent_asia_choseong":"🌏 아시아 초성","continent_asia_flag":"🌏 아시아 국기","continent_europe_choseong":"🌍 유럽 초성","continent_europe_flag":"🌍 유럽 국기","continent_americas_choseong":"🌎 아메리카 초성","continent_americas_flag":"🌎 아메리카 국기","continent_africa_choseong":"🌍 아프리카 초성","continent_africa_flag":"🌍 아프리카 국기","continent_oceania_choseong":"🌊 오세아니아 초성","continent_oceania_flag":"🌊 오세아니아 국기","continent_all_choseong":"🌐 전체 초성","continent_all_flag":"🌐 전체 국기"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=_modeBest>0?((_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점"):"";
+  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점","continent_asia":"🌏 아시아","continent_europe":"🌍 유럽","continent_americas":"🌎 아메리카","continent_africa":"🌍 아프리카","continent_oceania":"🌊 오세아니아","continent_all":"🌐 전체","continent_asia_choseong":"🌏 아시아 초성","continent_asia_flag":"🌏 아시아 국기","continent_europe_choseong":"🌍 유럽 초성","continent_europe_flag":"🌍 유럽 국기","continent_americas_choseong":"🌎 아메리카 초성","continent_americas_flag":"🌎 아메리카 국기","continent_africa_choseong":"🌍 아프리카 초성","continent_africa_flag":"🌍 아프리카 국기","continent_oceania_choseong":"🌊 오세아니아 초성","continent_oceania_flag":"🌊 오세아니아 국기","continent_all_choseong":"🌐 전체 초성","continent_all_flag":"🌐 전체 국기","speed":"⚡ 스피드"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=_modeBest>0?((_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점"):"";
   // vs-bar
   var vsBar=document.getElementById('r-vs-bar');var vsFill=document.getElementById('r-vs-fill');var vsLabel=document.getElementById('r-vs-label');
   if(vsBar&&vsFill&&_modeBest>0){vsBar.style.display='block';vsLabel.textContent='vs 최고 '+_modeBest+'점';var _ratio=Math.min(gScore/_modeBest,1.5);var _pct=Math.min(_ratio/1.5*100,100);setTimeout(function(){vsFill.style.width=_pct+'%';vsFill.style.background=gScore>=_modeBest?'linear-gradient(90deg,#22c55e,#84cc16)':'linear-gradient(90deg,#22d3ee,#818cf8)';},300);}
@@ -2404,9 +2405,9 @@ function updateWeakModeBtnVisibility() {
 
 function showLearnCard(q){
   var el=document.createElement('div');el.className='learn-card';
-  var cap=q.capital?' · 수도: '+q.capital:'';
+  var cap=q.capital?' · 수도: '+q.capital:'';var hint=q.hint?'<div class="lc-hint">💡 '+q.hint+'</div>':'';
   var cont=q.continent?(function(){var m={asia:'🌏 아시아',europe:'🌍 유럽',americas:'🌎 아메리카',africa:'🌍 아프리카',oceania:'🌏 오세아니아'};return ' · '+(m[q.continent]||q.continent);})():'';
-  el.innerHTML='<div class="lc-flag">'+q.flag+'</div><div class="lc-name">'+q.name+cont+'</div><div class="lc-info">'+cap+'</div>';
+  el.innerHTML='<div class="lc-flag">'+q.flag+'</div><div class="lc-name">'+q.name+cont+'</div><div class="lc-info">'+cap+'</div>'+hint';
   document.body.appendChild(el);
   setTimeout(function(){el.classList.add('show');},30);
   setTimeout(function(){el.classList.remove('show');setTimeout(function(){el.remove();},350);},1800);
@@ -2680,7 +2681,7 @@ function copyShareText2(){
 function _fallbackCopy(text){  try{navigator.clipboard.writeText(text).then(function(){showModal("📋","클립보드 복사!","친구에게 공유해보세요!",null,null,"확인",null);});}catch(e){showModal("📋","공유 텍스트",text,null,null,"닫기",null);}
 }
 
-function loadStats2(){var s=localStorage.getItem('quizStats2');if(s)try{return JSON.parse(s);}catch(e){}return {plays:0,totalCorrect:0,totalAnswered:0,maxCombo:0,bestScores:{choseong:0,flag:0,map:0,daily:0,focus:0,weakspot:0,continent:0},wrongMap:{}};}
+function loadStats2(){var s=localStorage.getItem('quizStats2');if(s)try{return JSON.parse(s);}catch(e){}return {plays:0,totalCorrect:0,totalAnswered:0,maxCombo:0,bestScores:{choseong:0,flag:0,map:0,daily:0,focus:0,weakspot:0,continent:0,speed:0},wrongMap:{}};}
 function saveStats2(st){localStorage.setItem('quizStats2',JSON.stringify(st));}
 function recordGameStats2(mode,score,history,maxCombo){
   var st=loadStats2();st.plays++;
