@@ -965,7 +965,11 @@ var COUNTRIES=[
   {name:"남수단",flag:"🇸🇸",hint:"수도 주바, 2011년 독립한 세계에서 가장 젊은 나라",capital:"주바",continent:"africa"},
   {name:"아제르바이잔",flag:"🇦🇿",hint:"수도 바쿠, 카스피해 서안 석유 부국. 바쿠는 '불의 땅'이란 뜻",capital:"바쿠",continent:"asia"},
   {name:"안도라",flag:"🇦🇩",hint:"수도 안도라라베야, 피레네 산맥 속 소국. 면세 쇼핑과 스키 리조트로 유명",capital:"안도라라베야",continent:"europe"},
-  {name:"콩고공화국",flag:"🇨🇬",hint:"수도 브라자빌, 콩고민주공화국과 콩고강을 사이에 두고 마주보는 나라",capital:"브라자빌",continent:"africa"}
+  {name:"콩고공화국",flag:"🇨🇬",hint:"수도 브라자빌, 콩고민주공화국과 콩고강을 사이에 두고 마주보는 나라",capital:"브라자빌",continent:"africa"},
+  {name:"시에라리온",flag:"🇸🇱",continent:"africa",capital:"프리타운",hint:"수도 프리타운(자유민의 도시), 서아프리카 다이아몬드 산지."},
+  {name:"라이베리아",flag:"🇱🇷",continent:"americas",capital:"몬로비아",hint:"수도 몬로비아, 미국이 해방노예 귀환 위해 설립. 아프리카 유일 성조기 기반 국기."},
+  {name:"부룬디",flag:"🇧🇮",continent:"africa",capital:"기테가",hint:"수도 기테가, 아프리카 대호수 지역. 탄자니아와 국경 맞닿음."},
+  {name:"지부티",flag:"🇩🇯",continent:"africa",capital:"지부티시",hint:"수도 지부티시, 아프리카의 뿔 전략 요충지. 홍해·아덴만 관문."}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -1021,7 +1025,12 @@ var MAP_COORDS={
   "잠비아":{x:537,y:300},
   "소말리아":{x:575,y:245},
   "콩고민주공화국":{x:520,y:275},
-,"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220},"남수단":{x:525,y:248},"아제르바이잔":{x:545,y:148},"조지아":{x:542,y:143},"안도라":{x:440,y:149},"콩고공화국":{x:510,y:268},"세이셸":{x:555,y:278},"베냉":{x:475,y:242},"토고":{x:467,y:244}};
+,"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220},"남수단":{x:525,y:248},"아제르바이잔":{x:545,y:148},"조지아":{x:542,y:143},"안도라":{x:440,y:149},"콩고공화국":{x:510,y:268},"세이셸":{x:555,y:278},"베냉":{x:475,y:242},"토고":{x:467,y:244},
+  "시에라리온":{x:163,y:237},
+  "라이베리아":{x:162,y:248},
+  "부룬디":{x:254,y:270},
+  "지부티":{x:275,y:235}
+};
 
 var CHARACTERS=[
   {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터",effect:"없음",effectType:"none"},
@@ -1063,7 +1072,7 @@ var LEVELS=[
   {level:13,min:7000,name:"역사 지리학자",emoji:"📜"},{level:14,min:9000,name:"지구 탐정",emoji:"🔍"},
   {level:15,min:11500,name:"전략 지도가",emoji:"🎯"},{level:16,min:14000,name:"세계 석학",emoji:"🏛️"},
   {level:17,min:17000,name:"지리 레전드",emoji:"👑"},{level:18,min:20500,name:"대지의 수호자",emoji:"🌿"},
-  {level:19,min:24500,name:"전설의 탐험가",emoji:"🔱"},{level:20,min:29000,name:"지리 박사",emoji:"🎖️"},,
+  {level:19,min:24500,name:"전설의 탐험가",emoji:"🔱"},{level:20,min:29000,name:"지리 박사",emoji:"🎖️"},
   {name:"아르메니아",flag:"🇦🇲",continent:"asia",capital:"예레반",hint:"수도 예레반, 세계 최초 기독교 공식 채택 국가(301년). 아라라트 산 자락의 코카서스 소국."},
   {name:"알제리",flag:"🇩🇿",continent:"africa",capital:"알제",hint:"수도 알제, 아프리카 최대 면적 국가. 사하라 사막이 85%. 석유·가스 수출 대국."},
   {name:"세이셸",flag:"🇸🇨",continent:"africa",capital:"빅토리아",hint:"수도 빅토리아, 인도양 115개 섬 군도. 세계 최상위 럭셔리 관광지. 자이언트 육지거북 서식."},
@@ -1239,8 +1248,7 @@ function renderQuestion(){
     if(_choiceModeOn){renderChoiceBtns();}else{var cr=document.getElementById("choice-btn-row");if(cr)cr.style.display="none";setTimeout(function(){inp.focus();setTimeout(function(){if(inp)inp.scrollIntoView({behavior:'smooth',block:'center'});},200);},60);}
   } else if(gMode==="flag"){
     document.getElementById("flag-mode").style.display="";
-    document.getElementById("q-flag").textContent=q.flag;var contMap={"asia":"아시아","europe":"유럽","americas":"아메리카","africa":"아프리카","oceania":"오세아니아"};document.getElementById("q-badge").textContent="🌍 "+(contMap[q.continent]||q.continent)+" 국기";
-    renderFlagChoices(q);
+    document.getElementById("q-flag").textContent=q.flag;var contMap={"asia":"아시아","europe":"유럽","americas":"아메리카","africa":"아프리카","oceania":"오세아니아"};if(gMode.endsWith("_choseong")){document.getElementById("q-badge").textContent="🌍 "+(contMap[q.continent]||q.continent)+" 초성";document.getElementById("choseong-mode").style.display="flex";document.getElementById("flag-mode").style.display="none";document.getElementById("map-mode").style.display="none";document.getElementById("choice-btn-row").style.display=gChoiceMode?"flex":"none";document.getElementById("text-input-row").style.display=gChoiceMode?"none":"flex";document.getElementById("q-flag").textContent=q.flag;document.getElementById("q-hint").textContent=q.hint||"";}else{document.getElementById("q-badge").textContent="🌍 "+(contMap[q.continent]||q.continent)+" 국기";renderFlagChoices(q);}
   } else {
     document.getElementById("map-mode").style.display="flex";
     document.getElementById("map-country-name").textContent=q.name+"의 위치는?";
@@ -1810,7 +1818,7 @@ function startContinentQuiz(continentId) {
   var q = shuffle(pool).slice(0, Math.min(20, pool.length));
   var cLabels = {asia:'🌏 아시아', europe:'🌍 유럽', americas:'🌎 아메리카', africa:'🌍 아프리카', oceania:'🌊 오세아니아', all:'🌐 전체'};
   var typeLabels = {map:'🗺️', choseong:'🔤', flag:'🚩'};
-  gMode = _continentQuizType === 'map' ? 'continent_' + continentId : _continentQuizType;
+  gMode = 'continent_' + continentId + (_continentQuizType !== 'map' ? '_' + _continentQuizType : '');
   gQuestions = q;
   gIdx = 0; gScore = 0; gCombo = 0; gCoins = 0; gHistory = [];
   gAnswering = false; gMapClicked = false; _dangerActive = false; _lastAlertAt = -999;
