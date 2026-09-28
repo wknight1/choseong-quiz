@@ -966,6 +966,7 @@ var MAP_COORDS={
 "동티모르":{x:838,y:320},"수리남":{x:300,y:310},"적도기니":{x:495,y:315},"몬테네그로":{x:530,y:188},
   "수단":{x:590,y:251},
   "니카라과":{x:220,y:250},"온두라스":{x:215,y:242},"엘살바도르":{x:210,y:248},"벨리즈":{x:210,y:238},"니제르":{x:500,y:228}
+,"브루나이":{x:785,y:275},"몰디브":{x:650,y:295},"에스와티니":{x:590,y:375},"레소토":{x:580,y:385},"동사모아":{x:110,y:330}
 };
 
 var CHARACTERS=[
@@ -1023,7 +1024,12 @@ var COMBO_DATA=[
   {name:"온두라스",flag:"🇭🇳",capital:"테구시갈파",continent:"americas",hint:"수도 테구시갈파, 마야 문명 유적 코판 보유. 중미에서 두 번째로 큰 나라"},
   {name:"엘살바도르",flag:"🇸🇻",capital:"산살바도르",continent:"americas",hint:"수도 산살바도르, 중미 최소 국가이자 최고 인구밀도. 세계 최초 비트코인 법정화폐 채택"},
   {name:"벨리즈",flag:"🇧🇿",capital:"벨모판",continent:"americas",hint:"수도 벨모판, 중미 유일 영어 공용국. 마야 유적과 세계 2위 산호초(벨리즈 배리어 리프) 보유"},
-  {name:"니제르",flag:"🇳🇪",capital:"니아메",continent:"africa",hint:"수도 니아메, 사하라 사막이 국토 80%를 차지. 세계 최대 우라늄 생산국 중 하나"}
+  {name:"니제르",flag:"🇳🇪",capital:"니아메",continent:"africa",hint:"수도 니아메, 사하라 사막이 국토 80%를 차지. 세계 최대 우라늄 생산국 중 하나"},
+{name:"브루나이",flag:"🇧🇳",hint:"수도 반다르스리브가완, 동남아 소국으로 석유·가스 부국. 술탄이 통치하는 절대군주국.",capital:"반다르스리브가완",continent:"asia"},
+{name:"몰디브",flag:"🇲🇻",hint:"수도 말레, 인도양의 산호섬 나라. 해수면 상승으로 수몰 위기에 처한 최저 국가(평균고도 1.5m).",capital:"말레",continent:"asia"},
+{name:"에스와티니",flag:"🇸🇿",hint:"수도 음바바네, 아프리카 내륙 소왕국. 2018년 스와질란드에서 개명. 아프리카 마지막 절대군주국 중 하나.",capital:"음바바네",continent:"africa"},
+{name:"레소토",flag:"🇱🇸",hint:"수도 마세루, 남아프리카공화국 영토에 완전히 둘러싸인 세계 3대 '나라 안 나라'. 고산지대 왕국.",capital:"마세루",continent:"africa"},
+{name:"동사모아",flag:"🇦🇸",hint:"수도 파고파고, 미국 자치령 남태평양 섬. 전통 사모아 문화와 미국 문화가 공존하는 오세아니아 섬.",capital:"파고파고",continent:"oceania"}
 ];
 var TOTAL_Q=20;
 
@@ -1873,8 +1879,9 @@ function shareChallenge(score,correct,mode,maxCombo){
   var code=encodeResult2(score,correct,mode,maxCombo);
   var url=location.origin+location.pathname+(code?'?challenge='+code:'');
   var modeLabel=mode==='flag'?'🚩국기':mode==='map'?'🗺️지도':'🔤초성';
-  var stars=Math.ceil((correct/20)*5);
-  var text='🌍 나라퀴즈마스터 '+modeLabel+'\n'+'⭐'.repeat(stars)+'☆'.repeat(5-stars)+'\n'+score+'점 | 정답 '+correct+'/20 | 콤보 '+maxCombo+'🔥\n'+url;
+  var total=gHistory?gHistory.length:20;
+  var stars=Math.ceil((correct/total)*5);
+  var text='🌍 나라퀴즈마스터 '+modeLabel+'\n'+'⭐'.repeat(stars)+'☆'.repeat(5-stars)+'\n'+score+'점 | 정답 '+correct+'/'+total+' | 콤보 '+maxCombo+'🔥\n'+url;
   if(navigator.share){navigator.share({title:'나라퀴즈 챌린지',text:text,url:url}).catch(function(){});}
   else{try{navigator.clipboard.writeText(text).then(function(){showModal('📋','공유 완료!','챌린지 링크가 복사됐어요!',null,null,'확인',null);});}catch(e){showModal('📤','공유',text,null,null,'닫기',null);}}
 }
