@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="초성퀴즈">
+<meta name="theme-color" content="#0f172a">
+<link rel="apple-touch-icon" href="icon.png">
+<title>🌍 나라 초성퀴즈</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .header {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    margin-bottom: 8px;
+  }
+  .title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .title span { color: #38bdf8; }
+  .score-box { display: flex; gap: 16px; }
+  .score-item { text-align: center; }
+  .score-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+  .score-num { font-size: 22px; font-weight: 700; color: #f1f5f9; }
+  .score-num.gold { color: #fbbf24; }
+
+  .progress-bar {
+    width: 100%; max-width: 480px;
+    height: 6px; background: #1e293b; border-radius: 99px;
+    margin-bottom: 20px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .card {
+    width: 100%; max-width: 480px;
+    background: #1e293b;
+    border-radius: 20px;
+    padding: 28px 24px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.3);
+    position: relative;
+  }
+
+  .top-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: #818cf8; color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 4px 14px; border-radius: 99px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .question-num {
+    font-size: 12px; color: #64748b; margin-bottom: 10px; text-align: center;
+  }
+
+  .choseong {
+    font-size: 48px; font-weight: 900; text-align: center;
+    letter-spacing: 10px;
+    color: #f1f5f9;
+    margin: 8px 0 20px;
+    min-height: 60px;
+  }
+
+  .hint-area {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.35s ease, opacity 0.3s ease;
+    margin-bottom: 0;
+  }
+  .hint-area.visible {
+    max-height: 120px;
+    opacity: 1;
+    margin-bottom: 4px;
+  }
+  .hint-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    justify-content: center;
+    padding: 2px 0 8px;
+  }
+  .hint-chip {
+    background: #0f172a; border: 1.5px solid #334155;
+    color: #94a3b8; font-size: 12px; font-weight: 600;
+    padding: 5px 12px; border-radius: 99px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    -webkit-appearance: none; font-family: inherit;
+  }
+  .hint-chip.revealed {
+    border-color: #854d0e; color: #fbbf24; background: #1c1000;
+    cursor: default;
+  }
+  .hint-chip:not(.revealed):active { opacity: 0.7; }
+
+  .input-row {
+    display: flex; gap: 8px; margin-top: 20px;
+  }
+  .answer-input {
+    flex: 1;
+    background: #0f172a; border: 2px solid #334155;
+    color: #f1f5f9; font-size: 17px; font-weight: 600;
+    padding: 14px 16px; border-radius: 14px;
+    outline: none;
+    -webkit-appearance: none; appearance: none;
+    transition: border-color 0.2s;
+    font-family: -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  }
+  .answer-input:focus { border-color: #38bdf8; }
+  .answer-input.correct { border-color: #4ade80; background: #052e16; }
+  .answer-input.wrong { border-color: #f87171; background: #2d0b0b; }
+
+  .submit-btn {
+    background: #38bdf8; color: #0f172a;
+    border: none; border-radius: 14px;
+    font-size: 17px; font-weight: 800;
+    padding: 14px 20px; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+    transition: opacity 0.15s, transform 0.1s;
+    font-family: inherit;
+  }
+  .submit-btn:active { opacity: 0.8; transform: scale(0.97); }
+
+  .feedback {
+    text-align: center; font-size: 15px; font-weight: 600;
+    min-height: 24px; margin-top: 8px;
+    transition: color 0.2s;
+  }
+  .feedback.ok { color: #4ade80; }
+  .feedback.fail { color: #f87171; }
+  .feedback.info { color: #94a3b8; }
+
+  .action-row {
+    width: 100%; max-width: 480px;
+    display: flex; gap: 8px; margin-bottom: 4px;
+  }
+  .skip-btn {
+    flex: 1;
+    background: transparent; border: 1.5px solid #1e293b;
+    color: #475569; font-size: 13px; font-weight: 500;
+    padding: 11px; border-radius: 12px; cursor: pointer;
+    -webkit-appearance: none; font-family: inherit;
+    transition: color 0.2s;
+  }
+  .skip-btn:active { opacity: 0.5; }
+
+  .result-screen {
+    width: 100%; max-width: 480px;
+    text-align: center; padding: 16px;
+    display: none; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .result-screen.show { display: flex; }
+  .result-emoji { font-size: 72px; margin: 8px 0; }
+  .result-title { font-size: 28px; font-weight: 900; }
+  .result-sub { font-size: 15px; color: #94a3b8; line-height: 1.5; }
+  .result-score-big { font-size: 64px; font-weight: 900; color: #fbbf24; line-height: 1; }
+  .result-score-label { font-size: 14px; color: #64748b; margin-top: 2px; }
+
+  .result-list {
+    width: 100%; background: #1e293b; border-radius: 16px; overflow: hidden;
+  }
+  .result-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 18px; border-bottom: 1px solid #0f172a; font-size: 14px;
+  }
+  .result-item:last-child { border-bottom: none; }
+  .result-item .r-left { color: #94a3b8; }
+  .result-item .r-right { font-weight: 700; }
+  .result-item .r-right.ok2 { color: #4ade80; }
+  .result-item .r-right.fail2 { color: #f87171; }
+
+  .restart-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    color: #fff; border: none; border-radius: 16px;
+    font-size: 18px; font-weight: 800; padding: 18px;
+    cursor: pointer; -webkit-appearance: none; font-family: inherit;
+    box-shadow: 0 4px 20px rgba(56,189,248,0.3);
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .restart-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+  .game-wrap { width: 100%; max-width: 480px; }
+
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-6px)}
+    40%{transform:translateX(6px)}
+    60%{transform:translateX(-6px)}
+    80%{transform:translateX(6px)}
+  }
+  .shake { animation: shake 0.35s ease; }
+
+  @keyframes pop {
+    0%{transform:scale(1)}
+    50%{transform:scale(1.08)}
+    100%{transform:scale(1)}
+  }
+  .pop { animation: pop 0.25s ease; }
+
+  @keyframes fadeIn {
+    from{opacity:0;transform:translateY(-4px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .fadein { animation: fadeIn 0.3s ease forwards; }
+</style>
+</head>
+<body>
+
+<div class="game-wrap" id="gameWrap">
+  <div class="header">
+    <div class="title">🌍 <span>초성</span>퀴즈</div>
+    <div class="score-box">
+      <div class="score-item">
+        <div class="score-label">정답</div>
+        <div class="score-num gold" id="scoreNum">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">문제</div>
+        <div class="score-num" id="totalNum">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+
+  <div class="card">
+    <div class="top-badge" id="topBadge">나라 이름 맞추기</div>
+    <div class="question-num" id="questionNum">1 / 20</div>
+    <div class="choseong" id="choseong">ㄷㅎㅁㄱ</div>
+
+    <div class="hint-area" id="hintArea">
+      <div class="hint-chips" id="hintChips"></div>
+    </div>
+
+    <div class="input-row">
+      <input class="answer-input" id="answerInput" type="text"
+        placeholder="나라 이름 입력…"
+        autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+        inputmode="text"
+      >
+      <button class="submit-btn" onclick="submitAnswer()">→</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="action-row">
+    <button class="skip-btn" onclick="skipQuestion()">⏭ 건너뛰기</button>
+  </div>
+</div>
+
+<div class="result-screen" id="resultScreen">
+  <div class="result-emoji" id="resultEmoji">🎉</div>
+  <div class="result-title" id="resultTitle">퀴즈 완료!</div>
+  <div class="result-score-big" id="resultBig">0</div>
+  <div class="result-score-label" id="resultLabel">/ 20 정답</div>
+  <div class="result-sub" id="resultSub">수고하셨습니다!</div>
+  <div class="result-list" id="resultList"></div>
+  <button class="restart-btn" onclick="restartGame()">🔄 다시 시작</button>
+</div>
+
+<script>
+const COUNTRIES = [
+  { name:"대한민국", hint:"🌏 동아시아 반도", capital:"서울" },
+  { name:"일본", hint:"🌏 동아시아 섬나라", capital:"도쿄" },
+  { name:"중국", hint:"🌏 동아시아 최다 인구(과거)", capital:"베이징" },
+  { name:"미국", hint:"🌎 북아메리카 초강대국", capital:"워싱턴 D.C." },
+  { name:"브라질", hint:"🌎 남아메리카 최대 국가", capital:"브라질리아" },
+  { name:"프랑스", hint:"🌍 서유럽 에펠탑", capital:"파리" },
+  { name:"독일", hint:"🌍 중부유럽 자동차 강국", capital:"베를린" },
+  { name:"영국", hint:"🌍 서유럽 섬나라", capital:"런던" },
+  { name:"이탈리아", hint:"🌍 남유럽 장화 모양", capital:"로마" },
+  { name:"스페인", hint:"🌍 남유럽 투우", capital:"마드리드" },
+  { name:"러시아", hint:"🌍🌏 세계 최대 면적", capital:"모스크바" },
+  { name:"캐나다", hint:"🌎 북아메리카 단풍잎 국기", capital:"오타와" },
+  { name:"호주", hint:"🌏 오세아니아 캥거루", capital:"캔버라" },
+  { name:"인도", hint:"🌏 남아시아 세계 1위 인구", capital:"뉴델리" },
+  { name:"멕시코", hint:"🌎 북아메리카 선인장", capital:"멕시코시티" },
+  { name:"아르헨티나", hint:"🌎 남아메리카 탱고", capital:"부에노스아이레스" },
+  { name:"이집트", hint:"🌍 북아프리카 피라미드", capital:"카이로" },
+  { name:"남아프리카공화국", hint:"🌍 아프리카 최남단", capital:"프리토리아" },
+  { name:"터키", hint:"🌍🌏 두 대륙에 걸친 나라", capital:"앙카라" },
+  { name:"사우디아라비아", hint:"🌏 중동 석유 왕국", capital:"리야드" },
+  { name:"태국", hint:"🌏 동남아시아 사원", capital:"방콕" },
+  { name:"베트남", hint:"🌏 동남아시아 S자 형태", capital:"하노이" },
+  { name:"인도네시아", hint:"🌏 동남아시아 섬 17000개", capital:"자카르타" },
+  { name:"필리핀", hint:"🌏 동남아시아 7000개 섬", capital:"마닐라" },
+  { name:"포르투갈", hint:"🌍 남유럽 대항해시대", capital:"리스본" },
+  { name:"네덜란드", hint:"🌍 서유럽 풍차 튤립", capital:"암스테르담" },
+  { name:"스위스", hint:"🌍 중부유럽 알프스", capital:"베른" },
+  { name:"그리스", hint:"🌍 남유럽 민주주의 발상지", capital:"아테네" },
+  { name:"노르웨이", hint:"🌍 북유럽 피오르드", capital:"오슬로" },
+  { name:"스웨덴", hint:"🌍 북유럽 노벨상", capital:"스톡홀름" },
+  { name:"핀란드", hint:"🌍 북유럽 산타마을", capital:"헬싱키" },
+  { name:"덴마크", hint:"🌍 북유럽 동화 나라", capital:"코펜하겐" },
+  { name:"폴란드", hint:"🌍 동유럽 자유의 땅", capital:"바르샤바" },
+  { name:"체코", hint:"🌍 중부유럽 프라하 성", capital:"프라하" },
+  { name:"헝가리", hint:"🌍 중부유럽 온천 왕국", capital:"부다페스트" },
+  { name:"오스트리아", hint:"🌍 중부유럽 음악의 나라", capital:"빈" },
+  { name:"벨기에", hint:"🌍 서유럽 와플 초콜릿", capital:"브뤼셀" },
+  { name:"이란", hint:"🌏 중동 페르시아 제국", capital:"테헤란" },
+  { name:"이라크", hint:"🌏 중동 메소포타미아", capital:"바그다드" },
+  { name:"파키스탄", hint:"🌏 남아시아 이슬람 국가", capital:"이슬라마바드" },
+  { name:"방글라데시", hint:"🌏 남아시아 벵골만", capital:"다카" },
+  { name:"미얀마", hint:"🌏 동남아시아 불교 국가", capital:"네피도" },
+  { name:"말레이시아", hint:"🌏 동남아시아 쌍둥이 빌딩", capital:"쿠알라룸푸르" },
+  { name:"싱가포르", hint:"🌏 동남아시아 도시 국가", capital:"싱가포르" },
+  { name:"뉴질랜드", hint:"🌏 오세아니아 키위새", capital:"웰링턴" },
+  { name:"칠레", hint:"🌎 남아메리카 가늘고 긴 나라", capital:"산티아고" },
+  { name:"콜롬비아", hint:"🌎 남아메리카 커피", capital:"보고타" },
+  { name:"페루", hint:"🌎 남아메리카 잉카 제국", capital:"리마" },
+  { name:"모로코", hint:"🌍 북아프리카 사하라 입구", capital:"라바트" },
+  { name:"케냐", hint:"🌍 동아프리카 사바나", capital:"나이로비" },
+];
+
+function getChoseong(str) {
+  const CH_START = 0xAC00;
+  const JAMO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  return [...str].map(c => {
+    const code = c.charCodeAt(0);
+    if (code >= 0xAC00 && code <= 0xD7A3) return JAMO[Math.floor((code - CH_START) / 588)];
+    return c;
+  }).join('');
+}
+
+function normalize(s) {
+  return s.replace(/\s/g,'').replace(/[·•\-]/g,'');
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+const TOTAL = 20;
+let questions = [], idx = 0, score = 0;
+let wrongCount = 0;
+let history = [];
+let answering = false;
+
+function getHints(q) {
+  return [
+    { label: '💡 수도', value: q.capital },
+    { label: '🔤 글자 수', value: q.name.length + '글자' },
+    { label: '🔑 첫 글자', value: '"' + q.name[0] + '"' },
+  ];
+}
+
+function startGame() {
+  questions = shuffle(COUNTRIES).slice(0, TOTAL);
+  idx = 0; score = 0; wrongCount = 0; history = []; answering = false;
+  document.getElementById('gameWrap').style.display = '';
+  document.getElementById('resultScreen').classList.remove('show');
+  renderQuestion();
+  updateScore();
+}
+
+function renderQuestion() {
+  const q = questions[idx];
+  wrongCount = 0;
+  answering = false;
+  document.getElementById('questionNum').textContent = (idx+1) + ' / ' + TOTAL;
+  document.getElementById('choseong').textContent = getChoseong(q.name);
+  document.getElementById('answerInput').value = '';
+  document.getElementById('answerInput').className = 'answer-input';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('topBadge').textContent = '나라 이름 맞추기';
+  const hintArea = document.getElementById('hintArea');
+  const hintChips = document.getElementById('hintChips');
+  hintArea.classList.remove('visible');
+  hintChips.innerHTML = '';
+  updateProgress();
+  setTimeout(function(){ document.getElementById('answerInput').focus(); }, 50);
+}
+
+function showHintArea() {
+  const q = questions[idx];
+  const hintArea = document.getElementById('hintArea');
+  const hintChips = document.getElementById('hintChips');
+  const hints = getHints(q);
+  if (!hintArea.classList.contains('visible')) {
+    hintChips.innerHTML = '';
+    hints.forEach(function(h, i) {
+      const btn = document.createElement('button');
+      btn.className = 'hint-chip fadein';
+      btn.textContent = h.label;
+      btn.addEventListener('click', function() {
+        if (this.classList.contains('revealed')) return;
+        this.classList.add('revealed');
+        this.textContent = h.label + ': ' + h.value;
+      });
+      hintChips.appendChild(btn);
+    });
+    hintArea.classList.add('visible');
+    document.getElementById('topBadge').textContent = '💡 힌트 탭해서 열기';
+  }
+}
+
+function updateScore() {
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('totalNum').textContent = idx;
+}
+
+function updateProgress() {
+  document.getElementById('progressFill').style.width = ((idx/TOTAL)*100) + '%';
+}
+
+function submitAnswer() {
+  if (answering) return;
+  const input = document.getElementById('answerInput');
+  const val = normalize(input.value.trim());
+  if (!val) return;
+  const q = questions[idx];
+  const ok = val === normalize(q.name);
+
+  if (ok) {
+    answering = true;
+    input.className = 'answer-input correct';
+    document.getElementById('feedback').textContent = '🎉 정답!';
+    document.getElementById('feedback').className = 'feedback ok';
+    document.getElementById('choseong').classList.add('pop');
+    history.push({ name: q.name, userAns: input.value.trim(), ok: true, wrongCount: wrongCount });
+    score++;
+    updateScore();
+    setTimeout(function() {
+      document.getElementById('choseong').classList.remove('pop');
+      nextQuestion();
+    }, 700);
+  } else {
+    wrongCount++;
+    input.className = 'answer-input wrong';
+    input.classList.add('shake');
+    if (wrongCount === 1) {
+      document.getElementById('feedback').textContent = '❌ 틀렸어요! 힌트를 확인해보세요.';
+      document.getElementById('feedback').className = 'feedback fail';
+      showHintArea();
+    } else {
+      document.getElementById('feedback').textContent = '❌ 오답 (' + wrongCount + '번째)';
+      document.getElementById('feedback').className = 'feedback fail';
+    }
+    setTimeout(function() {
+      input.classList.remove('shake');
+      input.value = '';
+      input.className = 'answer-input';
+      if (!answering) input.focus();
+    }, 500);
+  }
+}
+
+function skipQuestion() {
+  if (answering) return;
+  const q = questions[idx];
+  history.push({ name: q.name, userAns: '(건너뜀)', ok: false, wrongCount: wrongCount });
+  document.getElementById('feedback').textContent = '⏭ 정답: ' + q.name;
+  document.getElementById('feedback').className = 'feedback info';
+  answering = true;
+  setTimeout(nextQuestion, 700);
+}
+
+function nextQuestion() {
+  idx++;
+  updateScore();
+  if (idx >= TOTAL) { showResult(); return; }
+  renderQuestion();
+}
+
+function showResult() {
+  document.getElementById('gameWrap').style.display = 'none';
+  const rs = document.getElementById('resultScreen');
+  rs.classList.add('show');
+  const pct = score / TOTAL;
+  let emoji = '😢', title = '아쉬워요!', sub = '다시 한 번 도전해보세요!';
+  if (pct >= 0.9) { emoji='🏆'; title='완벽해요!'; sub='나라 박사 인증! 정말 대단해요 🌍'; }
+  else if (pct >= 0.7) { emoji='🥳'; title='잘하셨어요!'; sub='훌륭한 실력이에요. 조금만 더!'; }
+  else if (pct >= 0.5) { emoji='😊'; title='절반 이상!'; sub='꽤 잘 아시네요. 계속 도전하세요!'; }
+  else if (pct >= 0.3) { emoji='😅'; title='조금 더!'; sub='세계 나라들을 더 공부해봐요!'; }
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultBig').textContent = score;
+  document.getElementById('resultLabel').textContent = '/ ' + TOTAL + ' 정답';
+  document.getElementById('resultSub').textContent = sub;
+  const list = document.getElementById('resultList');
+  list.innerHTML = '';
+  history.forEach(function(h) {
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    const cho = getChoseong(h.name);
+    const rightText = h.ok
+      ? ('✓ ' + (h.wrongCount > 0 ? '힌트 후 정답' : '정답'))
+      : (h.userAns === '(건너뜀)' ? '⏭ 건너뜀' : ('✗ ' + (h.userAns||'?')));
+    div.innerHTML = '<span class="r-left">' + cho + ' → <b style="color:#f1f5f9">' + h.name + '</b></span>'
+      + '<span class="r-right ' + (h.ok?'ok2':'fail2') + '">' + rightText + '</span>';
+    list.appendChild(div);
+  });
+  document.getElementById('progressFill').style.width = '100%';
+}
+
+function restartGame() { startGame(); }
+
+document.getElementById('answerInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); submitAnswer(); }
+});
+
+startGame();
+</script>
+</body>
+</html>
