@@ -914,7 +914,11 @@ var COUNTRIES=[
   ,{name:"에리트레아",flag:"🇪🇷",capital:"아스마라",continent:"africa",hint:"1993년 에티오피아에서 독립한 아프리카 최연소 국가 중 하나. 홍해 해안선 보유"}
 
   ,{name:"감비아",flag:"🇬🇲",hint:"수도 반줄, 아프리카 본토 최소 국가. 감비아강이 나라 전체를 관통",capital:"반줄",continent:"africa"}
-  ,{name:"카타르",flag:"🇶🇦",hint:"수도 도하, 1인당 GDP 세계 최상위권. 2022 FIFA 월드컵 개최국",capital:"도하",continent:"asia"}
+  ,{name:"카타르",flag:"🇶🇦",hint:"수도 도하, 1인당 GDP 세계 최상위권. 2022 FIFA 월드컵 개최국",capital:"도하",continent:"asia"},
+  {name:"동티모르",flag:"🇹🇱",capital:"딜리",continent:"asia",hint:"수도 딜리, 2002년 독립한 아시아 최신 독립국. 커피 수출이 GDP 90%"},
+  {name:"수리남",flag:"🇸🇷",capital:"파라마리보",continent:"americas",hint:"수도 파라마리보, 남미 유일 네덜란드어 공용국. 열대우림 국토의 93%"},
+  {name:"적도기니",flag:"🇬🇶",capital:"말라보",continent:"africa",hint:"수도 말라보, 아프리카 유일 스페인어 공용국. 1990년대 석유 발견 후 급성장"},
+  {name:"몬테네그로",flag:"🇲🇪",capital:"포드고리차",continent:"europe",hint:"수도 포드고리차, 아드리아해 연안 발칸국. 유럽의 마지막 숨겨진 보석이라 불림"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -958,7 +962,8 @@ var MAP_COORDS={
   ,"마샬군도":{x:120,y:200},"자메이카":{x:205,y:220},"트리니다드토바고":{x:225,y:252},"우즈베키스탄":{x:600,y:148},"바하마":{x:210,y:215},"부탄":{x:697,y:210}
   ,"몰타":{x:514,y:212},"키프로스":{x:540,y:210},"리히텐슈타인":{x:490,y:165},"모나코":{x:492,y:177},"산마리노":{x:505,y:180},"지부티":{x:565,y:255},"에리트레아":{x:558,y:248}
 
-  "감비아":{x:424,y:234},"카타르":{x:597,y:218}
+  "감비아":{x:424,y:234},"카타르":{x:597,y:218},
+"동티모르":{x:838,y:320},"수리남":{x:300,y:310},"적도기니":{x:495,y:315},"몬테네그로":{x:530,y:188}
 };
 
 var CHARACTERS=[
@@ -983,7 +988,7 @@ var ACHIEVEMENTS=[
   {id:"legend",name:"전설의 퀴즈왕 👑",check:function(s){return s.bestScore>=1500},coins:150},
   {id:"combo10",name:"콤보 신",check:function(s){return s.maxCombo>=10},coins:120},
   {id:"mapmaster",name:"지도 마스터 🗺️",check:function(s){return (s.mapCorrect||0)>=30},coins:80},
-  {id:"modes3",name:"올라운더 🎯",check:function(s){return (s.modesPlayed||0)>=3},coins:60},
+  {id:"modes3",name:"올라운더 🎯",check:function(s){var rm=s.realModesSet||{};return Object.keys(rm).length>=3;},coins:60},
   {id:"games20",name:"단골손님 🏅",check:function(s){return s.gamesPlayed>=20},coins:100},
   {id:"daily3",name:"3일 연속 📅",check:function(s){return s.dailyStreakCount>=3},coins:40},
   {id:"enc50",name:"도감 탐험가 📚",check:function(s){return (s.encViewedCount||Object.keys(s.encViewed||{}).length)>=50},coins:80},
@@ -1016,7 +1021,7 @@ var TOTAL_Q=20;
 
 // ═══════════════════════ STATE ═══════════════════════
 var SK="quizmaster_v3";var ST;
-function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,mapCorrect:0,perCountry:{},bestScores:{},encViewed:{}};}
+function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,realModesSet:{},mapCorrect:0,perCountry:{},bestScores:{},encViewed:{}};}
 function save(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
 function load(){try{var r=localStorage.getItem(SK);if(!r)return defaultState();var s=JSON.parse(r);var m=Object.assign({},defaultState(),s);if(!Array.isArray(m.ownedCharacters))m.ownedCharacters=["basic"];if(m.ownedCharacters.indexOf("basic")<0)m.ownedCharacters.unshift("basic");return m;}catch(e){return defaultState();}}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -1315,6 +1320,7 @@ function onMapClick(evt){
     coinEarned=Math.round(coinEarned*(DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].coinMult||1));
   }
   gScore+=pts;gCoins+=coinEarned;
+  if(ok)ST.noHintCorrect++;
   gHistory.push({name:q.name,userAns:gradeLabel,ok:ok,pts:pts,wrong:grade>1?1:0});
   document.getElementById("feedback").textContent=gradeLabel+" +"+pts+"점 🪙×"+coinEarned;
   document.getElementById("feedback").className="feedback "+(ok?"ok":grade===2?"info":"fail");
@@ -1402,7 +1408,7 @@ function endGame(){
   if(gMode==='focus')ST.focusCompleted=(ST.focusCompleted||0)+1;
   if(gMode==='daily'){ST.dailyCompleted=(ST.dailyCompleted||0)+1;}
   if(!ST.modesSet)ST.modesSet={};
-  ST.modesSet[gMode]=true;ST.modesPlayed=Object.keys(ST.modesSet).length;
+  ST.modesSet[gMode]=true;ST.modesPlayed=Object.keys(ST.modesSet).length;if(['choseong','flag','map'].indexOf(gMode)>=0){if(!ST.realModesSet)ST.realModesSet={};ST.realModesSet[gMode]=true;}
   var t2=today();var diff=daysBetween(ST.lastPlayedDate,t2);
   if(diff===1)ST.streak++;else if(diff>1)ST.streak=1;ST.lastPlayedDate=t2;
   // Session bonus: 2nd+ game gets +10% coins
