@@ -608,7 +608,17 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 </div>
 
 <!-- ══ GAME ══ -->
-<div class="screen" id="game">
+  <!-- CONTINENT PICKER MODAL -->
+  <div id="continent-picker" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1200;align-items:center;justify-content:center;">
+    <div style="background:var(--card);border-radius:20px;padding:24px;max-width:360px;width:90%;text-align:center;">
+      <div style="font-size:22px;font-weight:700;margin-bottom:6px;">🌍 대륙별 퀴즈</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">대륙을 선택하면 해당 나라들만 출제!</div>
+      <div id="continent-btn-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;"></div>
+      <button onclick="closeContinentPicker()" style="width:100%;padding:10px;border-radius:10px;border:none;background:var(--surface);color:var(--text);font-size:14px;cursor:pointer;">✕ 닫기</button>
+    </div>
+  </div>
+
+  <div class="screen" id="game">
   <div class="game-header">
     <div class="coin-display"><span>🪙</span><span id="g-coins">0</span></div>
     <div id="g-mode-badge" style="font-size:12px;color:var(--sub);font-weight:600"></div>
@@ -1001,7 +1011,7 @@ var MAP_COORDS={
   "잠비아":{x:537,y:300},
   "소말리아":{x:575,y:245},
   "콩고민주공화국":{x:520,y:275},
-};
+,"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220}};
 
 var CHARACTERS=[
   {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터",effect:"없음",effectType:"none"},
@@ -1043,7 +1053,9 @@ var LEVELS=[
   {level:13,min:7000,name:"역사 지리학자",emoji:"📜"},{level:14,min:9000,name:"지구 탐정",emoji:"🔍"},
   {level:15,min:11500,name:"전략 지도가",emoji:"🎯"},{level:16,min:14000,name:"세계 석학",emoji:"🏛️"},
   {level:17,min:17000,name:"지리 레전드",emoji:"👑"},{level:18,min:20500,name:"대지의 수호자",emoji:"🌿"},
-  {level:19,min:24500,name:"전설의 탐험가",emoji:"🔱"},{level:20,min:29000,name:"지리 박사",emoji:"🎖️"},
+  {level:19,min:24500,name:"전설의 탐험가",emoji:"🔱"},{level:20,min:29000,name:"지리 박사",emoji:"🎖️"},,
+  {name:"아르메니아",flag:"🇦🇲",continent:"asia",capital:"예레반",hint:"수도 예레반, 세계 최초 기독교 공식 채택 국가(301년). 아라라트 산 자락의 코카서스 소국."},
+  {name:"알제리",flag:"🇩🇿",continent:"africa",capital:"알제",hint:"수도 알제, 아프리카 최대 면적 국가. 사하라 사막이 85%. 석유·가스 수출 대국."}
 ];
 
 var DAILY_BONUS=[10,15,25,35,50,75,120];
@@ -1568,7 +1580,7 @@ function endGame(){
   var xpGained=correct*10+Math.min(ST.maxCombo,10)*5;
   var xpEl=document.getElementById('r-xp-row');
   if(xpEl)xpEl.textContent=xpGained>0?('✨ +'+xpGained+' XP 획득'):'';
-  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=(_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점";
+  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점","continent_asia":"🌏 아시아","continent_europe":"🌍 유럽","continent_americas":"🌎 아메리카","continent_africa":"🌍 아프리카","continent_oceania":"🌊 오세아니아","continent_all":"🌐 전체"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=(_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점";
   renderStarResult(correct,gQuestions.length);
   // New record badge
   var nrEl=document.getElementById('r-new-record');
@@ -1729,6 +1741,56 @@ function getWrongMap() {
     Object.keys(m2).forEach(function(k){ merged[k] = (merged[k]||0) + m2[k]; });
     return merged;
   } catch(e) { return {}; }
+}
+
+function showContinentPicker() {
+  var picker = document.getElementById('continent-picker');
+  var grid = document.getElementById('continent-btn-grid');
+  if (!picker || !grid) return;
+  var continents = [
+    {id:'asia', label:'🌏 아시아', color:'#7f1d1d,#dc2626'},
+    {id:'europe', label:'🌍 유럽', color:'#1e3a5f,#1d4ed8'},
+    {id:'americas', label:'🌎 아메리카', color:'#14532d,#15803d'},
+    {id:'africa', label:'🌍 아프리카', color:'#451a03,#92400e'},
+    {id:'oceania', label:'🌊 오세아니아', color:'#312e81,#7c3aed'},
+    {id:'all', label:'🌐 전체', color:'#1f2937,#374151'}
+  ];
+  grid.innerHTML = '';
+  continents.forEach(function(c) {
+    var cnt = COUNTRIES.filter(function(x){ return c.id==='all' || x.continent===c.id; }).length;
+    var btn = document.createElement('button');
+    btn.style.cssText = 'background:linear-gradient(135deg,'+c.color.split(',')[0]+','+c.color.split(',')[1]+');color:#fff;border:none;border-radius:12px;padding:14px 8px;cursor:pointer;font-size:14px;font-weight:600;line-height:1.4;';
+    btn.innerHTML = c.label + '<br><span style="font-size:11px;opacity:.85;">'+cnt+'개 나라</span>';
+    (function(cid){ btn.onclick = function(){ closeContinentPicker(); startContinentQuiz(cid); }; })(c.id);
+    grid.appendChild(btn);
+  });
+  picker.style.display = 'flex';
+}
+
+function closeContinentPicker() {
+  var picker = document.getElementById('continent-picker');
+  if (picker) picker.style.display = 'none';
+}
+
+function startContinentQuiz(continentId) {
+  var pool = COUNTRIES.filter(function(c){
+    return (continentId === 'all' || c.continent === continentId) && MAP_COORDS[c.name];
+  });
+  if (pool.length < 3) {
+    showModal('🌍', '나라 부족', '해당 대륙의 나라가 너무 적어요!', null, null, '확인', null);
+    return;
+  }
+  var q = shuffle(pool).slice(0, Math.min(20, pool.length));
+  var cLabels = {asia:'🌏 아시아', europe:'🌍 유럽', americas:'🌎 아메리카', africa:'🌍 아프리카', oceania:'🌊 오세아니아', all:'🌐 전체'};
+  gMode = 'continent_' + continentId;
+  gQuestions = q;
+  gIdx = 0; gScore = 0; gCombo = 0; gCoins = 0; gHistory = [];
+  gAnswering = false; gMapClicked = false; _dangerActive = false; _lastAlertAt = -999;
+  var eq = getEquipped(); gShield = eq.effectType === 'shield';
+  initLives(); showScreen('game');
+  document.getElementById('g-mode-badge').textContent = (cLabels[continentId] || '🌍') + ' 퀴즈';
+  document.getElementById('best-indicator').style.display = 'none';
+  renderQuestion(); updateGameUI();
 }
 
 function startWeakSpotMode() {
