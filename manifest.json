@@ -1,0 +1,21 @@
+{
+  "name": "나라 퀴즈마스터",
+  "short_name": "나라퀴즈",
+  "description": "79개 나라 초성·국기·지도 퀴즈 게임",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%237c3aed'/%3E%3Ctext x='256' y='330' text-anchor='middle' font-size='280' font-family='serif'%3E🌍%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "education"],
+  "lang": "ko",
+  "dir": "ltr"
+}
