@@ -3,11 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1e293b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="나라 퀴즈">
+  <meta property="og:title" content="🌍 나라 초성 퀴즈마스터">
+  <meta property="og:description" content="79개 나라 초성·국기·지도 퀴즈! 코인·레벨·업적으로 도전하세요 🏆">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://wknight1.github.io/choseong-quiz/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="🌍 나라 초성 퀴즈마스터">
+  <meta name="twitter:description" content="79개 나라 초성·국기·지도 퀴즈! 코인·레벨·업적으로 도전하세요 🏆">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="🌍 나라퀴즈">
 <meta name="theme-color" content="#0a0e1a">
-<title>🌍 나라퀴즈 — 초성 & 국기 & 지도</title>
+<title>🌍 나라 초성 퀴즈마스터</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -18,6 +29,7 @@
 }
 html{height:-webkit-fill-available}
 body{
+  overscroll-behavior:none;
   font-family:-apple-system,'Apple SD Gothic Neo',sans-serif;
   background:var(--bg);color:var(--fg);
   min-height:100vh;min-height:-webkit-fill-available;
@@ -997,7 +1009,7 @@ function renderQuestion(){
     // choice mode
     var tr=document.getElementById("text-input-row");
     if(tr)tr.style.display=_choiceModeOn?"none":"";
-    if(_choiceModeOn){renderChoiceBtns();}else{var cr=document.getElementById("choice-btn-row");if(cr)cr.style.display="none";setTimeout(function(){inp.focus();},60);}
+    if(_choiceModeOn){renderChoiceBtns();}else{var cr=document.getElementById("choice-btn-row");if(cr)cr.style.display="none";setTimeout(function(){inp.focus();setTimeout(function(){if(inp)inp.scrollIntoView({behavior:'smooth',block:'center'});},200);},60);}
   } else if(gMode==="flag"){
     document.getElementById("flag-mode").style.display="";
     document.getElementById("q-flag").textContent=q.flag;var contMap={"asia":"아시아","europe":"유럽","americas":"아메리카","africa":"아프리카","oceania":"오세아니아"};document.getElementById("q-badge").textContent="🌍 "+(contMap[q.continent]||q.continent)+" 국기";
