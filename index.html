@@ -770,7 +770,12 @@ var COUNTRIES=[
   {name:"조지아",flag:"🇬🇪",continent:"europe",capital:"트빌리시",hint:"🌍 캅카스 산맥의 와인 발상지"},
   {name:"우루과이",flag:"🇺🇾",continent:"americas",capital:"몬테비데오",hint:"🌎 남미 최소 국가 중 하나, 복지강국"},
   {name:"오만",flag:"🇴🇲",continent:"asia",capital:"무스카트",hint:"🌏 아라비아 반도 동남부 술탄국"},
-  {name:"코스타리카",flag:"🇨🇷",continent:"americas",capital:"산호세",hint:"🌎 세계에서 군대를 헌법으로 폐지한 나라, 커피의 나라"}
+  {name:"코스타리카",flag:"🇨🇷",continent:"americas",capital:"산호세",hint:"🌎 세계에서 군대를 헌법으로 폐지한 나라, 커피의 나라"},
+  {name:"슬로베니아",flag:"🇸🇮",capital:"류블랴나",continent:"europe",hint:"알프스와 아드리아해 모두 가진 작은 나라"},
+  {name:"에스토니아",flag:"🇪🇪",capital:"탈린",continent:"europe",hint:"중세 구시가지가 유네스코 세계문화유산, 전자정부 선진국"},
+  {name:"라트비아",flag:"🇱🇻",capital:"리가",continent:"europe",hint:"발트 3국 중간 위치, 목조건축 유산의 나라"},
+  {name:"리투아니아",flag:"🇱🇹",capital:"빌뉴스",continent:"europe",hint:"발트 3국 중 가장 남쪽, 유럽의 지리적 중심"},
+  {name:"알바니아",flag:"🇦🇱",capital:"티라나",continent:"europe",hint:"독수리 나라, 쌍두독수리 국기로 유명"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -779,7 +784,12 @@ var MAP_COORDS={
   "영국":{x:462,y:110},"프랑스":{x:470,y:130},"독일":{x:486,y:118},"이탈리아":{x:490,y:142},
   "스페인":{x:454,y:143},"포르투갈":{x:442,y:146},"브라질":{x:268,y:290},"아르헨티나":{x:252,y:362},
   "캐나다":{x:175,y:108},"멕시코":{x:172,y:206},"호주":{x:840,y:338},"뉴질랜드":{x:900,y:380},
-  "인도":{x:726,y:206},"파키스탄":{x:698,y:190},"인도네시아":{x:818,y:280},"태국":{x:788,y:236},
+  "인도":{x:726,y:206},"파키스탄":{x:698,y:190},
+  "슬로베니아":{x:497,y:148},
+  "에스토니아":{x:530,y:112},
+  "라트비아":{x:528,y:120},
+  "리투아니아":{x:524,y:128},
+  "알바니아":{x:510,y:160},"인도네시아":{x:818,y:280},"태국":{x:788,y:236},
   "베트남":{x:804,y:242},"필리핀":{x:838,y:226},"말레이시아":{x:798,y:272},"싱가포르":{x:800,y:278},
   "러시아":{x:648,y:95},"폴란드":{x:496,y:115},"네덜란드":{x:474,y:112},"벨기에":{x:470,y:120},
   "스웨덴":{x:492,y:96},"노르웨이":{x:480,y:90},"덴마크":{x:485,y:105},"핀란드":{x:504,y:93},
@@ -1104,9 +1114,19 @@ function onMapClick(evt){
   var ok=grade<=1;
   var coinEarned=grade===0?3:grade===1?2:1;
   var eq=getEquipped();if(eq.effectType==="coin_bonus")coinEarned+=eq.effectValue;if(eq.effectType==="ultimate")coinEarned+=eq.effectValue.coin;
-  gScore+=pts;gCoins+=coinEarned;
   if(ok){gCombo++;ST.totalCorrect++;}else{gCombo=0;}
   if(ST.maxCombo<gCombo)ST.maxCombo=gCombo;
+  // Apply combo multiplier like choseong/flag modes
+  var mapMult=1;
+  if(ok){
+    var eqm=getEquipped();
+    if(eqm.effectType==="combo_multiplier"&&gCombo>=eqm.comboThreshold)mapMult=eqm.effectValue;
+    if(eqm.effectType==="ultimate")mapMult=eqm.effectValue.multiplier;
+    if(gCombo>=5)mapMult=Math.max(mapMult,3);else if(gCombo>=4)mapMult=Math.max(mapMult,2);else if(gCombo>=3)mapMult=Math.max(mapMult,1.5);else if(gCombo>=2)mapMult=Math.max(mapMult,1.2);
+    if(gCombo>=5)coinEarned+=5;
+    pts=Math.round(pts*mapMult);
+  }
+  gScore+=pts;gCoins+=coinEarned;
   gHistory.push({name:q.name,userAns:gradeLabel,ok:ok,pts:pts,wrong:grade>1?1:0});
   document.getElementById("feedback").textContent=gradeLabel+" +"+pts+"점 🪙×"+coinEarned;
   document.getElementById("feedback").className="feedback "+(ok?"ok":grade===2?"info":"fail");
@@ -1197,8 +1217,6 @@ function endGame(){
 }
 
 function restartSameMode(){startGame(gMode);}
-
-function copyShareText(){var correct=gHistory.filter(function(h){return h.ok;}).length;var stars=Math.ceil((correct/TOTAL_Q)*5);var starStr="⭐".repeat(stars)+"☆".repeat(5-stars);var modeLabel=gMode==="flag"?"🚩국기":gMode==="map"?"🗺️지도":"🔤초성";var text=["🌍 나라 퀴즈마스터 "+modeLabel,starStr,"점수: "+gScore+"점  정답: "+correct+"/"+TOTAL_Q,"최대 콤보: "+ST.maxCombo+"🔥","https://wknight1.github.io/choseong-quiz/"].join("\n");try{navigator.clipboard.writeText(text).then(function(){showModal("📋","클립보드 복사!","친구에게 공유해보세요!",null,null,"확인",null);});}catch(e){showModal("📋","공유 텍스트",text,null,null,"닫기",null);}}
 
 // ═══════════════════════ AUTOSAVE / RESUME ═══════════════════════
 var RESUME_KEY = 'gameResume_v1';
