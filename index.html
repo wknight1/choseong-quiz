@@ -1247,7 +1247,6 @@ var DAILY_BONUS=[10,15,25,35,50,75,120,
   {name:"키르기스스탄",flag:"🇰🇬",hint:"수도 비슈케크, 텐산 산맥과 이식쿨 호수. 중앙아시아 유목 문화의 나라",capital:"비슈케크",continent:"asia"},
   {name:"룩셈부르크",flag:"🇱🇺",hint:"수도 룩셈부르크, 서유럽 내륙 소국. 세계 최고 수준의 1인당 GDP 보유",capital:"룩셈부르크",continent:"europe"},
   {name:"슬로베니아",flag:"🇸🇮",hint:"수도 류블랴나, 발칸 북서부 알프스 접경국. 포스토이나 동굴로 유명",capital:"류블랴나",continent:"europe"},
-  {name:"탄자니아",flag:"🇹🇿",hint:"수도 도도마, 킬리만자로 최고봉·세렝게티 국립공원 위치",capital:"도도마",continent:"africa"},
   {name:"앙골라",flag:"🇦🇴",hint:"수도 루안다, 아프리카 남서부. 석유·다이아몬드 풍부한 포르투갈어 사용국",capital:"루안다",continent:"africa"},
   {name:"캄보디아",flag:"🇰🇭",hint:"수도 프놈펜, 앙코르와트 세계문화유산. 동남아 크메르 문명 발상지",capital:"프놈펜",continent:"asia"}
 ];
@@ -1262,7 +1261,7 @@ var TOTAL_Q=20;
 
 // ═══════════════════════ STATE ═══════════════════════
 var SK="quizmaster_v3";var ST;
-function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,realModesSet:{},mapCorrect:0,perCountry:{},bestScores:{},encViewed:{},focusCompleted:0,dailyCompleted:0};}
+function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,realModesSet:{},mapCorrect:0,perCountry:{},bestScores:{choseong:0,flag:0,map:0,focus:0,daily:0,weakspot:0,continent:0,speed:0},encViewed:{},focusCompleted:0,dailyCompleted:0};}
 function save(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
 function load(){try{var r=localStorage.getItem(SK);if(!r)return defaultState();var s=JSON.parse(r);var m=Object.assign({},defaultState(),s);if(!Array.isArray(m.ownedCharacters))m.ownedCharacters=["basic"];if(m.ownedCharacters.indexOf("basic")<0)m.ownedCharacters.unshift("basic");return m;}catch(e){return defaultState();}}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -1846,6 +1845,7 @@ function onMapClick(evt){
     pts=Math.round(pts*mapMult*(DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].scoreMult||1));
     coinEarned=Math.round(coinEarned*(DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].coinMult||1));
   }
+  if(gMode==="speed"){pts=Math.max(10,pts+Math.floor(_gTimerSecs*2));}
   gScore+=pts;gCoins+=coinEarned;
   if(ok)ST.noHintCorrect++;
   gHistory.push({name:q.name,userAns:gradeLabel,ok:ok,pts:pts,wrong:grade>1?1:0});
@@ -1887,6 +1887,7 @@ function onCorrect(el,cls,e){
   if(eq.effectType==="coin_bonus")coinEarned+=eq.effectValue;
   if(eq.effectType==="ultimate")coinEarned+=eq.effectValue.coin;
   if(gCombo>=5)coinEarned+=5;
+  if(gMode==="speed"){pts=Math.max(10,pts+Math.floor(_gTimerSecs*2));}
   gScore+=pts;gCoins+=coinEarned;
   if(gHintsUsed===0)ST.noHintCorrect++;
   gHistory.push({name:q.name,userAns:q.name,ok:true,wrong:gWrong,pts:pts,coins:coinEarned});
@@ -1990,6 +1991,12 @@ function startSpeedQuiz() {
       timerEl.textContent = '⚡ ' + _gTimerSecs;
       if (_gTimerSecs <= 10) timerEl.className = 'urgent';
     }
+    var timerFill = document.getElementById('g-timer');
+    if (timerFill) {
+      var pct = (_gTimerSecs / 30) * 100;
+      timerFill.style.width = pct + '%';
+      timerFill.style.background = _gTimerSecs <= 10 ? '#ef4444' : _gTimerSecs <= 20 ? '#f97316' : 'var(--green)';
+    }
     if (_gTimerSecs <= 0) {
       clearInterval(_gTimerInterval);
       showToast('⏰ 시간 종료!');
@@ -2047,7 +2054,7 @@ function endGame(){
   // Animate coin count
   (function(){var el=document.getElementById("r-coins-num");var target=gCoins;var cur=0;var step=Math.max(1,Math.ceil(target/20));var iv=setInterval(function(){cur=Math.min(cur+step,target);el.textContent="+"+cur;if(cur>=target)clearInterval(iv);},40);})();
   // Mode badge
-  var modeLabels={choseong:'🔤 초성 퀴즈',flag:'🚩 국기 퀴즈',map:'🗺️ 지도 퀴즈',focus:'🎯 집중 퀴즈',daily:'📅 데일리 챌린지',weakspot:'🎯 약점 집중',continent_asia:'🌏 아시아 지도',continent_europe:'🌍 유럽 지도',continent_americas:'🌎 아메리카 지도',continent_africa:'🌍 아프리카 지도',continent_oceania:'🌊 오세아니아 지도',continent_all:'🌐 전체 지도',continent_asia_choseong:'🌏 아시아 초성',continent_asia_flag:'🌏 아시아 국기',continent_europe_choseong:'🌍 유럽 초성',continent_europe_flag:'🌍 유럽 국기',continent_americas_choseong:'🌎 아메리카 초성',continent_americas_flag:'🌎 아메리카 국기',continent_africa_choseong:'🌍 아프리카 초성',continent_africa_flag:'🌍 아프리카 국기',continent_oceania_choseong:'🌊 오세아니아 초성',continent_oceania_flag:'🌊 오세아니아 국기',continent_all_choseong:'🌐 전체 초성',continent_all_flag:'🌐 전체 국기',speed:'⚡ 스피드 퀴즈'};
+  var modeLabels={choseong:'🔤 초성 퀴즈',flag:'🚩 국기 퀴즈',map:'🗺️ 지도 퀴즈',focus:'🎯 집중 퀴즈',daily:'📅 데일리 챌린지',speed:'⚡ 스피드 퀴즈',weakspot:'🎯 약점 집중',continent_asia:'🌏 아시아 지도',continent_europe:'🌍 유럽 지도',continent_americas:'🌎 아메리카 지도',continent_africa:'🌍 아프리카 지도',continent_oceania:'🌊 오세아니아 지도',continent_all:'🌐 전체 지도',continent_asia_choseong:'🌏 아시아 초성',continent_asia_flag:'🌏 아시아 국기',continent_europe_choseong:'🌍 유럽 초성',continent_europe_flag:'🌍 유럽 국기',continent_americas_choseong:'🌎 아메리카 초성',continent_americas_flag:'🌎 아메리카 국기',continent_africa_choseong:'🌍 아프리카 초성',continent_africa_flag:'🌍 아프리카 국기',continent_oceania_choseong:'🌊 오세아니아 초성',continent_oceania_flag:'🌊 오세아니아 국기',continent_all_choseong:'🌐 전체 초성',continent_all_flag:'🌐 전체 국기',speed:'⚡ 스피드 퀴즈'};
   var mb=document.getElementById('r-mode-badge');
   if(mb)mb.textContent=modeLabels[gMode]||gMode;
   // XP row: show XP gained (10 per correct + combo bonus)
@@ -2679,7 +2686,7 @@ function recordGameStats2(mode,score,history,maxCombo){
   var st=loadStats2();st.plays++;
   history.forEach(function(h){st.totalAnswered++;if(h.ok)st.totalCorrect++;else st.wrongMap[h.name]=(st.wrongMap[h.name]||0)+1;});
   if(maxCombo>(st.maxCombo||0))st.maxCombo=maxCombo;
-  var k=mode==='flag'?'flag':mode==='map'?'map':mode==='daily'?'daily':mode==='focus'?'focus':mode==='weakspot'?'weakspot':(mode&&mode.indexOf('continent_')===0)?'continent':'choseong';
+  var k=mode==='flag'?'flag':mode==='map'?'map':mode==='daily'?'daily':mode==='focus'?'focus':mode==='weakspot'?'weakspot':mode==='speed'?'speed':(mode&&mode.indexOf('continent_')===0)?'continent':'choseong';
   if(score>(st.bestScores[k]||0))st.bestScores[k]=score;
   saveStats2(st);
 }
