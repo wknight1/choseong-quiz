@@ -681,7 +681,10 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <button class="rtab active fail" id="rtab-fail" onclick="filterResult('fail')">✗ 오답</button>
   </div>
   <div class="result-list" id="r-list"></div>
-  <button class="share-btn" onclick="copyShareText2()">📤 결과 공유하기</button>
+  <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
+    <button class="share-btn" onclick="copyShareText2()" style="flex:1;min-width:120px;">📤 결과 공유</button>
+    <button class="share-btn" onclick="shareChallenge(gScore,gHistory.filter(function(h){return h.ok;}).length,gMode,ST.maxCombo)" style="flex:1;min-width:120px;background:linear-gradient(135deg,#0f3460,#533483);">🔗 챌린지 링크</button>
+  </div>
   <button class="restart-btn" onclick="restartSameMode()">🔄 다시 하기</button>
   <button class="home-btn2" onclick="goHome()">🏠 홈으로</button>
 </div>
@@ -799,7 +802,12 @@ var COUNTRIES=[
   {name:"에스토니아",flag:"🇪🇪",capital:"탈린",continent:"europe",hint:"중세 구시가지가 유네스코 세계문화유산, 전자정부 선진국"},
   {name:"라트비아",flag:"🇱🇻",capital:"리가",continent:"europe",hint:"발트 3국 중간 위치, 목조건축 유산의 나라"},
   {name:"리투아니아",flag:"🇱🇹",capital:"빌뉴스",continent:"europe",hint:"발트 3국 중 가장 남쪽, 유럽의 지리적 중심"},
-  {name:"알바니아",flag:"🇦🇱",capital:"티라나",continent:"europe",hint:"독수리 나라, 쌍두독수리 국기로 유명"}
+  {name:"알바니아",flag:"🇦🇱",capital:"티라나",continent:"europe",hint:"독수리 나라, 쌍두독수리 국기로 유명"},
+  {name:"세네갈",flag:"🇸🇳",capital:"다카르",continent:"africa",hint:"서아프리카 관문, 다카르 랠리 출발지"},
+  {name:"카메룬",flag:"🇨🇲",capital:"야운데",continent:"africa",hint:"아프리카의 축구 강국, 서아프리카 위치"},
+  {name:"앙골라",flag:"🇦🇴",capital:"루안다",continent:"africa",hint:"남부 아프리카, 아프리카에서 포르투갈어 사용"},
+  {name:"피지",flag:"🇫🇯",capital:"수바",continent:"oceania",hint:"남태평양의 섬나라, 럭비 강국"},
+  {name:"바누아투",flag:"🇻🇺",capital:"포트빌라",continent:"oceania",hint:"태평양 작은 섬나라, 행복 지수 높기로 유명"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -829,7 +837,9 @@ var MAP_COORDS={
   "미얀마":{x:772,y:218},
   "아이슬란드":{x:300,y:65},"네팔":{x:728,y:202},"볼리비아":{x:250,y:328},
   "짐바브웨":{x:520,y:358},"파나마":{x:205,y:265},
-  "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264}
+  "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},
+  "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
+  "피지":{x:880,y:330},"바누아투":{x:862,y:320}
 };
 
 var CHARACTERS=[
