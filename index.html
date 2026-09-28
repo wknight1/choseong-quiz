@@ -529,7 +529,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 
 
   <!-- 일일 미션 패널 -->
-  <div id="daily-missions-panel" style="width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:8px;display:none;">
+  <div id="daily-missions-panel" style="width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:8px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <span style="font-size:13px;font-weight:800;color:var(--fg);">📋 오늘의 미션</span>
       <span id="mission-reset-time" style="font-size:10px;color:var(--muted);">자정 초기화</span>
@@ -1012,6 +1012,11 @@ var COUNTRIES=[
   {name:"가봉",flag:"🇬🇦",hint:"수도 리브르빌, 중앙아프리카 석유 부국. 열대우림 85%",capital:"리브르빌",continent:"africa"},
   {name:"중앙아프리카공화국",flag:"🇨🇫",hint:"수도 방기, 아프리카 내륙 최빈국 중 하나. 다이아몬드 산지",capital:"방기",continent:"africa"},
   
+
+
+{name:"팔레스타인",flag:"🇵🇸",continent:"asia",hint:"수도 라말라. 가자지구·요르단강 서안 지역. 2012년 유엔 옵서버 국가 승인."},
+{name:"코소보",flag:"🇽🇰",continent:"europe",hint:"수도 프리슈티나. 2008년 독립 선언. 발칸반도에서 가장 새로운 나라."},
+{name:"소말리랜드",flag:"🇸🇴",continent:"africa",hint:"수도 하르게이사. 소말리아에서 분리된 실질 자치 지역. 국제 미승인 국가."}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -1122,7 +1127,16 @@ var MAP_COORDS={
   "세인트루시아":{x:27.4,y:54.5},
   "세인트키츠네비스":{x:26.8,y:52.8},
   "도미니카":{x:27.1,y:53.2}
-};
+,
+"도미니카공화국":{x:243,y:238},
+"아이티":{x:234,y:239},
+"파푸아뉴기니":{x:833,y:310},
+"동티모르":{x:808,y:330},
+"팔레스타인":{x:579,y:220},
+"코소보":{x:534,y:192},
+"북마케도니아":{x:536,y:195},
+"수단":{x:562,y:260},
+"소말리랜드":{x:580,y:275}};
 
 var CHARACTERS=[
   {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터",effect:"없음",effectType:"none"},
@@ -1675,14 +1689,14 @@ function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.
   var choices=shuffle([q].concat(pool.slice(0,3)));
   var numLabels=['①','②','③','④'];
   choices.forEach(function(c,i){var btn=document.createElement("button");btn.className="choice-btn";btn.style.position='relative';btn.innerHTML='<span style="position:absolute;top:4px;left:7px;font-size:10px;opacity:0.45;font-weight:400;line-height:1">'+numLabels[i]+'</span><span style="font-size:1.6em;display:block;margin-bottom:3px">'+c.flag+'</span><span style="font-size:13px">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
-function onFlagChoice(chosen,correct,btn,e){if(gAnswering)return;var ok=chosen.name===correct.name;if(ok){btn.classList.add("correct-choice");onCorrect(btn,"",e);}else{btn.classList.add("wrong-choice");anim(btn,"shake",400);var btns=document.querySelectorAll(".choice-btn");btns.forEach(function(b){if(b.innerHTML.includes(correct.name)||b.textContent===correct.name)b.classList.add("reveal-choice");});gWrong++;if(gWrong===1)document.getElementById("q-badge").textContent="💡 힌트: "+correct.hint;if(gShield&&gWrong===1){gShield=false;document.getElementById("feedback").textContent="🛡 방어막! 콤보 유지!";document.getElementById("feedback").className="feedback info";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);setTimeout(function(){document.getElementById("flag-choices").innerHTML="";renderFlagChoices(correct);document.getElementById("feedback").textContent="";},800);return;}gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;document.getElementById("feedback").className="feedback fail";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);gCombo=0;updateComboUI();loseLife2();gAnswering=true;btns.forEach(function(b){b.disabled=true;});setTimeout(nextQ,1000);}}
+function onFlagChoice(chosen,correct,btn,e){if(gAnswering)return;var ok=chosen.name===correct.name;if(ok){_flagCorrectToday++;updateMissionProgress('flagCorrect',1);btn.classList.add("correct-choice");onCorrect(btn,"",e);}else{btn.classList.add("wrong-choice");anim(btn,"shake",400);var btns=document.querySelectorAll(".choice-btn");btns.forEach(function(b){if(b.innerHTML.includes(correct.name)||b.textContent===correct.name)b.classList.add("reveal-choice");});gWrong++;if(gWrong===1)document.getElementById("q-badge").textContent="💡 힌트: "+correct.hint;if(gShield&&gWrong===1){gShield=false;document.getElementById("feedback").textContent="🛡 방어막! 콤보 유지!";document.getElementById("feedback").className="feedback info";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);setTimeout(function(){document.getElementById("flag-choices").innerHTML="";renderFlagChoices(correct);document.getElementById("feedback").textContent="";},800);return;}gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;document.getElementById("feedback").className="feedback fail";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);gCombo=0;updateComboUI();loseLife2();gAnswering=true;btns.forEach(function(b){b.disabled=true;});setTimeout(nextQ,1000);}}
 
 // ─── 지도 ───
 document.getElementById("map-svg-container").addEventListener("click",onMapClick);
 document.getElementById("map-svg-container").addEventListener("touchend",function(e){e.preventDefault();var t=e.changedTouches[0];onMapClick({clientX:t.clientX,clientY:t.clientY});});
 
 function onMapClick(evt){
-  if(gMapClicked||gAnswering||gMode!=="map")return;
+  if(gMapClicked||gAnswering||(gMode!=="map"&&!gMode.startsWith("continent_")))return;
   gMapClicked=true;gAnswering=true;clearTimer();
   var q=gQuestions[gIdx];
   var answer=MAP_COORDS[q.name];
