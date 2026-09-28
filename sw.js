@@ -1,4 +1,4 @@
-const CACHE = 'choseong-quiz-v30';
+const CACHE = 'choseong-quiz-v48';
 const FILES = ['./manifest.json'];
 
 self.addEventListener('install', e => {

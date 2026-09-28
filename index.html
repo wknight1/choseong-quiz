@@ -1035,7 +1035,7 @@ var TOTAL_Q=20;
 
 // ═══════════════════════ STATE ═══════════════════════
 var SK="quizmaster_v3";var ST;
-function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,realModesSet:{},mapCorrect:0,perCountry:{},bestScores:{},encViewed:{}};}
+function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,realModesSet:{},mapCorrect:0,perCountry:{},bestScores:{},encViewed:{},focusCompleted:0,dailyCompleted:0};}
 function save(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
 function load(){try{var r=localStorage.getItem(SK);if(!r)return defaultState();var s=JSON.parse(r);var m=Object.assign({},defaultState(),s);if(!Array.isArray(m.ownedCharacters))m.ownedCharacters=["basic"];if(m.ownedCharacters.indexOf("basic")<0)m.ownedCharacters.unshift("basic");return m;}catch(e){return defaultState();}}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -1871,7 +1871,7 @@ function updateDailyChalBtn(){
 // ── URL SHARE / CHALLENGE ──
 var gChallengeTarget=-1;
 function encodeResult2(score,correct,mode,maxCombo){
-  var data={s:score,c:correct,m:(mode||'choseong').charAt(0),k:maxCombo,d:getDailyKey2()};
+  var data={s:score,c:correct,m:(mode||'choseong').charAt(0),k:maxCombo,d:getDailyKey2(),t:gQuestions.length};
   try{return btoa(JSON.stringify(data));}catch(e){return '';}
 }
 function decodeResult2(enc){try{return JSON.parse(atob(enc));}catch(e){return null;}}
@@ -1886,7 +1886,7 @@ function shareChallenge(score,correct,mode,maxCombo){
   else{try{navigator.clipboard.writeText(text).then(function(){showModal('📋','공유 완료!','챌린지 링크가 복사됐어요!',null,null,'확인',null);});}catch(e){showModal('📤','공유',text,null,null,'닫기',null);}}
 }
 function checkChallengeParam2(){
-  try{var params=new URLSearchParams(location.search);var code=params.get('challenge');if(!code)return;var data=decodeResult2(code);if(!data)return;gChallengeTarget=data.s;var modeLabel={'c':'초성','f':'국기','a':'지도'}[data.m]||'?';document.getElementById('ch-score').textContent=data.s+'점';document.getElementById('ch-correct').textContent=data.c+'/20';document.getElementById('ch-mode').textContent=modeLabel;document.getElementById('ch-combo').textContent=data.k+'🔥';document.getElementById('ch-date').textContent=data.d;document.getElementById('challenge-popup').style.display='flex';}catch(e){}
+  try{var params=new URLSearchParams(location.search);var code=params.get('challenge');if(!code)return;var data=decodeResult2(code);if(!data)return;gChallengeTarget=data.s;var modeLabel={'c':'초성','f':'국기','a':'지도'}[data.m]||'?';document.getElementById('ch-score').textContent=data.s+'점';document.getElementById('ch-correct').textContent=data.c+'/'+(data.t||20);document.getElementById('ch-mode').textContent=modeLabel;document.getElementById('ch-combo').textContent=data.k+'🔥';document.getElementById('ch-date').textContent=data.d;document.getElementById('challenge-popup').style.display='flex';}catch(e){}
 }
 function acceptChallenge(){
   var popup=document.getElementById('challenge-popup');if(popup)popup.style.display='none';
