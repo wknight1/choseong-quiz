@@ -1224,12 +1224,7 @@ var LEVELS=[
   {level:13,min:7000,name:"역사 지리학자",emoji:"📜"},{level:14,min:9000,name:"지구 탐정",emoji:"🔍"},
   {level:15,min:11500,name:"전략 지도가",emoji:"🎯"},{level:16,min:14000,name:"세계 석학",emoji:"🏛️"},
   {level:17,min:17000,name:"지리 레전드",emoji:"👑"},{level:18,min:20500,name:"대지의 수호자",emoji:"🌿"},
-  {level:19,min:24500,name:"전설의 탐험가",emoji:"🔱"},{level:20,min:29000,name:"지리 박사",emoji:"🎖️"},
-  {name:"아르메니아",flag:"🇦🇲",continent:"asia",capital:"예레반",hint:"수도 예레반, 세계 최초 기독교 공식 채택 국가(301년). 아라라트 산 자락의 코카서스 소국."},
-  {name:"알제리",flag:"🇩🇿",continent:"africa",capital:"알제",hint:"수도 알제, 아프리카 최대 면적 국가. 사하라 사막이 85%. 석유·가스 수출 대국."},
-  {name:"세이셸",flag:"🇸🇨",continent:"africa",capital:"빅토리아",hint:"수도 빅토리아, 인도양 115개 섬 군도. 세계 최상위 럭셔리 관광지. 자이언트 육지거북 서식."}
-  {name:"통가",flag:"🇹🇴",continent:"oceania",capital:"누쿠알로파",hint:"수도 누쿠알로파, 태평양 왕국. 폴리네시아 유일 군주제 독립국. 2022년 해저화산 폭발."},
-  {name:"투르크메니스탄",flag:"🇹🇲",continent:"asia",capital:"아슈하바트",hint:"수도 아슈하바트, 세계 최고 백색 대리석 건물 밀도. 다르바자 가스 분화구(지옥문) 60년째 연소 중."}
+  {level:19,min:24500,name:"전설의 탐험가",emoji:"🔱"},{level:20,min:29000,name:"지리 박사",emoji:"🎖️"}
 ];
 
 var DAILY_BONUS=[10,15,25,35,50,75,120,
@@ -1379,7 +1374,7 @@ function startGame(mode){
   } else {
     gQuestions=shuffle(gMode==="map"?pool:COUNTRIES).slice(0,TOTAL_Q);
   }
-  gIdx=0;gScore=0;gCombo=0;gCoins=0;gHistory=[];gAnswering=false;gMapClicked=false;_dangerActive=false;_lastAlertAt=-999;
+  gIdx=0;gScore=0;gCombo=0;gCoins=0;gHistory=[];gAnswering=false;gMapClicked=false;_sessionCorrect=0;_dangerActive=false;_lastAlertAt=-999;
   var eq=getEquipped();gShield=eq.effectType==="shield";
   showScreen("game");
   document.getElementById("g-mode-badge").textContent=gMode.startsWith("continent_")?"🌍 대륙":gMode==="flag"?"🚩 국기":gMode==="map"?"🗺️ 지도":gMode==="focus"?"🎯 집중":gMode==="daily"?"📅 데일리":"🔤 초성";
@@ -1859,7 +1854,7 @@ function onCorrect(el,cls,e){
   var speedBonus=timerLeft>66?50:timerLeft>50?30:timerLeft>33?10:0;
   var hintPenalty=gHintsUsed>0?30:0;
   var basePts=100-hintPenalty+speedBonus;
-  gCombo++;checkComboMilestone(gCombo);
+  gCombo++;checkComboMilestone(gCombo);_sessionCorrect++;updateMissionProgress('sessionCorrect',1);
   var eq=getEquipped();var mult=1;
   if(eq.effectType==="combo_multiplier"&&gCombo>=eq.comboThreshold)mult=eq.effectValue;
   if(eq.effectType==="ultimate")mult=eq.effectValue.multiplier;
