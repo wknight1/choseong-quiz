@@ -350,6 +350,17 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 .onboard-step{display:none;flex-direction:column;align-items:center;gap:10px;}
 .onboard-step.active{display:flex;}
 .onboard-icon{font-size:3rem;}
+
+/* Learn card -- educational flash after correct answer */
+.learn-card{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--card);border:1.5px solid var(--sky);border-radius:16px;padding:12px 20px;
+  font-size:0.85rem;color:var(--txt);z-index:3000;opacity:0;
+  transition:opacity .3s,transform .3s;pointer-events:none;max-width:300px;text-align:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.learn-card.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.learn-card .lc-flag{font-size:1.5rem;}
+.learn-card .lc-name{font-weight:700;margin:2px 0;}
+.learn-card .lc-info{color:var(--muted);font-size:0.78rem;}
 </style>
 </head>
 <body>
@@ -848,6 +859,8 @@ var COMBO_DATA=[
   {c:0,lbl:"",emoji:"▶️",cls:"c1"},{c:1,lbl:"시작",emoji:"▶️",cls:"c1"},
   {c:2,lbl:"웜업!",emoji:"🔥",cls:"c2"},{c:3,lbl:"연속!",emoji:"⚡",cls:"c3"},
   {c:4,lbl:"불꽃!",emoji:"🌟",cls:"c4"},{c:5,lbl:"MAX!",emoji:"💥",cls:"c5"},
+  {c:6,lbl:"GODLIKE!",emoji:"👑",cls:"c5"},{c:7,lbl:"전설!",emoji:"🌌",cls:"c5"},
+  {c:8,lbl:"신급!",emoji:"🪐",cls:"c5"},{c:9,lbl:"우주적!",emoji:"☄️",cls:"c5"},
 ];
 var TOTAL_Q=20;
 
@@ -1130,7 +1143,7 @@ function onMapClick(evt){
   gHistory.push({name:q.name,userAns:gradeLabel,ok:ok,pts:pts,wrong:grade>1?1:0});
   document.getElementById("feedback").textContent=gradeLabel+" +"+pts+"점 🪙×"+coinEarned;
   document.getElementById("feedback").className="feedback "+(ok?"ok":grade===2?"info":"fail");
-  updateGameUI();updateComboUI();updateStreakFire(gCombo);updateBestIndicator(gScore);
+  updateGameUI();updateComboUI();updateStreakFire(gCombo);updateBestIndicator(gScore);hapticComboFn(gCombo);
   triggerHitEffect(ok,gCombo,pts,document.getElementById("q-card"),evt);
   if(ok){burst(evt.clientX,evt.clientY,8+gCombo*2);flyCoins(evt.clientX,evt.clientY,Math.min(coinEarned,4));sndCoin();}
   var c=gHistory.filter(function(h){return h.ok;}).length;
@@ -1159,10 +1172,10 @@ function onCorrect(el,cls,e){
   if(gHintsUsed===0)ST.noHintCorrect++;
   gHistory.push({name:q.name,userAns:q.name,ok:true,wrong:gWrong,pts:pts,coins:coinEarned});
   document.getElementById("feedback").textContent="🎉 정답! +"+pts+"점 🪙×"+coinEarned;
-  document.getElementById("feedback").className="feedback ok";
+  document.getElementById("feedback").className="feedback ok";showLearnCard(q);
   if(cls)el.className=cls+" correct";
   ST.totalCorrect++;if(ST.maxCombo<gCombo)ST.maxCombo=gCombo;
-  updateGameUI();updateComboUI();updateStreakFire(gCombo);updateBestIndicator(gScore);
+  updateGameUI();updateComboUI();updateStreakFire(gCombo);updateBestIndicator(gScore);hapticComboFn(gCombo);
   triggerHitEffect(true,gCombo,pts,document.getElementById("q-card"),e);
   var ex=e||{clientX:window.innerWidth/2,clientY:window.innerHeight*.42};
   var n=8+gCombo*2;var eq2=getEquipped();if(eq2.id==="rocket"||eq2.id==="dragon"||eq2.id==="galaxy")n+=8;
@@ -1176,7 +1189,7 @@ function nextQ(){gIdx++;if(gIdx>=TOTAL_Q){endGame();return;}autosave();renderQue
 function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);gAnswering=true;setTimeout(nextQ,700);}
 
 function updateGameUI(){document.getElementById("g-coins").textContent=ST.coins+gCoins;document.getElementById("g-score").textContent=gScore;}
-function updateComboUI(){var c=gCombo;var d=COMBO_DATA[Math.min(c,5)];var b=document.getElementById("combo-badge");b.className="combo-badge "+(d?d.cls:"c1");document.getElementById("combo-emoji").textContent=d?d.emoji:"▶️";document.getElementById("combo-num").textContent=c>0?c:"";document.getElementById("combo-label").textContent=d&&c>0?d.lbl:"콤보";if(c>0)anim(b,"combo-bump",400);}
+function updateComboUI(){var c=gCombo;var d=COMBO_DATA[Math.min(c,9)];var b=document.getElementById("combo-badge");b.className="combo-badge "+(d?d.cls:"c1");document.getElementById("combo-emoji").textContent=d?d.emoji:"▶️";document.getElementById("combo-num").textContent=c>0?c:"";document.getElementById("combo-label").textContent=d&&c>0?d.lbl:"콤보";if(c>0)anim(b,"combo-bump",400);}
 
 // ─── RESULT ───
 function renderStarResult(correct,total){var stars=Math.ceil((correct/total)*5);var container=document.getElementById("star-row");if(!container)return;container.innerHTML="";for(var i=1;i<=5;i++){var span=document.createElement("span");span.className="star-item"+(i<=stars?"":" dim");span.textContent="⭐";container.appendChild(span);(function(el,delay){setTimeout(function(){if(!el.classList.contains("dim"))el.classList.add("lit");else el.style.opacity=".18";},delay);})(span,280+i*170);}if(stars===5)setTimeout(function(){sndPerfectChord();},280+5*170+200);}
@@ -1393,6 +1406,16 @@ function updateWeakModeBtnVisibility() {
   if (btn) btn.style.display = count >= 5 ? '' : 'none';
 }
 
+
+function showLearnCard(q){
+  var el=document.createElement('div');el.className='learn-card';
+  var cap=q.capital?' · 수도: '+q.capital:'';
+  var cont=q.continent?' ('+q.continent+')':'';
+  el.innerHTML='<div class="lc-flag">'+q.flag+'</div><div class="lc-name">'+q.name+cont+'</div><div class="lc-info">'+cap+'</div>';
+  document.body.appendChild(el);
+  setTimeout(function(){el.classList.add('show');},30);
+  setTimeout(function(){el.classList.remove('show');setTimeout(function(){el.remove();},350);},1800);
+}
 // ═══════════════════════ INIT ═══════════════════════
 ST=load();
 updateHomeUI();
