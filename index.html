@@ -614,7 +614,13 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <div style="background:var(--card);border-radius:20px;padding:24px;max-width:360px;width:90%;text-align:center;">
       <div style="font-size:22px;font-weight:700;margin-bottom:6px;">🌍 대륙별 퀴즈</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">대륙을 선택하면 해당 나라들만 출제!</div>
-      <div id="continent-btn-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;"></div>
+      <div id="continent-btn-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;"></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;">퀴즈 타입 선택</div>
+      <div id="continent-type-btns" style="display:flex;gap:8px;margin-bottom:14px;">
+        <button onclick="setContinentType('map')" id="ct-map" style="flex:1;padding:8px 4px;border-radius:10px;border:2px solid var(--indigo);background:var(--indigo);color:#fff;font-size:13px;font-weight:700;cursor:pointer;">🗺️ 지도</button>
+        <button onclick="setContinentType('choseong')" id="ct-choseong" style="flex:1;padding:8px 4px;border-radius:10px;border:2px solid var(--surface);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;">🔤 초성</button>
+        <button onclick="setContinentType('flag')" id="ct-flag" style="flex:1;padding:8px 4px;border-radius:10px;border:2px solid var(--surface);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;">🚩 국기</button>
+      </div>
       <button onclick="closeContinentPicker()" style="width:100%;padding:10px;border-radius:10px;border:none;background:var(--surface);color:var(--text);font-size:14px;cursor:pointer;">✕ 닫기</button>
     </div>
   </div>
@@ -955,7 +961,11 @@ var COUNTRIES=[
   {name:"바베이도스",flag:"🇧🇧",capital:"브리지타운",continent:"americas",hint:"수도 브리지타운, 카리브해 동쪽 끝. 가수 리한나의 고국, 럼주 발원지로 알려짐"},
   {name:"잠비아",flag:"🇿🇲",capital:"루사카",continent:"africa",hint:"수도 루사카, 아프리카 내륙국. 빅토리아 폭포 공유국(짐바브웨와), 세계 최대 구리 생산국 중 하나"},
   {name:"소말리아",flag:"🇸🇴",capital:"모가디슈",continent:"africa",hint:"수도 모가디슈, 아프리카 뿔 끝. 해적 활동과 내전으로 유명, 세계에서 가장 긴 해안선 보유"},
-  {name:"콩고민주공화국",flag:"🇨🇩",capital:"킨샤사",continent:"africa",hint:"수도 킨샤사, 아프리카 최대 프랑스어권 국가. 콩고강 유역, 세계 2위 열대우림, 콜탄(스마트폰 원료) 최대 생산국"}
+  {name:"콩고민주공화국",flag:"🇨🇩",capital:"킨샤사",continent:"africa",hint:"수도 킨샤사, 아프리카 최대 프랑스어권 국가. 콩고강 유역, 세계 2위 열대우림, 콜탄(스마트폰 원료) 최대 생산국"},
+  {name:"남수단",flag:"🇸🇸",hint:"수도 주바, 2011년 독립한 세계에서 가장 젊은 나라",capital:"주바",continent:"africa"},
+  {name:"아제르바이잔",flag:"🇦🇿",hint:"수도 바쿠, 카스피해 서안 석유 부국. 바쿠는 '불의 땅'이란 뜻",capital:"바쿠",continent:"asia"},
+  {name:"안도라",flag:"🇦🇩",hint:"수도 안도라라베야, 피레네 산맥 속 소국. 면세 쇼핑과 스키 리조트로 유명",capital:"안도라라베야",continent:"europe"},
+  {name:"콩고공화국",flag:"🇨🇬",hint:"수도 브라자빌, 콩고민주공화국과 콩고강을 사이에 두고 마주보는 나라",capital:"브라자빌",continent:"africa"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -1011,7 +1021,7 @@ var MAP_COORDS={
   "잠비아":{x:537,y:300},
   "소말리아":{x:575,y:245},
   "콩고민주공화국":{x:520,y:275},
-,"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220}};
+,"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220},"남수단":{x:525,y:248},"아제르바이잔":{x:545,y:148},"조지아":{x:542,y:143},"안도라":{x:440,y:149},"콩고공화국":{x:510,y:268},"세이셸":{x:555,y:278},"베냉":{x:475,y:242},"토고":{x:467,y:244}};
 
 var CHARACTERS=[
   {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터",effect:"없음",effectType:"none"},
@@ -1778,9 +1788,20 @@ function closeContinentPicker() {
   if (picker) picker.style.display = 'none';
 }
 
+var _continentQuizType = 'map'; // default
+function setContinentType(type) {
+  _continentQuizType = type;
+  var btns = document.querySelectorAll('#continent-type-btns button');
+  btns.forEach(function(b){ b.style.borderColor='var(--surface)'; b.style.background='var(--surface)'; b.style.color='var(--text)'; });
+  var active = document.getElementById('ct-' + type);
+  if(active){ active.style.borderColor='var(--indigo)'; active.style.background='var(--indigo)'; active.style.color='#fff'; }
+}
 function startContinentQuiz(continentId) {
+  var filterMap = (_continentQuizType === 'map');
   var pool = COUNTRIES.filter(function(c){
-    return (continentId === 'all' || c.continent === continentId) && MAP_COORDS[c.name];
+    if(continentId !== 'all' && c.continent !== continentId) return false;
+    if(filterMap && !MAP_COORDS[c.name]) return false;
+    return true;
   });
   if (pool.length < 3) {
     showModal('🌍', '나라 부족', '해당 대륙의 나라가 너무 적어요!', null, null, '확인', null);
@@ -1788,13 +1809,14 @@ function startContinentQuiz(continentId) {
   }
   var q = shuffle(pool).slice(0, Math.min(20, pool.length));
   var cLabels = {asia:'🌏 아시아', europe:'🌍 유럽', americas:'🌎 아메리카', africa:'🌍 아프리카', oceania:'🌊 오세아니아', all:'🌐 전체'};
-  gMode = 'continent_' + continentId;
+  var typeLabels = {map:'🗺️', choseong:'🔤', flag:'🚩'};
+  gMode = _continentQuizType === 'map' ? 'continent_' + continentId : _continentQuizType;
   gQuestions = q;
   gIdx = 0; gScore = 0; gCombo = 0; gCoins = 0; gHistory = [];
   gAnswering = false; gMapClicked = false; _dangerActive = false; _lastAlertAt = -999;
   var eq = getEquipped(); gShield = eq.effectType === 'shield';
   initLives(); showScreen('game');
-  document.getElementById('g-mode-badge').textContent = (cLabels[continentId] || '🌍') + ' 퀴즈';
+  document.getElementById('g-mode-badge').textContent = (typeLabels[_continentQuizType]||'🌍') + ' ' + (cLabels[continentId] || '') + ' 퀴즈';
   document.getElementById('best-indicator').style.display = 'none';
   renderQuestion(); updateGameUI();
 }
