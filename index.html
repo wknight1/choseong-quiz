@@ -905,6 +905,14 @@ var COUNTRIES=[
   {name:"우즈베키스탄",flag:"🇺🇿",capital:"타슈켄트",continent:"asia",hint:"중앙아시아 내륙국, 실크로드 핵심(사마르칸트·부하라), 세계 5위 면화 수출국"}
   ,{name:"바하마",flag:"🇧🇸",capital:"나소",continent:"americas",hint:"카리브해 700개 이상 섬으로 이뤄진 군도 국가. 크리스토퍼 콜럼버스 첫 상륙지(1492)"}
   ,{name:"부탄",flag:"🇧🇹",capital:"팀푸",continent:"asia",hint:"GDP 대신 GNH(국민총행복) 지표 사용하는 유일한 나라. 히말라야 왕국, 세계 탄소 음성 국가"}
+  ,{name:"아이슬란드",flag:"🇮🇸",capital:"레이캬비크",continent:"europe",hint:"세계 최북단 수도, 전력 100% 재생에너지(지열+수력). 오로라 최고 관측지"}
+  ,{name:"몰타",flag:"🇲🇹",capital:"발레타",continent:"europe",hint:"지중해의 작은 섬나라, EU 최소 영토 국가 중 하나. 기사단 역사, 조지 크로스 수상"}
+  ,{name:"키프로스",flag:"🇨🇾",capital:"니코시아",continent:"europe",hint:"지중해 동부 섬. 세계 유일 수도 경계선이 도시 한가운데 통과(분단)"}
+  ,{name:"리히텐슈타인",flag:"🇱🇮",capital:"파두츠",continent:"europe",hint:"세계에서 두 번째로 작은 이중 내륙국(스위스·오스트리아에 둘러싸임). 1인당 GDP 세계 최상위"}
+  ,{name:"모나코",flag:"🇲🇨",capital:"모나코",continent:"europe",hint:"바티칸 다음 세계 두 번째로 작은 나라(2km²). F1 모나코 GP 개최지, 세계 최고 인구밀도"}
+  ,{name:"산마리노",flag:"🇸🇲",capital:"산마리노",continent:"europe",hint:"세계 현존 최고(古) 공화국(301년 건국). 이탈리아에 완전히 둘러싸인 내륙 미니국가"}
+  ,{name:"지부티",flag:"🇩🇯",capital:"지부티",continent:"africa",hint:"홍해와 아덴만의 전략적 관문. 여러 강대국 해군기지 보유, 지구에서 가장 더운 곳 중 하나"}
+  ,{name:"에리트레아",flag:"🇪🇷",capital:"아스마라",continent:"africa",hint:"1993년 에티오피아에서 독립한 아프리카 최연소 국가 중 하나. 홍해 해안선 보유"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -946,6 +954,7 @@ var MAP_COORDS={
   ,"키리바시":{x:128,y:222}
   ,"팔라우":{x:93,y:222}
   ,"마샬군도":{x:120,y:200},"자메이카":{x:205,y:220},"트리니다드토바고":{x:225,y:252},"우즈베키스탄":{x:600,y:148},"바하마":{x:210,y:215},"부탄":{x:697,y:210}
+  ,"아이슬란드":{x:430,y:85},"몰타":{x:514,y:212},"키프로스":{x:540,y:210},"리히텐슈타인":{x:490,y:165},"모나코":{x:492,y:177},"산마리노":{x:505,y:180},"지부티":{x:565,y:255},"에리트레아":{x:558,y:248}
 };
 
 var CHARACTERS=[
@@ -1386,6 +1395,8 @@ function endGame(){
     }
   });
   if(gMode==='map')ST.mapCorrect=(ST.mapCorrect||0)+correct;
+  if(gMode==='focus')ST.focusCompleted=(ST.focusCompleted||0)+1;
+  if(gMode==='daily'){ST.dailyCompleted=(ST.dailyCompleted||0)+1;}
   if(!ST.modesSet)ST.modesSet={};
   ST.modesSet[gMode]=true;ST.modesPlayed=Object.keys(ST.modesSet).length;
   var t2=today();var diff=daysBetween(ST.lastPlayedDate,t2);
