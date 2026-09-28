@@ -1024,12 +1024,16 @@ var MAP_COORDS={
   "수리남":{x:275,y:248},
   "잠비아":{x:537,y:300},
   "소말리아":{x:575,y:245},
-  "콩고민주공화국":{x:520,y:275},
-,"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220},"남수단":{x:525,y:248},"아제르바이잔":{x:545,y:148},"조지아":{x:542,y:143},"안도라":{x:440,y:149},"콩고공화국":{x:510,y:268},"세이셸":{x:555,y:278},"베냉":{x:475,y:242},"토고":{x:467,y:244},
+  "콩고민주공화국":{x:520,y:275},"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220},"남수단":{x:525,y:248},"아제르바이잔":{x:545,y:148},"조지아":{x:542,y:143},"안도라":{x:440,y:149},"콩고공화국":{x:510,y:268},"세이셸":{x:555,y:278},"베냉":{x:475,y:242},"토고":{x:467,y:244},
   "시에라리온":{x:163,y:237},
   "라이베리아":{x:162,y:248},
   "부룬디":{x:254,y:270},
   "지부티":{x:275,y:235}
+  "파라과이":{x:310,y:340},
+  "볼리비아":{x:295,y:325},
+  "예멘":{x:572,y:240},
+  "오만":{x:590,y:228},
+  "키르기스스탄":{x:648,y:188},
 };
 
 var CHARACTERS=[
@@ -1236,25 +1240,31 @@ function renderQuestion(){
   document.getElementById("choseong-mode").style.display="none";
   document.getElementById("flag-mode").style.display="none";
   document.getElementById("map-mode").style.display="none";
-  if(gMode==="choseong"){
+  var _isChoseong=gMode==="choseong"||gMode.endsWith("_choseong");
+  var _isFlag=gMode==="flag"||gMode.endsWith("_flag");
+  var _isContinent=gMode.startsWith("continent_");
+  var _contMap={"asia":"아시아","europe":"유럽","americas":"아메리카","africa":"아프리카","oceania":"오세아니아"};
+  if(_isChoseong){
     document.getElementById("choseong-mode").style.display="";
     document.getElementById("q-choseong").textContent=getCS(q.name);
     var ha=document.getElementById("hint-area");ha.classList.remove("visible");document.getElementById("hint-chips").innerHTML="";
     var inp=document.getElementById("ans-input");inp.value="";inp.className="answer-input";
     document.getElementById("word-hint-row").style.display="none";
-    // choice mode
+    if(_isContinent){document.getElementById("q-badge").textContent="🌍 "+(_contMap[q.continent]||q.continent)+" 초성 퀴즈";}
     var tr=document.getElementById("text-input-row");
     if(tr)tr.style.display=_choiceModeOn?"none":"";
-    if(_choiceModeOn){renderChoiceBtns();}else{var cr=document.getElementById("choice-btn-row");if(cr)cr.style.display="none";setTimeout(function(){inp.focus();setTimeout(function(){if(inp)inp.scrollIntoView({behavior:'smooth',block:'center'});},200);},60);}
-  } else if(gMode==="flag"){
+    if(_choiceModeOn){renderChoiceBtns();}else{var cr=document.getElementById("choice-btn-row");if(cr)cr.style.display="none";setTimeout(function(){inp.focus();setTimeout(function(){if(inp)inp.scrollIntoView({behavior:"smooth",block:"center"})},200)},100);}
+  } else if(_isFlag){
     document.getElementById("flag-mode").style.display="";
-    document.getElementById("q-flag").textContent=q.flag;var contMap={"asia":"아시아","europe":"유럽","americas":"아메리카","africa":"아프리카","oceania":"오세아니아"};if(gMode.endsWith("_choseong")){document.getElementById("q-badge").textContent="🌍 "+(contMap[q.continent]||q.continent)+" 초성";document.getElementById("choseong-mode").style.display="flex";document.getElementById("flag-mode").style.display="none";document.getElementById("map-mode").style.display="none";document.getElementById("choice-btn-row").style.display=gChoiceMode?"flex":"none";document.getElementById("text-input-row").style.display=gChoiceMode?"none":"flex";document.getElementById("q-flag").textContent=q.flag;document.getElementById("q-hint").textContent=q.hint||"";}else{document.getElementById("q-badge").textContent="🌍 "+(contMap[q.continent]||q.continent)+" 국기";renderFlagChoices(q);}
+    if(_isContinent){document.getElementById("q-badge").textContent="🌍 "+(_contMap[q.continent]||q.continent)+" 국기 퀴즈";}
+    renderFlagChoices(q);
   } else {
     document.getElementById("map-mode").style.display="flex";
     document.getElementById("map-country-name").textContent=q.name+"의 위치는?";
     document.getElementById("map-flag-hint").textContent=q.flag;
     document.getElementById("map-marker-layer").innerHTML="";
     document.getElementById("map-tap-hint").style.opacity="1";
+    if(_isContinent){document.getElementById("q-badge").textContent="🌍 "+(_contMap[q.continent]||q.continent)+" 지도 퀴즈";}
   }
   startTimer();
 }
@@ -2482,7 +2492,12 @@ loadChoiceMode();
   if (preset) setPreset(preset);
 })();
 
-setTimeout(function(){ checkChallengeParam2(); updateDailyChalBtn(); checkOnboarding(); }, 300);
+setTimeout(function(){ checkChallengeParam2(); updateDailyChalBtn(); checkOnboarding(); },
+  {name:"파라과이",flag:"🇵🇾",hint:"수도 아순시온, 남미에서 유일하게 두 공용어(과라니어·스페인어). 수력발전 세계 1위",capital:"아순시온",continent:"americas"},
+  {name:"볼리비아",flag:"🇧🇴",hint:"수도 수크레(헌법)·라파스(행정), 세계 최고 수도. 우유니 소금사막",capital:"수크레",continent:"americas"},
+  {name:"예멘",flag:"🇾🇪",hint:"수도 사나, 아라비아반도 남쪽. 세계 최초 커피 수출국",capital:"사나",continent:"asia"},
+  {name:"오만",flag:"🇴🇲",hint:"수도 무스카트, 아라비아반도 동남쪽. 유향(몰약) 산지",capital:"무스카트",continent:"asia"},
+  {name:"키르기스스탄",flag:"🇰🇬",hint:"수도 비슈케크, 텐산 산맥과 이식쿨 호수. 중앙아시아 유목 문화",capital:"비슈케크",continent:"asia"}, 300);
 // Override startGame to init lives
 var _origStartGame = startGame;
 startGame = function(mode) {
