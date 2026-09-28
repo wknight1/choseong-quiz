@@ -272,7 +272,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 @keyframes heartFlash{0%{transform:scale(1)}20%{transform:scale(.5);opacity:.3}50%{transform:scale(1.3);opacity:1}100%{transform:scale(1)}}
 .heart-icon.flashing{animation:heartFlash .6s ease;}
 .stat-card{background:var(--card);border-radius:14px;padding:16px 12px;text-align:center;border:1.5px solid var(--border);}
-.stat-val{font-size:28px;font-weight:900;color:var(--sky);line-height:1;margin-bottom:4px;}
+#stats-screen .stat-val{font-size:28px;font-weight:900;color:var(--sky);line-height:1;margin-bottom:4px;}
 .stat-lbl{font-size:11px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
 .sound-panel{background:var(--card);border-radius:16px;padding:16px;border:1.5px solid var(--border);display:none;margin-bottom:12px;}
 .sound-panel.open{display:block;}
@@ -309,8 +309,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 .preset-btn.active{border-color:var(--sky);color:var(--sky);background:rgba(56,189,248,.08)}
 /* ══ DIFFICULTY SELECTOR ══ */
 .diff-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;width:100%}
-.diff-btn{background:var(--card);border:1.5px solid var(--border);color:var(--sub);font-size:11px;font-weight:700;padding:8px 4px;border-radius:10px;cursor:pointer;-webkit-appearance:none;font-family:inherit;text-align:center;transition:border-color .2s,color .2s,background .2s}
-.diff-btn.active{border-color:var(--sky);color:var(--sky);background:rgba(56,189,248,.08)}
+
 /* ══ HOME BOTTOM ROW ══ */
 .home-bottom-row{display:flex;gap:7px;width:100%}
 .home-icon-btn{flex:1;background:var(--card);border:1.5px solid var(--border);color:var(--fg);font-size:13px;font-weight:700;padding:11px 6px;border-radius:12px;cursor:pointer;-webkit-appearance:none;font-family:inherit;text-align:center;transition:opacity .15s}
@@ -753,7 +752,15 @@ var COUNTRIES=[
   {name:"남아프리카공화국",flag:"🇿🇦",hint:"🌍 아프리카 최남단 희망봉",capital:"프리토리아",continent:"africa"},
   {name:"모로코",flag:"🇲🇦",hint:"🌍 북아프리카 마그레브 사하라",capital:"라바트",continent:"africa"},
   {name:"가나",flag:"🇬🇭",hint:"🌍 서아프리카 초콜릿 카카오",capital:"아크라",continent:"africa"},
-  {name:"탄자니아",flag:"🇹🇿",hint:"🌍 동아프리카 킬리만자로",capital:"도도마",continent:"africa"},
+  {name:"탄자니아",flag:"🇹🇿",hint:"🌍 동아프리카 킬리만자로",capital:"도도마",continent:"africa"},,
+  {name:"아이슬란드",flag:"🇮🇸",continent:"europe",capital:"레이캬비크",hint:"🌍 북극에 가장 가까운 유럽 화산 섬나라"},
+  {name:"네팔",flag:"🇳🇵",continent:"asia",capital:"카트만두",hint:"🌏 에베레스트가 있는 히말라야 왕국"},
+  {name:"볼리비아",flag:"🇧🇴",continent:"americas",capital:"수크레",hint:"🌎 우유니 소금사막이 있는 내륙국"},
+  {name:"짐바브웨",flag:"🇿🇼",continent:"africa",capital:"하라레",hint:"🌍 빅토리아 폭포 인근 아프리카 나라"},
+  {name:"파나마",flag:"🇵🇦",continent:"americas",capital:"파나마시티",hint:"🌎 대서양과 태평양을 잇는 운하의 나라"},
+  {name:"조지아",flag:"🇬🇪",continent:"europe",capital:"트빌리시",hint:"🌍 캅카스 산맥의 와인 발상지"},
+  {name:"우루과이",flag:"🇺🇾",continent:"americas",capital:"몬테비데오",hint:"🌎 남미 최소 국가 중 하나, 복지강국"},
+  {name:"오만",flag:"🇴🇲",continent:"asia",capital:"무스카트",hint:"🌏 아라비아 반도 동남부 술탄국"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -775,7 +782,10 @@ var MAP_COORDS={
   "가나":{x:476,y:262},"탄자니아":{x:558,y:296},"에티오피아":{x:562,y:252},
   "몽골":{x:762,y:130},"캄보디아":{x:798,y:252},"우즈베키스탄":{x:660,y:158},
   "파푸아뉴기니":{x:868,y:296},"루마니아":{x:516,y:128},"우크라이나":{x:524,y:118},
-  "미얀마":{x:772,y:218},
+  "미얀마":{x:772,y:218},,
+    "아이슬란드":{x:300,y:65},"네팔":{x:728,y:202},"볼리비아":{x:250,y:328},
+  "짐바브웨":{x:520,y:358},"파나마":{x:205,y:265},
+  "쿠바":{x:210,y:238},"조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238}
 };
 
 var CHARACTERS=[
@@ -1004,7 +1014,7 @@ function showHints(){
   });
   document.getElementById("hint-area").classList.add("visible");
 }
-function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1){document.getElementById("feedback").textContent="❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className="feedback fail";showHints();gHintsUsed=1;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째)";document.getElementById("feedback").className="feedback fail";}triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
+function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1){document.getElementById("feedback").textContent="❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className="feedback fail";showHints();gHintsUsed=1;}else if(gWrong>=3){document.getElementById("feedback").textContent="💡 정답: "+q.name;document.getElementById("feedback").className="feedback info";gHistory.push({name:q.name,userAns:inp.value,ok:false,wrong:gWrong});clearTimer();gCombo=0;updateComboUI();gAnswering=true;setTimeout(nextQ,1200);return;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째) — 한 번 더!";document.getElementById("feedback").className="feedback fail";}renderWordHints(q);triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
 
 // ─── 국기 ───
 function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.innerHTML="";var same=COUNTRIES.filter(function(c){return c.continent===q.continent&&c.name!==q.name;});var others=COUNTRIES.filter(function(c){return c.continent!==q.continent&&c.name!==q.name;});var pool=shuffle(same).concat(shuffle(others));var choices=shuffle([q].concat(pool.slice(0,3)));choices.forEach(function(c){var btn=document.createElement("button");btn.className="choice-btn";btn.innerHTML='<span style="font-size:1.6em;display:block;margin-bottom:3px">'+c.flag+'</span><span style="font-size:13px">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
@@ -1260,7 +1270,7 @@ function renderChoiceBtns() {
         row.querySelectorAll('.choice-btn').forEach(function(b) {
           if (b.textContent === q.name) b.classList.add('reveal-choice');
         });
-        if (gWrong === 1) { showHints(); }
+        if (gWrong === 1) { showHints(); } renderWordHints(q);
         document.getElementById('feedback').textContent = '❌ 오답! 정답: ' + q.name;
         document.getElementById('feedback').className = 'feedback fail';
         triggerHitEffect(false, gCombo, 0, document.getElementById('q-card'), e);
@@ -1535,13 +1545,15 @@ function acceptChallenge(){
 function copyShareText2(){
   var correct=gHistory.filter(function(h){return h.ok;}).length;
   var stars=Math.ceil((correct/TOTAL_Q)*5);
-  var starStr='⭐'.repeat(stars)+'☆'.repeat(5-stars);
-  var modeLabel=gMode==='flag'?'🚩국기':gMode==='map'?'🗺️지도':'🔤초성';
-  var text=['🌍 나라 퀴즈마스터 '+modeLabel,starStr,'점수: '+gScore+'점  정답: '+correct+'/'+TOTAL_Q,'최대 콤보: '+ST.maxCombo+'🔥','https://wknight1.github.io/choseong-quiz/'].join('\n');
-  try{navigator.clipboard.writeText(text).then(function(){showModal('📋','클립보드 복사!','친구에게 공유해보세요!',null,null,'확인',null);});}catch(e){showModal('📋','공유 텍스트',text,null,null,'닫기',null);}
+  var starStr="⭐".repeat(stars)+"☆".repeat(5-stars);
+  var modeLabel=gMode==="flag"?"🚩국기":gMode==="map"?"🗺️지도":"🔤초성";
+  var text=["🌍 나라 퀴즈마스터 "+modeLabel,starStr,"점수: "+gScore+"점  정답: "+correct+"/"+TOTAL_Q,"최대 콤보: "+ST.maxCombo+"🔥","https://wknight1.github.io/choseong-quiz/"].join("\n");
+  if(navigator.share){navigator.share({title:"나라 퀴즈마스터",text:text,url:"https://wknight1.github.io/choseong-quiz/"}).catch(function(){_fallbackCopy(text);});}
+  else{_fallbackCopy(text);}
+}
+function _fallbackCopy(text){  try{navigator.clipboard.writeText(text).then(function(){showModal("📋","클립보드 복사!","친구에게 공유해보세요!",null,null,"확인",null);});}catch(e){showModal("📋","공유 텍스트",text,null,null,"닫기",null);}
 }
 
-// ── STATS ──
 function loadStats2(){var s=localStorage.getItem('quizStats2');if(s)try{return JSON.parse(s);}catch(e){}return {plays:0,totalCorrect:0,totalAnswered:0,maxCombo:0,bestScores:{choseong:0,flag:0,map:0},wrongMap:{}};}
 function saveStats2(st){localStorage.setItem('quizStats2',JSON.stringify(st));}
 function recordGameStats2(mode,score,history,maxCombo){
