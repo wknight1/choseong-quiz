@@ -320,6 +320,33 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 .theme-btn{flex:1;background:var(--card);border:1.5px solid var(--border);color:var(--sub);font-size:12px;font-weight:700;padding:8px 4px;border-radius:10px;cursor:pointer;-webkit-appearance:none;font-family:inherit;text-align:center;transition:border-color .2s,color .2s}
 .theme-btn.active{border-color:var(--indigo);color:var(--indigo);background:rgba(129,140,248,.08)}
 
+
+/* ═══ RESULT FILTER TABS ═══ */
+.result-tabs{display:flex;gap:6px;margin-bottom:10px;width:100%}
+.rtab{flex:1;padding:7px 4px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);
+  color:var(--sub);font-size:12px;font-weight:700;cursor:pointer;-webkit-appearance:none;font-family:inherit;transition:all .15s}
+.rtab.active{background:var(--sky);border-color:var(--sky);color:#0a0e1a}
+.rtab.active.fail{background:var(--red);border-color:var(--red)}
+
+/* ═══ STREAK BANNER ═══ */
+.streak-banner{width:100%;background:linear-gradient(135deg,#1a0a00,#2d1500);
+  border:1.5px solid #f97316;border-radius:14px;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.streak-fire{font-size:28px;animation:fireWobble .8s ease-in-out infinite alternate}
+@keyframes fireWobble{0%{transform:scale(1) rotate(-3deg)}100%{transform:scale(1.15) rotate(3deg)}}
+.streak-info{flex:1}
+.streak-days{font-size:18px;font-weight:900;color:#f97316}
+.streak-label{font-size:11px;color:var(--sub);margin-top:1px}
+.streak-bonus{font-size:13px;font-weight:800;color:#fbbf24}
+
+/* ═══ CHOSEONG HINT WORDS ═══ */
+.word-hint-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:8px 0 4px}
+.word-hint-btn{background:var(--card2);border:1.5px solid var(--border);border-radius:10px;
+  color:var(--fg);font-size:13px;font-weight:600;padding:7px 14px;cursor:pointer;
+  -webkit-appearance:none;font-family:inherit;transition:all .15s;flex-shrink:0}
+.word-hint-btn:active{opacity:.7;transform:scale(.96)}
+.word-hint-btn.used{opacity:.35;pointer-events:none}
+
 </style>
 </head>
 <body>
@@ -510,6 +537,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
       <div class="hint-area" id="hint-area">
         <div class="hint-chips" id="hint-chips"></div>
       </div>
+      <div class="word-hint-row" id="word-hint-row" style="display:none"></div>
       <div class="input-row">
         <input class="answer-input" id="ans-input" type="text" placeholder="나라 이름 입력…"
           autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text">
@@ -597,6 +625,11 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="result-score-label" id="r-label">/ 20 정답</div>
   <div class="result-sub" id="r-sub"></div>
   <div class="result-coins-earned"><span>🪙</span><span id="r-coins-num">+0</span> 코인 획득!</div>
+  <div class="result-tabs" id="result-tabs">
+    <button class="rtab active" id="rtab-all" onclick="filterResult('all')">전체 20</button>
+    <button class="rtab" id="rtab-ok" onclick="filterResult('ok')">✓ 정답</button>
+    <button class="rtab active fail" id="rtab-fail" onclick="filterResult('fail')">✗ 오답</button>
+  </div>
   <div class="result-list" id="r-list"></div>
   <button class="share-btn" onclick="copyShareText2()">📤 결과 공유하기</button>
   <button class="restart-btn" onclick="restartSameMode()">🔄 다시 하기</button>
@@ -1074,15 +1107,7 @@ function endGame(){
   document.getElementById("r-sub").textContent=sub;
   document.getElementById("r-coins-num").textContent="+"+gCoins;
   renderStarResult(correct,TOTAL_Q);
-  var list=document.getElementById("r-list");list.innerHTML="";
-  gHistory.forEach(function(h,idx){
-    var div=document.createElement("div");div.className="result-item";
-    var q=gQuestions[idx];
-    var left=(q?q.flag+" ":"")+(gMode==="choseong"?getCS(h.name)+"→ ":(gMode==="map"?"":""));
-    var rt=h.ok?"✓ "+(h.pts||"")+"점":h.userAns==="(건너뜀)"?"⏭":h.userAns==="(시간초과)"?"⏱":"✗ "+(h.userAns||"?");
-    var cap=q?(" · "+q.capital):"";div.innerHTML='<span class="r-left">'+left+'<b style="color:var(--fg)">'+h.name+'</b><span style="color:var(--muted);font-size:11px">'+cap+'</span></span><span class="r-right '+(h.ok?"ok2":"fail2")+'">'+rt+'</span>';
-    list.appendChild(div);
-  });
+  gResultFilter = "fail"; renderResultList(); // show wrong answers by default
   showScreen("result");
 }
 
@@ -1093,6 +1118,7 @@ function copyShareText(){var correct=gHistory.filter(function(h){return h.ok;}).
 // ═══════════════════════ INIT ═══════════════════════
 ST=load();
 updateHomeUI();
+  if(ST.streak>=2&&!document.getElementById("streak-banner-el"))showStreakBanner(ST.streak);
 
 document.getElementById("ans-input").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();submitChoseong();}});
 
@@ -1407,6 +1433,109 @@ startGame = function(mode) {
   bgmBPM = 120;
   _origStartGame(mode);
 };
+
+
+// ═══ RESULT FILTER TABS ═══
+var gResultFilter = 'all';
+function filterResult(tab) {
+  gResultFilter = tab;
+  ['all','ok','fail'].forEach(function(t) {
+    var btn = document.getElementById('rtab-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+  });
+  renderResultList();
+}
+
+function renderResultList() {
+  var list = document.getElementById('r-list');
+  if (!list) return;
+  list.innerHTML = '';
+  var filtered = gHistory.filter(function(h) {
+    if (gResultFilter === 'ok') return h.ok;
+    if (gResultFilter === 'fail') return !h.ok;
+    return true;
+  });
+  var okCount = gHistory.filter(function(h){ return h.ok; }).length;
+  var failCount = gHistory.length - okCount;
+  // Update tab labels
+  var tabAll = document.getElementById('rtab-all');
+  var tabOk = document.getElementById('rtab-ok');
+  var tabFail = document.getElementById('rtab-fail');
+  if (tabAll) tabAll.textContent = '전체 ' + gHistory.length;
+  if (tabOk) tabOk.textContent = '✓ ' + okCount;
+  if (tabFail) tabFail.textContent = '✗ ' + failCount;
+  
+  filtered.forEach(function(h) {
+    var idx = gHistory.indexOf(h);
+    var div = document.createElement('div');
+    div.className = 'result-item';
+    var q = gQuestions[idx];
+    var left = (q ? q.flag + ' ' : '') + (gMode === 'choseong' ? getCS(h.name) + ' → ' : '');
+    var rt = h.ok ? '✓ ' + (h.pts || '') + '점' : h.userAns === '(건너뜀)' ? '⏭' : h.userAns === '(시간초과)' ? '⏱' : '✗ ' + (h.userAns || '?');
+    var cap = q ? (' · ' + q.capital) : '';
+    div.innerHTML = '<span class="r-left">' + left + '<b style="color:var(--fg)">' + h.name + '</b><span style="color:var(--muted);font-size:11px">' + cap + '</span></span><span class="r-right ' + (h.ok ? 'ok2' : 'fail2') + '">' + rt + '</span>';
+    list.appendChild(div);
+  });
+  
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--sub);font-size:13px">' + (gResultFilter === 'ok' ? '아직 정답이 없어요 😅' : gResultFilter === 'fail' ? '오답이 없어요! 완벽해요 🎉' : '기록 없음') + '</div>';
+  }
+}
+
+// ═══ CHOSEONG WORD HINT BUTTONS ═══
+function renderWordHints(q) {
+  var row = document.getElementById('word-hint-row');
+  if (!row) return;
+  // Only show if 2+ wrong attempts
+  if (gWrong < 1) { row.style.display = 'none'; return; }
+  // Generate 4 similar-length country names as distractors + answer
+  var same = COUNTRIES.filter(function(c) { return c.continent === q.continent && c.name !== q.name; });
+  var others = COUNTRIES.filter(function(c) { return c.name !== q.name; });
+  var pool = shuffle(same.concat(others)).slice(0, 3);
+  var choices = shuffle([q].concat(pool));
+  row.innerHTML = '';
+  row.style.display = 'flex';
+  choices.forEach(function(c) {
+    var btn = document.createElement('button');
+    btn.className = 'word-hint-btn';
+    btn.textContent = c.name;
+    btn.onclick = function() {
+      var inp = document.getElementById('ans-input');
+      if (inp) { inp.value = c.name; submitChoseong(); }
+    };
+    row.appendChild(btn);
+  });
+}
+
+// ═══ STREAK BANNER INJECTION ═══
+function showStreakBanner(streak) {
+  if (streak < 2) return;
+  var existing = document.getElementById('streak-banner-el');
+  if (existing) existing.remove();
+  var fireEmoji = streak >= 30 ? '💥' : streak >= 14 ? '☄️' : streak >= 7 ? '🌋' : streak >= 3 ? '🔥' : '🕯️';
+  var bonusCoins = streak >= 7 ? 10 : streak >= 3 ? 5 : 2;
+  var banner = document.createElement('div');
+  banner.id = 'streak-banner-el';
+  banner.className = 'streak-banner';
+  banner.innerHTML = '<div class="streak-fire">' + fireEmoji + '</div>' +
+    '<div class="streak-info">' +
+      '<div class="streak-days">' + streak + '일 연속 출석!</div>' +
+      '<div class="streak-label">오늘도 왔군요! 계속 유지하세요</div>' +
+    '</div>' +
+    '<div class="streak-bonus">+' + bonusCoins + '🪙</div>';
+  // Insert after daily-banner
+  var daily = document.getElementById('daily-chal-main-btn');
+  if (daily && daily.parentNode) {
+    daily.parentNode.insertBefore(banner, daily.nextSibling);
+  } else {
+    var home = document.getElementById('home');
+    if (home) home.appendChild(banner);
+  }
+  // Award bonus coins
+  ST.coins += bonusCoins;
+  save();
+  updateHomeUI();
+}
 
 </script>
 </body>
