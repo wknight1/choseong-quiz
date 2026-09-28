@@ -506,6 +506,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <div class="stat-card"><div class="stat-val" id="h-coins">0</div><div class="stat-lbl">🪙 코인</div></div>
     <div class="stat-card"><div class="stat-val" id="h-best">0</div><div class="stat-lbl">🏆 최고점</div></div>
     <div class="stat-card"><div class="stat-val" id="h-streak">0</div><div class="stat-lbl">🔥 스트릭</div></div>
+    <div class="stat-card"><div class="stat-val" id="h-ach-count">0</div><div class="stat-lbl">🏅 업적</div></div>
   </div>
 
   <div class="level-hud">
@@ -517,7 +518,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   </div>
 
   <!-- 오늘의 나라 카드 -->
-  <div id="todays-country-card" style="width:100%;background:linear-gradient(135deg,#0f2040,#1a1a3e);border:1.5px solid #1e3a5f;border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .15s" onclick="startGame('choseong')" title="초성 퀴즈로 이 나라 맞춰보기">
+  <div id="todays-country-card" style="width:100%;background:linear-gradient(135deg,#0f2040,#1a1a3e);border:1.5px solid #1e3a5f;border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .15s" onclick="(function(){var n=document.getElementById('tc-name');if(n&&n.textContent&&n.textContent!=='-'){startFocusCountry(n.textContent);}else{startGame('choseong');}})()" title="이 나라 집중 퀴즈">
     <div style="font-size:2.4rem;min-width:44px;text-align:center" id="tc-flag">🌍</div>
     <div style="flex:1;min-width:0">
       <div style="font-size:10px;font-weight:700;color:var(--sky);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">🗓 오늘의 나라</div>
@@ -793,7 +794,12 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
     <button class="share-btn" onclick="copyShareText2()" style="flex:1;min-width:120px;">📤 결과 공유</button>
     <button class="share-btn" onclick="shareChallenge(gScore,gHistory.filter(function(h){return h.ok;}).length,gMode,ST.maxCombo)" style="flex:1;min-width:120px;background:linear-gradient(135deg,#0f3460,#533483);">🔗 챌린지 링크</button>
-    <button id="btn-revive" onclick="reviveGame()" style="display:none;flex:1;min-width:120px;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">💊 부활</button>
+    <div id="r-next-challenge" style="display:none;width:100%;max-width:340px;margin:0 auto 10px;padding:12px 14px;background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(99,102,241,0.12));border:1.5px solid var(--sky);border-radius:14px;text-align:center;">
+    <div style="font-size:11px;font-weight:700;color:var(--sky);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px;">💡 다음 도전</div>
+    <div id="r-next-challenge-text" style="font-size:13px;color:var(--fg);font-weight:600;margin-bottom:8px;"></div>
+    <button id="r-next-challenge-btn" onclick="" style="background:var(--sky);color:#000;border:none;border-radius:10px;padding:8px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;"></button>
+  </div>
+  <button id="btn-revive" onclick="reviveGame()" style="display:none;flex:1;min-width:120px;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">💊 부활</button>
   </div>
   <button class="restart-btn" id="restart-btn-main" onclick="restartSameMode()">🔄 다시 하기</button>
   <button class="restart-btn" id="btn-continent-pick" onclick="showContinentPicker()" style="display:none;background:linear-gradient(135deg,#0ea5e9,#6366f1)">🌍 대륙 선택하기</button>
@@ -840,7 +846,6 @@ var COUNTRIES=[
   {name:"말레이시아",flag:"🇲🇾",hint:"수도 쿠알라룸푸르, 페트로나스 트윈타워로 유명",capital:"쿠알라룸푸르",continent:"asia"},
   {name:"싱가포르",flag:"🇸🇬",hint:"수도=도시 전체, 면적 728km² 도시국가이자 금융 허브",capital:"싱가포르",continent:"asia"},
   {name:"미얀마",flag:"🇲🇲",hint:"수도 네피도, 양곤 쉐다곤 황금 파고다로 유명",capital:"네피도",continent:"asia"},
-  {name:"캄보디아",flag:"🇰🇭",hint:"수도 프놈펜, 세계 최대 힌두 사원 앙코르와트 보유",capital:"프놈펜",continent:"asia"},
   // 남아시아
   {name:"인도",flag:"🇮🇳",hint:"수도 뉴델리, 세계 인구 1위(14.4억). 힌두교·불교 발상지",capital:"뉴델리",continent:"asia"},
   {name:"파키스탄",flag:"🇵🇰",hint:"수도 이슬라마바드, 세계 5위 인구 대국. K2(8611m) 위치",capital:"이슬라마바드",continent:"asia"},
@@ -901,7 +906,6 @@ var COUNTRIES=[
   {name:"남아프리카공화국",flag:"🇿🇦",hint:"행정수도 프리토리아, 희망봉·다이아몬드 산지. 넬슨 만델라의 나라",capital:"프리토리아",continent:"africa"},
   {name:"모로코",flag:"🇲🇦",hint:"수도 라바트, 사하라 사막의 관문. 마라케시 붉은 도시",capital:"라바트",continent:"africa"},
   {name:"가나",flag:"🇬🇭",hint:"수도 아크라, 세계 2위 카카오 생산국. 아프리카 첫 독립 영어권 국가",capital:"아크라",continent:"africa"},
-  {name:"탄자니아",flag:"🇹🇿",hint:"수도 도도마, 킬리만자로(5895m) 아프리카 최고봉. 세렝게티 위치",capital:"도도마",continent:"africa"},
   {name:"아이슬란드",flag:"🇮🇸",continent:"europe",capital:"레이캬비크",hint:"수도 레이캬비크, 북극광 오로라 명소. 화산·빙하 공존하는 섬나라"},
   {name:"네팔",flag:"🇳🇵",continent:"asia",capital:"카트만두",hint:"수도 카트만두, 에베레스트(8849m) 위치. 힌두교·불교 성지"},
   {name:"볼리비아",flag:"🇧🇴",continent:"americas",capital:"수크레",hint:"수도 수크레/라파스, 세계 최대 소금사막 우유니(10,000km²)"},
@@ -911,14 +915,12 @@ var COUNTRIES=[
   {name:"우루과이",flag:"🇺🇾",continent:"americas",capital:"몬테비데오",hint:"수도 몬테비데오, 남미 최고 복지 수준. 세계 최초 마리화나 합법화"},
   {name:"오만",flag:"🇴🇲",continent:"asia",capital:"무스카트",hint:"수도 무스카트, 아라비아 반도 동남부. 중동 유일 비OPEC 산유국"},
   {name:"코스타리카",flag:"🇨🇷",continent:"americas",capital:"산호세",hint:"수도 산호세, 군대를 헌법으로 폐지(1949). 영토 25%가 국립공원"},
-  {name:"슬로베니아",flag:"🇸🇮",capital:"류블랴나",continent:"europe",hint:"수도 류블랴나, 알프스+아드리아해 모두 보유한 작은 나라"},
   {name:"에스토니아",flag:"🇪🇪",capital:"탈린",continent:"europe",hint:"수도 탈린, 발트 3국 최북단. 세계 최초 인터넷 투표 실시 국가"},
   {name:"라트비아",flag:"🇱🇻",capital:"리가",continent:"europe",hint:"수도 리가, 발트 3국 중간. 중세 목조 건축물 유네스코 세계유산"},
   {name:"리투아니아",flag:"🇱🇹",capital:"빌뉴스",continent:"europe",hint:"수도 빌뉴스, 발트 3국 중 최남단. 세계 최초 농구 금메달 독립국"},
   {name:"알바니아",flag:"🇦🇱",capital:"티라나",continent:"europe",hint:"수도 티라나, 쌍두독수리 국기. 알렉산더대왕 고향설 있는 발칸반도"},
   {name:"세네갈",flag:"🇸🇳",capital:"다카르",continent:"africa",hint:"수도 다카르, 서아프리카 관문. 다카르 랠리(파리~다카르) 종착지"},
   {name:"카메룬",flag:"🇨🇲",capital:"야운데",continent:"africa",hint:"수도 야운데, 아프리카 사자 축구팀. 영어·프랑스어 공용어"},
-  {name:"앙골라",flag:"🇦🇴",capital:"루안다",continent:"africa",hint:"수도 루안다, 아프리카 최대 포르투갈어 사용국. 다이아몬드 산지"},
   {name:"피지",flag:"🇫🇯",capital:"수바",continent:"oceania",hint:"수도 수바, 333개 섬의 남태평양 낙원. 럭비 7인제 강국"},
   {name:"바누아투",flag:"🇻🇺",capital:"포트빌라",continent:"oceania",hint:"수도 포빌라, 행복지수 세계 1위 기록. 활화산 직접 트레킹 가능"},
   {name:"솔로몬제도",flag:"🇸🇧",capital:"호니아라",continent:"oceania",hint:"수도 호니아라, 7개 주요 섬+900개 소도서. 2차대전 과달카날 전투지"},
@@ -1045,7 +1047,7 @@ var MAP_COORDS={
   "리투아니아":{x:524,y:128},
   "알바니아":{x:510,y:160},"인도네시아":{x:818,y:280},"태국":{x:788,y:236},
   "베트남":{x:804,y:242},"필리핀":{x:838,y:226},"말레이시아":{x:798,y:272},"싱가포르":{x:800,y:278},
-  "러시아":{x:648,y:95},"폴란드":{x:496,y:115},"네덜란드":{x:474,y:112},"벨기에":{x:470,y:120},
+  "러시아":{x:648,y:95},"폴란드":{x:496,y:115},"네덜란드":{x:474,y:112},"벨기에":{x:470,y:120},"룩셈부르크":{x:477,y:126},
   "스웨덴":{x:492,y:96},"노르웨이":{x:480,y:90},"덴마크":{x:485,y:105},"핀란드":{x:504,y:93},
   "스위스":{x:478,y:130},"오스트리아":{x:490,y:127},"그리스":{x:506,y:148},"터키":{x:538,y:145},
   "이집트":{x:538,y:190},"남아프리카공화국":{x:522,y:365},"케냐":{x:556,y:280},"나이지리아":{x:498,y:260},
@@ -1231,6 +1233,13 @@ var DAILY_BONUS=[10,15,25,35,50,75,120,
   {name:"세인트루시아",flag:"🇱🇨",hint:"수도 캐스트리스. 카리브해 피통 쌍봉 유네스코 세계유산.",continent:"americas"},
   {name:"세인트키츠네비스",flag:"🇰🇳",hint:"수도 바스테르. 카리브해 최소 국가 중 하나. 설탕 산업으로 유명.",continent:"americas"},
   {name:"도미니카",flag:"🇩🇲",hint:"수도 로조. 카리브해 화산섬. 세계 두 번째로 큰 담수호 보유.",continent:"americas"}
+,
+  {name:"키르기스스탄",flag:"🇰🇬",hint:"수도 비슈케크, 텐산 산맥과 이식쿨 호수. 중앙아시아 유목 문화의 나라",capital:"비슈케크",continent:"asia"},
+  {name:"룩셈부르크",flag:"🇱🇺",hint:"수도 룩셈부르크, 서유럽 내륙 소국. 세계 최고 수준의 1인당 GDP 보유",capital:"룩셈부르크",continent:"europe"},
+  {name:"슬로베니아",flag:"🇸🇮",hint:"수도 류블랴나, 발칸 북서부 알프스 접경국. 포스토이나 동굴로 유명",capital:"류블랴나",continent:"europe"},
+  {name:"탄자니아",flag:"🇹🇿",hint:"수도 도도마, 킬리만자로 최고봉·세렝게티 국립공원 위치",capital:"도도마",continent:"africa"},
+  {name:"앙골라",flag:"🇦🇴",hint:"수도 루안다, 아프리카 남서부. 석유·다이아몬드 풍부한 포르투갈어 사용국",capital:"루안다",continent:"africa"},
+  {name:"캄보디아",flag:"🇰🇭",hint:"수도 프놈펜, 앙코르와트 세계문화유산. 동남아 크메르 문명 발상지",capital:"프놈펜",continent:"asia"}
 ];
 var COMBO_DATA=[
   {c:0,lbl:"",emoji:"▶️",cls:"c1"},{c:1,lbl:"시작",emoji:"▶️",cls:"c1"},
@@ -1329,6 +1338,8 @@ function updateTodaysCountryCard(){
   el.title="탭하면 "+c.name+" 집중 퀴즈 시작!";
 }
 function updateHomeUI(){
+  var _achEl=document.getElementById("h-ach-count");
+  if(_achEl){var _achDone=Object.keys(ST.achievements||{}).filter(function(k){return ST.achievements[k];}).length;_achEl.textContent=_achDone+"/"+ACHIEVEMENTS.length;}
   // Streak badge on daily button
   var sb = document.getElementById('home-streak-badge');
   if(sb){
@@ -2029,6 +2040,33 @@ function endGame(){
       reviveBtn.textContent = '💊 부활 (🪙5)';
     } else {
       reviveBtn.style.display = 'none';
+    }
+  }
+  // Next challenge suggestion
+  var ncBox = document.getElementById('r-next-challenge');
+  var ncText = document.getElementById('r-next-challenge-text');
+  var ncBtn = document.getElementById('r-next-challenge-btn');
+  if(ncBox && ncText && ncBtn){
+    var sugg = null;
+    var wrongCount = gHistory.filter(function(h){return !h.ok;}).length;
+    if(wrongCount >= 5){
+      sugg = {text:'❌ 오답이 '+wrongCount+'개! 약점을 집중 공략해봐요.', label:'약점 집중 모드', fn:'startWeakSpotMode()'};
+    } else if(gMode==='choseong'||gMode==='continent_all_choseong'){
+      sugg = {text:'초성 다음엔 국기로!', label:'🚩 국기 퀴즈 하기', fn:"startGame('flag')"};
+    } else if(gMode==='flag'||gMode.endsWith('_flag')){
+      sugg = {text:'국기 다음엔 지도로!', label:'🗺️ 지도 찾기 하기', fn:"startGame('map')"};
+    } else if(gMode==='map'||gMode.endsWith('_map')){
+      sugg = {text:'세 가지 모드 모두 해봤어요!', label:'🔤 초성 퀴즈 다시', fn:"startGame('choseong')"};
+    } else if(gMode==='daily'){
+      sugg = {text:'데일리 완료! 일반 모드도 해봐요.', label:'🔤 초성 퀴즈 하기', fn:"startGame('choseong')"};
+    } else {
+      sugg = {text:'더 높은 점수에 도전해봐요!', label:'🔄 같은 모드 다시', fn:"restartSameMode()"};
+    }
+    if(sugg){
+      ncText.textContent = sugg.text;
+      ncBtn.textContent = sugg.label;
+      ncBtn.onclick = new Function(sugg.fn);
+      ncBox.style.display = 'block';
     }
   }
   showScreen("result");
@@ -2944,8 +2982,7 @@ loadChoiceMode();
   if (preset) setPreset(preset);
 })();
 
-setTimeout(function(){ checkChallengeParam2(); updateDailyChalBtn(); checkOnboarding(); }
-  {name:"키르기스스탄",flag:"🇰🇬",hint:"수도 비슈케크, 텐산 산맥과 이식쿨 호수. 중앙아시아 유목 문화",capital:"비슈케크",continent:"asia"}, 300);
+setTimeout(function(){ checkChallengeParam2(); updateDailyChalBtn(); checkOnboarding(); }, 300);
 // Override startGame to init lives
 var _origStartGame = startGame;
 startGame = function(mode) {
