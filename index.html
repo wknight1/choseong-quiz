@@ -891,6 +891,9 @@ var COUNTRIES=[
   ,{name:"슬로바키아",flag:"🇸🇰",capital:"브라티슬라바",continent:"europe",hint:"수도 브라티슬라바, 체코슬로바키아에서 1993년 평화적 분리 독립(벨벳 이혼)."}
   ,{name:"크로아티아",flag:"🇭🇷",capital:"자그레브",continent:"europe",hint:"수도 자그레브, 달마티아 해안과 플리트비체 국립공원으로 유명."}
   ,{name:"예멘",flag:"🇾🇪",capital:"사나",continent:"asia",hint:"수도 사나(세계 최고(最古) 도시 중 하나), 아라비아반도 남서 끝 위치."},
+  ,{name:"북마케도니아",flag:"🇲🇰",capital:"스코페",continent:"europe",hint:"수도 스코페, 알렉산더 대왕의 고향 논쟁으로 유명한 발칸반도의 내륙국. EU 가입 협상 진행 중."}
+  ,{name:"몰도바",flag:"🇲🇩",capital:"키시나우",continent:"europe",hint:"수도 키시나우, 유럽에서 1인당 GDP가 가장 낮은 나라 중 하나. 와인 생산량이 세계 최고 수준."}
+  ,{name:"가이아나",flag:"🇬🇾",capital:"조지타운",continent:"americas",hint:"수도 조지타운, 남미 유일의 영어 공용어 국가. 최근 대규모 해저 유전 발견으로 급성장 중."}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -924,6 +927,9 @@ var MAP_COORDS={
   "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
   "피지":{x:880,y:330},"바누아투":{x:862,y:320},"파라과이":{x:290,y:380},"쿠웨이트":{x:605,y:225},"요르단":{x:580,y:222},"튀니지":{x:495,y:188},"도미니카공화국":{x:257,y:255},
   "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270},"우간다":{x:540,y:305},"스리랑카":{x:700,y:275},"라오스":{x:770,y:248},"아이티":{x:215,y:248},"슬로바키아":{x:490,y:148},"크로아티아":{x:480,y:158},"예멘":{x:610,y:268}
+  ,"북마케도니아":{x:480,y:155}
+  ,"몰도바":{x:510,y:130}
+  ,"가이아나":{x:285,y:285}
 };
 
 var CHARACTERS=[
@@ -1088,6 +1094,7 @@ function startGame(mode){
     // Focus mode: repeat the same country 10 times
     var fc = COUNTRIES.find(function(c){return c.name===gFocusCountry;});
     if (fc) {
+      gMode = 'focus';
       gQuestions = [];
       for (var _i=0; _i<10; _i++) gQuestions.push(fc);
     } else {
@@ -1100,7 +1107,7 @@ function startGame(mode){
   gIdx=0;gScore=0;gCombo=0;gCoins=0;gHistory=[];gAnswering=false;gMapClicked=false;_dangerActive=false;_lastAlertAt=-999;
   var eq=getEquipped();gShield=eq.effectType==="shield";
   showScreen("game");
-  document.getElementById("g-mode-badge").textContent=gMode==="flag"?"🚩 국기":gMode==="map"?"🗺️ 지도":"🔤 초성";
+  document.getElementById("g-mode-badge").textContent=gMode==="flag"?"🚩 국기":gMode==="map"?"🗺️ 지도":gMode==="focus"?"🎯 집중":gMode==="daily"?"📅 데일리":"🔤 초성";
   document.getElementById("best-indicator").style.display="block";
   renderQuestion();updateGameUI();
 }
@@ -1373,7 +1380,7 @@ function endGame(){
   document.getElementById("r-sub").textContent=sub;
   document.getElementById("r-coins-num").textContent="+"+gCoins;
   // Mode badge
-  var modeLabels={choseong:'🔤 초성 퀴즈',flag:'🚩 국기 퀴즈',map:'🗺️ 지도 퀴즈'};
+  var modeLabels={choseong:'🔤 초성 퀴즈',flag:'🚩 국기 퀴즈',map:'🗺️ 지도 퀴즈',focus:'🎯 집중 퀴즈',daily:'📅 데일리 챌린지'};
   var mb=document.getElementById('r-mode-badge');
   if(mb)mb.textContent=modeLabels[gMode]||gMode;
   // XP row: show XP gained (10 per correct + combo bonus)
@@ -1404,6 +1411,7 @@ function autosave() {
     combo: gCombo,
     coins: gCoins,
     history: gHistory,
+    totalQ: gQuestions.length,
     ts: Date.now()
   };
   try { localStorage.setItem(RESUME_KEY, JSON.stringify(snap)); } catch(e) {}
@@ -1426,7 +1434,7 @@ function checkResumeBanner() {
     var b = document.getElementById('resume-banner');
     var desc = document.getElementById('resume-desc');
     if (b && desc) {
-      desc.textContent = modeLabel + ' · ' + snap.qIdx + '/' + TOTAL_Q + '문제 · ' + snap.score + '점';
+      desc.textContent = modeLabel + ' · ' + snap.qIdx + '/' + (snap.totalQ || TOTAL_Q) + '문제 · ' + snap.score + '점';
       b.style.display = 'flex';
     }
   } catch(e) { clearResume(); }
@@ -1828,14 +1836,14 @@ function copyShareText2(){
   var correct=gHistory.filter(function(h){return h.ok;}).length;
   var stars=Math.ceil((correct/TOTAL_Q)*5);
   var starStr="⭐".repeat(stars)+"☆".repeat(5-stars);
-  var modeLabel=gMode==="flag"?"🚩국기":gMode==="map"?"🗺️지도":"🔤초성";
+  var modeLabel=gMode==="flag"?"🚩국기":gMode==="map"?"🗺️지도":gMode==="focus"?"🎯집중":gMode==="daily"?"📅데일리":"🔤초성";
   // Wordle-style emoji grid
   var gridCells=gHistory.map(function(h){return h.ok?"🟩":"🟥";});
   var gridRows=[];
   for(var gi=0;gi<gridCells.length;gi+=5)gridRows.push(gridCells.slice(gi,gi+5).join(""));
   var emojiGrid=gridRows.join("\n");
   var sessionMaxCombo=gHistory.reduce(function(mx,_,idx){var run=0;for(var j=idx;j>=0&&gHistory[j].ok;j--)run++;return Math.max(mx,run);},0);
-  var text=["🌍 나라 퀴즈마스터 "+modeLabel+" "+correct+"/"+TOTAL_Q,starStr,emojiGrid,"점수: "+gScore+"점  최대콤보: "+sessionMaxCombo+"🔥","https://wknight1.github.io/choseong-quiz/"].join("\n");
+  var text=["🌍 나라 퀴즈마스터 "+modeLabel+" "+correct+"/"+gQuestions.length,starStr,emojiGrid,"점수: "+gScore+"점  최대콤보: "+sessionMaxCombo+"🔥","https://wknight1.github.io/choseong-quiz/"].join("\n");
   if(navigator.share){navigator.share({title:"나라 퀴즈마스터",text:text,url:"https://wknight1.github.io/choseong-quiz/"}).catch(function(){_fallbackCopy(text);});}
   else{_fallbackCopy(text);}
 }
