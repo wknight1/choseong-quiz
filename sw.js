@@ -1,5 +1,5 @@
-const CACHE = 'choseong-quiz-v48';
-const FILES = ['./manifest.json'];
+const CACHE = 'choseong-quiz-v50';
+const FILES = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
