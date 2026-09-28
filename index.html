@@ -896,6 +896,11 @@ var COUNTRIES=[
   ,{name:"가이아나",flag:"🇬🇾",capital:"조지타운",continent:"americas",hint:"수도 조지타운, 남미 유일의 영어 공용어 국가. 최근 대규모 해저 유전 발견으로 급성장 중."}
 ,{name:"투르크메니스탄",flag:"🇹🇲",capital:"아슈하바트",continent:"asia",hint:"수도 아슈하바트, 세계 최대 천연가스 매장국 중 하나. 카라쿰 사막 '지옥의 문' 천연가스 구덩이"}
   ,{name:"마다가스카르",flag:"🇲🇬",capital:"안타나나리보",continent:"africa",hint:"수도 안타나나리보, 세계 4번째 큰 섬. 여우원숭이(여우원숭이 100종 이상) 서식하는 독특한 생태계"}
+  ,{name:"사모아",flag:"🇼🇸",capital:"아피아",continent:"oceania",hint:"수도 아피아, 남태평양 폴리네시아 화산섬. 세계에서 처음 새해를 맞는 나라 중 하나"}
+  ,{name:"통가",flag:"🇹🇴",capital:"누쿠알로파",continent:"oceania",hint:"수도 누쿠알로파, 태평양의 유일한 입헌군주국"}
+  ,{name:"키리바시",flag:"🇰🇮",capital:"타라와",continent:"oceania",hint:"수도 타라와, 날짜변경선에 걸친 산호초 섬나라. 해수면 상승으로 수몰 위기"}
+  ,{name:"팔라우",flag:"🇵🇼",capital:"응게룰무드",continent:"oceania",hint:"수도 응게룰무드, 미크로네시아 다이빙 천국. 해파리 호수로 유명"}
+  ,{name:"마샬군도",flag:"🇲🇭",capital:"마주로",continent:"oceania",hint:"수도 마주로, 29개 환초로 이뤄진 태평양 섬나라. 비키니 환초 핵실험 지역"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -936,6 +941,12 @@ var MAP_COORDS={
 
 var CHARACTERS=[
   {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터",effect:"없음",effectType:"none"},
+    "사모아":{x:136,y:270},
+    "통가":{x:140,y:278},
+    "키리바시":{x:128,y:222},
+    "팔라우":{x:93,y:222},
+    "마샬군도":{x:120,y:200},
+
   {id:"rocket",name:"로켓맨",emoji:"🚀",price:100,desc:"정답 시 🚀 파티클",effect:"파티클 업그레이드",effectType:"animation"},
   {id:"wizard",name:"마법사",emoji:"🧙",price:300,desc:"힌트 1개 추가",effect:"hint_bonus +1",effectType:"hint_bonus",effectValue:1},
   {id:"fire",name:"불꽃전사",emoji:"🔥",price:500,desc:"콤보 3부터 1.5배",effect:"combo_boost",effectType:"combo_multiplier",effectValue:1.5,comboThreshold:3},
@@ -1836,7 +1847,7 @@ function acceptChallenge(){
 }
 function copyShareText2(){
   var correct=gHistory.filter(function(h){return h.ok;}).length;
-  var stars=Math.ceil((correct/TOTAL_Q)*5);
+  var stars=Math.ceil((correct/gHistory.length)*5);
   var starStr="⭐".repeat(stars)+"☆".repeat(5-stars);
   var modeLabel=gMode==="flag"?"🚩국기":gMode==="map"?"🗺️지도":gMode==="focus"?"🎯집중":gMode==="daily"?"📅데일리":"🔤초성";
   // Wordle-style emoji grid
