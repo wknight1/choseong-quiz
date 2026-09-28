@@ -440,10 +440,23 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <div class="db-coins" id="daily-coins">+10🪙</div>
   </div>
 
+  <!-- Resume banner (shown if autosave exists within 60min) -->
+  <div id="resume-banner" style="display:none;width:100%;background:linear-gradient(135deg,#0f2d1a,#1a3020);border:1.5px solid #2d6040;border-radius:14px;padding:12px 14px;display:none;align-items:center;justify-content:space-between;gap:10px;">
+    <div>
+      <div style="font-size:13px;font-weight:800;color:#4ade80;">⚡ 이어하기</div>
+      <div id="resume-desc" style="font-size:11px;color:var(--sub);margin-top:2px;">저장된 게임</div>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button onclick="resumeGame()" style="background:#4ade80;color:#0a0e1a;border:none;border-radius:9px;font-size:12px;font-weight:800;padding:7px 12px;cursor:pointer;-webkit-appearance:none;font-family:inherit;">계속하기</button>
+      <button onclick="clearResume()" style="background:var(--card2);border:1.5px solid var(--border);color:var(--sub);border-radius:9px;font-size:12px;font-weight:700;padding:7px 10px;cursor:pointer;-webkit-appearance:none;font-family:inherit;">✕</button>
+    </div>
+  </div>
+
   <div class="mode-btns">
     <button class="mode-btn primary" onclick="startGame('choseong')">🔤 초성 퀴즈 <span class="btn-badge">클래식</span></button>
     <button class="mode-btn primary" onclick="startGame('flag')" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🚩 국기 퀴즈 <span class="btn-badge">4지선다</span></button>
     <button class="mode-btn primary" onclick="startGame('map')" style="background:linear-gradient(135deg,#10b981,#0891b2)">🗺️ 지도 찾기 <span class="btn-badge">NEW</span></button>
+    <button class="mode-btn primary" id="weak-mode-btn" onclick="startWeakSpotMode()" style="background:linear-gradient(135deg,#7c3aed,#c026d3);display:none;">🎯 약점 집중 <span class="btn-badge">맞춤</span></button>
     <button class="mode-btn secondary" onclick="showShop()">🏪 캐릭터 상점 <span style="font-size:11px;color:var(--muted)" id="shop-char-preview"></span></button>
   </div>
 
@@ -533,7 +546,10 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 
     <!-- 초성 모드 -->
     <div id="choseong-mode">
-      <div class="choseong-display" id="q-choseong">ㄷㅎㅁㄱ</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+        <div class="choseong-display" id="q-choseong">ㄷㅎㅁㄱ</div>
+        <button id="choice-mode-toggle" onclick="toggleChoiceMode()" title="4버튼 모드 토글" style="background:var(--card2);border:1.5px solid var(--border);border-radius:8px;color:var(--sub);font-size:11px;font-weight:700;padding:6px 9px;cursor:pointer;-webkit-appearance:none;font-family:inherit;white-space:nowrap;flex-shrink:0;">⌨️ 입력</button>
+      </div>
       <div class="hint-area" id="hint-area">
         <div class="hint-chips" id="hint-chips"></div>
       </div>
@@ -543,6 +559,8 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
           autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text">
         <button class="submit-btn" onclick="submitChoseong()">→</button>
       </div>
+      <!-- 4-button choice row (alternative input mode) -->
+      <div id="choice-btn-row" style="display:none;flex-wrap:wrap;gap:7px;justify-content:center;padding:8px 0;"></div>
     </div>
 
     <!-- 국기 모드 -->
@@ -890,7 +908,7 @@ function updateHomeUI(){document.getElementById("h-coins").textContent=ST.coins;
 
 // ═══════════════════════ SCREEN ═══════════════════════
 function showScreen(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");window.scrollTo(0,0);}
-function goHome(){clearTimer();_dangerActive=false;showScreen("home");updateHomeUI();}
+function goHome(){clearTimer();_dangerActive=false;clearResume();showScreen("home");updateHomeUI();updateWeakModeBtnVisibility();checkResumeBanner();}
 
 // ═══════════════════════ GAME ═══════════════════════
 var gMode="choseong",gQuestions=[],gIdx=0,gScore=0,gCombo=0,gCoins=0;
@@ -932,7 +950,11 @@ function renderQuestion(){
     document.getElementById("q-choseong").textContent=getCS(q.name);
     var ha=document.getElementById("hint-area");ha.classList.remove("visible");document.getElementById("hint-chips").innerHTML="";
     var inp=document.getElementById("ans-input");inp.value="";inp.className="answer-input";
-    setTimeout(function(){inp.focus();},60);
+    document.getElementById("word-hint-row").style.display="none";
+    // choice mode
+    var tr=document.getElementById("text-input-row");
+    if(tr)tr.style.display=_choiceModeOn?"none":"";
+    if(_choiceModeOn){renderChoiceBtns();}else{var cr=document.getElementById("choice-btn-row");if(cr)cr.style.display="none";setTimeout(function(){inp.focus();},60);}
   } else if(gMode==="flag"){
     document.getElementById("flag-mode").style.display="";
     document.getElementById("q-flag").textContent=q.flag;var contMap={"asia":"아시아","europe":"유럽","americas":"아메리카","africa":"아프리카","oceania":"오세아니아"};document.getElementById("q-badge").textContent="🌍 "+(contMap[q.continent]||q.continent)+" 국기";
@@ -1074,7 +1096,7 @@ function onCorrect(el,cls,e){
   setTimeout(nextQ,700);
 }
 
-function nextQ(){gIdx++;if(gIdx>=TOTAL_Q){endGame();return;}renderQuestion();updateGameUI();}
+function nextQ(){gIdx++;if(gIdx>=TOTAL_Q){endGame();return;}autosave();renderQuestion();updateGameUI();}
 
 function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);gAnswering=true;setTimeout(nextQ,700);}
 
@@ -1114,6 +1136,181 @@ function endGame(){
 function restartSameMode(){startGame(gMode);}
 
 function copyShareText(){var correct=gHistory.filter(function(h){return h.ok;}).length;var stars=Math.ceil((correct/TOTAL_Q)*5);var starStr="⭐".repeat(stars)+"☆".repeat(5-stars);var modeLabel=gMode==="flag"?"🚩국기":gMode==="map"?"🗺️지도":"🔤초성";var text=["🌍 나라 퀴즈마스터 "+modeLabel,starStr,"점수: "+gScore+"점  정답: "+correct+"/"+TOTAL_Q,"최대 콤보: "+ST.maxCombo+"🔥","https://wknight1.github.io/choseong-quiz/"].join("\n");try{navigator.clipboard.writeText(text).then(function(){showModal("📋","클립보드 복사!","친구에게 공유해보세요!",null,null,"확인",null);});}catch(e){showModal("📋","공유 텍스트",text,null,null,"닫기",null);}}
+
+// ═══════════════════════ AUTOSAVE / RESUME ═══════════════════════
+var RESUME_KEY = 'gameResume_v1';
+var _choiceModeOn = false;
+
+function autosave() {
+  if (!gQuestions || gIdx < 1) return;
+  var snap = {
+    mode: gMode,
+    qIdx: gIdx,
+    score: gScore,
+    combo: gCombo,
+    coins: gCoins,
+    history: gHistory,
+    ts: Date.now()
+  };
+  try { localStorage.setItem(RESUME_KEY, JSON.stringify(snap)); } catch(e) {}
+}
+
+function clearResume() {
+  localStorage.removeItem(RESUME_KEY);
+  var b = document.getElementById('resume-banner');
+  if (b) b.style.display = 'none';
+}
+
+function checkResumeBanner() {
+  try {
+    var raw = localStorage.getItem(RESUME_KEY);
+    if (!raw) return;
+    var snap = JSON.parse(raw);
+    var ageMin = (Date.now() - snap.ts) / 60000;
+    if (ageMin > 60) { clearResume(); return; }
+    var modeLabel = snap.mode === 'flag' ? '🚩 국기' : snap.mode === 'map' ? '🗺️ 지도' : '🔤 초성';
+    var b = document.getElementById('resume-banner');
+    var desc = document.getElementById('resume-desc');
+    if (b && desc) {
+      desc.textContent = modeLabel + ' · ' + snap.qIdx + '/' + TOTAL_Q + '문제 · ' + snap.score + '점';
+      b.style.display = 'flex';
+    }
+  } catch(e) { clearResume(); }
+}
+
+function resumeGame() {
+  try {
+    var raw = localStorage.getItem(RESUME_KEY);
+    if (!raw) return;
+    var snap = JSON.parse(raw);
+    gMode = snap.mode;
+    gIdx = snap.qIdx;
+    gScore = snap.score;
+    gCombo = snap.combo;
+    gCoins = snap.coins;
+    gHistory = snap.history || [];
+    gAnswering = false; gMapClicked = false; _dangerActive = false; _lastAlertAt = -999;
+    var eq = getEquipped(); gShield = eq.effectType === 'shield';
+    // Rebuild question pool: need same seed but skip already-answered
+    var pool = gMode === 'map' ? COUNTRIES.filter(function(c){return MAP_COORDS[c.name];}) : COUNTRIES;
+    // Reuse a simple deterministic pool using today's date seed same as daily
+    var seed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''));
+    var arr = pool.slice(); // just shuffle fresh -- user already answered gIdx questions
+    gQuestions = shuffle(arr).slice(0, TOTAL_Q);
+    showScreen('game');
+    document.getElementById('g-mode-badge').textContent = gMode==='flag'?'🚩 국기':gMode==='map'?'🗺️ 지도':'🔤 초성';
+    document.getElementById('best-indicator').style.display = 'block';
+    clearResume();
+    renderQuestion(); updateGameUI();
+  } catch(e) { clearResume(); }
+}
+
+// ═══════════════════════ 4-BUTTON CHOICE MODE ═══════════════════════
+function toggleChoiceMode() {
+  _choiceModeOn = !_choiceModeOn;
+  localStorage.setItem('choiceMode', _choiceModeOn ? '1' : '0');
+  var tb = document.getElementById('choice-mode-toggle');
+  if (tb) tb.textContent = _choiceModeOn ? '🔡 선택' : '⌨️ 입력';
+  var tr = document.getElementById('text-input-row');
+  if (tr) tr.style.display = _choiceModeOn ? 'none' : '';
+  // Rebuild choice buttons for current question
+  if (_choiceModeOn && gQuestions && gMode === 'choseong') {
+    renderChoiceBtns();
+  } else {
+    var cr = document.getElementById('choice-btn-row');
+    if (cr) cr.style.display = 'none';
+    var inp = document.getElementById('ans-input');
+    if (inp && !gAnswering) setTimeout(function(){ inp.focus(); }, 60);
+  }
+}
+
+function loadChoiceMode() {
+  _choiceModeOn = localStorage.getItem('choiceMode') === '1';
+  var tb = document.getElementById('choice-mode-toggle');
+  if (tb) tb.textContent = _choiceModeOn ? '🔡 선택' : '⌨️ 입력';
+  var tr = document.getElementById('text-input-row');
+  if (tr) tr.style.display = _choiceModeOn ? 'none' : '';
+}
+
+function renderChoiceBtns() {
+  var row = document.getElementById('choice-btn-row');
+  if (!row || !gQuestions) return;
+  var q = gQuestions[gIdx];
+  var same = COUNTRIES.filter(function(c){ return c.continent === q.continent && c.name !== q.name; });
+  var others = COUNTRIES.filter(function(c){ return c.name !== q.name; });
+  var pool = shuffle(same.concat(others)).slice(0, 3);
+  var choices = shuffle([q].concat(pool));
+  row.innerHTML = '';
+  row.style.display = 'flex';
+  choices.forEach(function(c) {
+    var btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.style.cssText = 'flex:1;min-width:42%;font-size:14px;padding:12px 8px;';
+    btn.textContent = c.name;
+    btn.onclick = function(e) {
+      if (gAnswering) return;
+      var ok = c.name === q.name;
+      if (ok) {
+        btn.classList.add('correct-choice');
+        onCorrect(btn, '', e);
+      } else {
+        btn.classList.add('wrong-choice');
+        anim(btn, 'shake', 400);
+        gWrong++;
+        row.querySelectorAll('.choice-btn').forEach(function(b) {
+          if (b.textContent === q.name) b.classList.add('reveal-choice');
+        });
+        if (gWrong === 1) { showHints(); }
+        document.getElementById('feedback').textContent = '❌ 오답! 정답: ' + q.name;
+        document.getElementById('feedback').className = 'feedback fail';
+        triggerHitEffect(false, gCombo, 0, document.getElementById('q-card'), e);
+        gCombo = 0; updateComboUI(); gAnswering = true;
+        row.querySelectorAll('.choice-btn').forEach(function(b){ b.disabled = true; });
+        setTimeout(nextQ, 900);
+      }
+    };
+    row.appendChild(btn);
+  });
+}
+
+// ═══════════════════════ WEAK SPOT MODE ═══════════════════════
+function getWrongMap() {
+  try {
+    var stats = JSON.parse(localStorage.getItem('quizStats') || '{}');
+    return stats.wrongMap || {};
+  } catch(e) { return {}; }
+}
+
+function startWeakSpotMode() {
+  var wm = getWrongMap();
+  var ranked = Object.keys(wm).map(function(k){ return {name:k, count:wm[k]}; });
+  ranked.sort(function(a,b){ return b.count - a.count; });
+  var weakNames = ranked.slice(0, 10).map(function(x){ return x.name; });
+  // Fill up to 10 if not enough wrong answers
+  if (weakNames.length < 5) {
+    showModal('🎯', '약점 집중 모드', '아직 데이터가 부족해요.\n퀴즈를 더 풀면 약점 나라가 쌓여요!', null, null, '확인', null);
+    return;
+  }
+  var weakQ = COUNTRIES.filter(function(c){ return weakNames.indexOf(c.name) >= 0; });
+  // Pad with random if less than 10
+  var extra = shuffle(COUNTRIES.filter(function(c){ return weakNames.indexOf(c.name) < 0; }));
+  while (weakQ.length < 10 && extra.length > 0) weakQ.push(extra.shift());
+  gMode = 'choseong';
+  gQuestions = shuffle(weakQ).slice(0, 10);
+  gIdx = 0; gScore = 0; gCombo = 0; gCoins = 0; gHistory = []; gAnswering = false; gMapClicked = false; _dangerActive = false; _lastAlertAt = -999;
+  var eq = getEquipped(); gShield = eq.effectType === 'shield';
+  showScreen('game');
+  document.getElementById('g-mode-badge').textContent = '🎯 약점 집중';
+  document.getElementById('best-indicator').style.display = 'block';
+  renderQuestion(); updateGameUI();
+}
+
+function updateWeakModeBtnVisibility() {
+  var wm = getWrongMap();
+  var count = Object.keys(wm).length;
+  var btn = document.getElementById('weak-mode-btn');
+  if (btn) btn.style.display = count >= 5 ? '' : 'none';
+}
 
 // ═══════════════════════ INIT ═══════════════════════
 ST=load();
