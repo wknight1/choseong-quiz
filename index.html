@@ -867,6 +867,10 @@ var ACHIEVEMENTS=[
   {id:"coins500",name:"코인 부자 💰",check:function(s){return s.coins>=500},coins:0},
   {id:"nohint50",name:"힌트 거부자 🙅",check:function(s){return s.noHintCorrect>=50},coins:60},
   {id:"legend",name:"전설의 퀴즈왕 👑",check:function(s){return s.bestScore>=1500},coins:150},
+  {id:"combo10",name:"콤보 신",check:function(s){return s.maxCombo>=10},coins:120},
+  {id:"mapmaster",name:"지도 마스터 🗺️",check:function(s){return (s.mapCorrect||0)>=30},coins:80},
+  {id:"modes3",name:"올라운더 🎯",check:function(s){return (s.modesPlayed||0)>=3},coins:60},
+  {id:"games20",name:"단골손님 🏅",check:function(s){return s.gamesPlayed>=20},coins:100},
 ];
 
 var LEVELS=[
@@ -1237,9 +1241,15 @@ function endGame(){
   else if(pct>=.5){emoji="😊";title="절반 이상!";sub="계속 도전하세요!";}
   else if(pct>=.3){emoji="😅";title="조금 더!";sub="세계 나라를 더 공부해봐요!";}
   var prevScore=ST.totalScore;
+  var isNewRecord=gScore>0&&gScore>=ST.bestScore&&ST.gamesPlayed>0;
   ST.totalScore+=gScore;if(gScore>ST.bestScore)ST.bestScore=gScore;ST.coins+=gCoins;ST.gamesPlayed++;
+  if(gMode==='map')ST.mapCorrect=(ST.mapCorrect||0)+correct;
+  if(!ST.modesSet)ST.modesSet={};
+  ST.modesSet[gMode]=true;ST.modesPlayed=Object.keys(ST.modesSet).length;
   var t2=today();var diff=daysBetween(ST.lastPlayedDate,t2);
   if(diff===1)ST.streak++;else if(diff>1)ST.streak=1;ST.lastPlayedDate=t2;
+  // Session bonus: 2nd+ game gets +10% coins
+  if(ST.gamesPlayed>=2&&gCoins>0){var bonus=Math.floor(gCoins*0.1);if(bonus>0){gCoins+=bonus;ST.coins+=bonus;}}
   save();checkLevelUp(prevScore,ST.totalScore);checkAch();
   document.getElementById("r-emoji").textContent=emoji;
   document.getElementById("r-title").textContent=title;
@@ -1256,6 +1266,9 @@ function endGame(){
   var xpEl=document.getElementById('r-xp-row');
   if(xpEl)xpEl.textContent=xpGained>0?('✨ +'+xpGained+' XP 획득'):'';
   renderStarResult(correct,TOTAL_Q);
+  // New record badge
+  var nrEl=document.getElementById('r-new-record');
+  if(nrEl)nrEl.style.display=isNewRecord?'block':'none';
   gResultFilter = "fail"; renderResultList(); // show wrong answers by default
   showScreen("result");
 }
@@ -1613,8 +1626,7 @@ function loseLife2(){
   var cfg=DIFF_CFG[gDifficulty2];if(!cfg||!cfg.lives)return;
   if(gLives2<=0)return;gLives2--;
   var h=document.getElementById('heart-'+(gLives2));if(h){h.classList.add('flashing');setTimeout(function(){if(h){h.classList.remove('flashing');h.classList.add('lost');}},600);}
-  if(gLives2<=0)setTimeout(function(){showModal('💔','게임 오버!','코인 5개로 부활할 수 있어요!
-보유 코인: 🪙'+( ST.coins+gCoins),function(){if((ST.coins+gCoins)<5){showModal('💸','코인 부족','코인이 5개 이상 있어야 해요.',null,null,'확인',null);return;}gCoins-=5;gLives2=1;renderLives2();if(document.getElementById('ans-input'))document.getElementById('ans-input').focus();},function(){endGame();},'부활(🪙5)','포기');},800);
+  if(gLives2<=0)setTimeout(function(){showModal('💔','게임 오버!','코인 5개로 부활할 수 있어요! 보유 코인: 🪙'+( ST.coins+gCoins),function(){if((ST.coins+gCoins)<5){showModal('💸','코인 부족','코인이 5개 이상 있어야 해요.',null,null,'확인',null);return;}gCoins-=5;gLives2=1;renderLives2();if(document.getElementById('ans-input'))document.getElementById('ans-input').focus();},function(){endGame();},'부활(🪙5)','포기');},800);
 }
 
 // ── MAP ZOOM ──
@@ -1635,8 +1647,7 @@ function getDailyQuestions2(pool){
   return arr.slice(0,20);
 }
 function startDailyChallenge(){
-  if(isDailyDone2()){showModal('📅','이미 완료!','오늘 데일리 챌린지는 완료했어요!
-내일 다시 도전하세요 🌅',null,null,'확인',null);return;}
+  if(isDailyDone2()){showModal('📅','이미 완료!','오늘 데일리 챌린지는 완료했어요! 내일 다시 도전하세요 🌅',null,null,'확인',null);return;}
   gIsDailyMode=true;
   var qs=getDailyQuestions2(COUNTRIES.filter(function(c){return MAP_COORDS[c.name];}));
   gMode='choseong';gQuestions=qs;gIdx=0;gScore=0;gCombo=0;gCoins=0;gHistory=[];gAnswering=false;gMapClicked=false;_dangerActive=false;_lastAlertAt=-999;
