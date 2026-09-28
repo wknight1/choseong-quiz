@@ -894,6 +894,8 @@ var COUNTRIES=[
   ,{name:"북마케도니아",flag:"🇲🇰",capital:"스코페",continent:"europe",hint:"수도 스코페, 알렉산더 대왕의 고향 논쟁으로 유명한 발칸반도의 내륙국. EU 가입 협상 진행 중."}
   ,{name:"몰도바",flag:"🇲🇩",capital:"키시나우",continent:"europe",hint:"수도 키시나우, 유럽에서 1인당 GDP가 가장 낮은 나라 중 하나. 와인 생산량이 세계 최고 수준."}
   ,{name:"가이아나",flag:"🇬🇾",capital:"조지타운",continent:"americas",hint:"수도 조지타운, 남미 유일의 영어 공용어 국가. 최근 대규모 해저 유전 발견으로 급성장 중."}
+,{name:"투르크메니스탄",flag:"🇹🇲",capital:"아슈하바트",continent:"asia",hint:"수도 아슈하바트, 세계 최대 천연가스 매장국 중 하나. 카라쿰 사막 '지옥의 문' 천연가스 구덩이"}
+  ,{name:"마다가스카르",flag:"🇲🇬",capital:"안타나나리보",continent:"africa",hint:"수도 안타나나리보, 세계 4번째 큰 섬. 여우원숭이(여우원숭이 100종 이상) 서식하는 독특한 생태계"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -926,7 +928,7 @@ var MAP_COORDS={
   "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},
   "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
   "피지":{x:880,y:330},"바누아투":{x:862,y:320},"파라과이":{x:290,y:380},"쿠웨이트":{x:605,y:225},"요르단":{x:580,y:222},"튀니지":{x:495,y:188},"도미니카공화국":{x:257,y:255},
-  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270},"우간다":{x:540,y:305},"스리랑카":{x:700,y:275},"라오스":{x:770,y:248},"아이티":{x:215,y:248},"슬로바키아":{x:490,y:148},"크로아티아":{x:480,y:158},"예멘":{x:610,y:268}
+  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270},"우간다":{x:540,y:305},"스리랑카":{x:700,y:275},"라오스":{x:770,y:248},"아이티":{x:215,y:248},"슬로바키아":{x:490,y:148},"크로아티아":{x:480,y:158},"예멘":{x:610,y:268},"투르크메니스탄":{x:660,y:168},"마다가스카르":{x:562,y:362}
   ,"북마케도니아":{x:480,y:155}
   ,"몰도바":{x:510,y:130}
   ,"가이아나":{x:285,y:285}
@@ -1387,8 +1389,8 @@ function endGame(){
   var xpGained=correct*10+Math.min(ST.maxCombo,10)*5;
   var xpEl=document.getElementById('r-xp-row');
   if(xpEl)xpEl.textContent=xpGained>0?('✨ +'+xpGained+' XP 획득'):'';
-  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=(_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점";
-  renderStarResult(correct,TOTAL_Q);
+  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=(_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점";
+  renderStarResult(correct,gQuestions.length);
   // New record badge
   var nrEl=document.getElementById('r-new-record');
   if(nrEl)nrEl.style.display=isNewRecord?'block':'none';
@@ -2059,7 +2061,7 @@ var _origEndGame = endGame;
 endGame = function() {
   recordGameStats2(gMode, gScore, gHistory, ST.maxCombo);
   if(gIsDailyMode){ markDailyDone2(); localStorage.setItem('daily_score_'+getDailyKey2(),String(gScore)); gIsDailyMode=false; updateDailyChalBtn(); }
-  launchMultiFW(gHistory.filter(function(h){return h.ok;}).length===TOTAL_Q?8:3);
+  launchMultiFW(gHistory.filter(function(h){return h.ok;}).length===gQuestions.length?8:3);
   _origEndGame();
 };
 
