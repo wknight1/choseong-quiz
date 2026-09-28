@@ -667,6 +667,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 <!-- ══ RESULT ══ -->
 <div class="screen" id="result">
   <div id="r-mode-badge" style="display:inline-block;padding:4px 14px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:8px;background:rgba(56,189,248,0.15);color:var(--sky);border:1px solid var(--sky);"></div>
+  <div id="r-mode-best" style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;min-height:16px;"></div>
   <div class="result-emoji" id="r-emoji">🎉</div>
   <div class="result-title" id="r-title">퀴즈 완료!</div>
   <div class="star-row" id="star-row"></div>
@@ -955,7 +956,8 @@ function updateBestIndicator(cur){var el=document.getElementById("best-indicator
 // ═══════════════════════ ACHIEVEMENT / LEVEL ═══════════════════════
 var achTimer=null;
 function showAch(txt){var p=document.getElementById("ach-popup");document.getElementById("ach-body").textContent=txt;clearTimeout(achTimer);p.classList.remove("show");void p.offsetWidth;p.classList.add("show");achTimer=setTimeout(function(){p.classList.remove("show");},3200);}
-function checkAch(){ACHIEVEMENTS.forEach(function(a){if(ST.achievements[a.id])return;if(a.check(ST)){ST.achievements[a.id]=true;if(a.coins)ST.coins+=a.coins;save();setTimeout(function(){showAch(a.name+(a.coins?" (+"+a.coins+"🪙)":""));},300);}});}
+function sndAchievement(){var ctx=getAC();if(!ctx||!sfxEnabled)return;var t=ctx.currentTime;[[784,0,.3,.3],[988,.1,.25,.25],[1175,.2,.2,.2],[1568,.32,.4,.15],[1976,.44,.5,.1]].forEach(function(p){tone(p[0],"triangle",t+p[1],p[2],p[3]);});tone(60,"sine",t,.15,.5);}
+function checkAch(){ACHIEVEMENTS.forEach(function(a){if(ST.achievements[a.id])return;if(a.check(ST)){ST.achievements[a.id]=true;if(a.coins)ST.coins+=a.coins;save();sndAchievement();setTimeout(function(){showAch("🏅 "+a.name+(a.coins?" (+"+a.coins+"🪙)":""));},300);}});}
 
 function getLevel(score){var cur=LEVELS[0];for(var i=0;i<LEVELS.length;i++){if(score>=LEVELS[i].min)cur=LEVELS[i];else break;}return cur;}
 function getLevelProgress(score){var cur=getLevel(score);var idx=LEVELS.indexOf(cur);var nxt=LEVELS[idx+1];if(!nxt)return{pct:100,cur:cur};return{pct:Math.round((score-cur.min)/(nxt.min-cur.min)*100),cur:cur,nxt:nxt};}
@@ -992,7 +994,9 @@ function updateTodaysCountryCard(){
   document.getElementById("tc-capital").textContent="수도: "+c.capital;
   document.getElementById("tc-hint").textContent=c.hint;
 }
-function updateHomeUI(){document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();var subEl=document.getElementById("home-sub-text");if(subEl)subEl.textContent=COUNTRIES.length+"개 나라 · 초성 · 국기 · 지도로 세계 정복!";}
+function updateHomeUI(){document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;
+  // sync per-mode best to ST for leaderboard
+  var _st2=loadStats2();if(_st2&&_st2.bestScores){var _mb=_st2.bestScores;if(!ST.modeScores)ST.modeScores={};ST.modeScores.choseong=_mb.choseong||0;ST.modeScores.flag=_mb.flag||0;ST.modeScores.map=_mb.map||0;}document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();var subEl=document.getElementById("home-sub-text");if(subEl)subEl.textContent=COUNTRIES.length+"개 나라 · 초성 · 국기 · 지도로 세계 정복!";}
 
 // ═══════════════════════ SCREEN ═══════════════════════
 function showScreen(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");window.scrollTo(0,0);}
@@ -1283,6 +1287,7 @@ function endGame(){
   var xpGained=correct*10+Math.min(ST.maxCombo,10)*5;
   var xpEl=document.getElementById('r-xp-row');
   if(xpEl)xpEl.textContent=xpGained>0?('✨ +'+xpGained+' XP 획득'):'';
+  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=(_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점";
   renderStarResult(correct,TOTAL_Q);
   // New record badge
   var nrEl=document.getElementById('r-new-record');
@@ -1680,7 +1685,7 @@ function getDailyQuestions2(pool){
   return arr.slice(0,20);
 }
 function startDailyChallenge(){
-  if(isDailyDone2()){showModal('📅','이미 완료!','오늘 데일리 챌린지는 완료했어요! 내일 다시 도전하세요 🌅',null,null,'확인',null);return;}
+  if(isDailyDone2()){var prevDailyScore=localStorage.getItem('daily_score_'+getDailyKey2())||'?';showModal('📅','오늘 완료!','오늘 점수: '+prevDailyScore+'점 🎉\n내일 새로운 나라들로 다시 도전하세요 🌅',null,null,'확인',null);return;}
   gIsDailyMode=true;
   var qs=getDailyQuestions2(COUNTRIES.filter(function(c){return MAP_COORDS[c.name];}));
   gMode='choseong';gQuestions=qs;gIdx=0;gScore=0;gCombo=0;gCoins=0;gHistory=[];gAnswering=false;gMapClicked=false;_dangerActive=false;_lastAlertAt=-999;
@@ -1808,7 +1813,7 @@ onFlagChoice = function(chosen, correct2, btn, e) {
 var _origEndGame = endGame;
 endGame = function() {
   recordGameStats2(gMode, gScore, gHistory, ST.maxCombo);
-  if(gIsDailyMode){ markDailyDone2(); gIsDailyMode=false; updateDailyChalBtn(); }
+  if(gIsDailyMode){ markDailyDone2(); localStorage.setItem('daily_score_'+getDailyKey2(),String(gScore)); gIsDailyMode=false; updateDailyChalBtn(); }
   launchMultiFW(gHistory.filter(function(h){return h.ok;}).length===TOTAL_Q?8:3);
   _origEndGame();
 };
