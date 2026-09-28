@@ -1023,10 +1023,14 @@ var COUNTRIES=[
 {name:"소말리랜드",flag:"🇸🇴",continent:"africa",hint:"수도 하르게이사. 소말리아에서 분리된 실질 자치 지역. 국제 미승인 국가."},
   {name:"아프가니스탄",flag:"🇦🇫",continent:"asia",hint:"수도 카불, 힌두쿠시 산악국가. 역사상 정복 불가능한 나라로 유명."},
   {name:"세인트빈센트그레나딘",flag:"🇻🇨",continent:"americas",hint:"수도 킹스타운, 카리브해 화산 섬나라. 007 비치 촬영지."},
-  {name:"나미비아",flag:"🇳🇦",continent:"africa",hint:"수도 빈트후크, 나미브 사막(세계 최고령 4천만년). 사막에 사는 코끼리 서식."}
+  {name:"나미비아",flag:"🇳🇦",continent:"africa",hint:"수도 빈트후크, 나미브 사막(세계 최고령 4천만년). 사막에 사는 코끼리 서식."},
+  {name:"그레나다",flag:"🇬🇩",continent:"americas",hint:"수도 세인트조지스. 카리브해 "},
+  {name:"미크로네시아",flag:"🇫🇲",continent:"oceania",hint:"수도 팔리키르. 태평양 607개 섬. 세계에서 세 번째로 작은 나라."},
+  {name:"기니",flag:"🇬🇳",continent:"africa",hint:"수도 코나크리. 서아프리카. 세계 최대 보크사이트(알루미늄 원료) 매장지."},
+  {name:"말라위",flag:"🇲🇼",continent:"africa",hint:"수도 릴롱궤. 아프리카 동부. 말라위 호수(세계 3위 아프리카 담수호) 보유."}
 ];
 
-// 지도 좌표 (1000x500 SVG 기준)
+// 지도 좌표 (1000x500 SVG 기준
 var MAP_COORDS={
   "대한민국":{x:820,y:155},"일본":{x:858,y:152},"중국":{x:780,y:162},"미국":{x:185,y:172},
   "영국":{x:462,y:110},"프랑스":{x:470,y:130},"독일":{x:486,y:118},"이탈리아":{x:490,y:142},
@@ -1054,7 +1058,6 @@ var MAP_COORDS={
   "짐바브웨":{x:520,y:358},"파나마":{x:205,y:265},
   "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
   "리비아":{x:507,y:194},"차드":{x:510,y:228},"말리":{x:455,y:218},"부르키나파소":{x:448,y:245}
-  ,"북마케도니아":{x:480,y:155}
   ,"몰도바":{x:510,y:130}
   ,"가이아나":{x:285,y:285}
   ,"사모아":{x:136,y:270}
@@ -1122,31 +1125,56 @@ var MAP_COORDS={
   "보스니아헤르체고비나":{x:513,y:185},
   "가봉":{x:470,y:340},
   "중앙아프리카공화국":{x:490,y:330},
-  "수리남":{x:315,y:305},
 
-  "과테말라":{x:175,y:228},"네팔":{x:738,y:192},"도미니카공화국":{x:230,y:218},"동티모르":{x:840,y:290},"라오스":{x:800,y:230},
-  "르완다":{x:540,y:300},"리히텐슈타인":{x:482,y:130},"마다가스카르":{x:568,y:345},"모나코":{x:474,y:136},"모리타니":{x:446,y:210},
-  "모잠비크":{x:548,y:328},"몬테네그로":{x:510,y:155},"몰타":{x:494,y:155},"바누아투":{x:908,y:330},"산마리노":{x:488,y:138},
-  "솔로몬제도":{x:900,y:300},"스리랑카":{x:732,y:238},"슬로바키아":{x:503,y:128},"시리아":{x:556,y:175},"아이슬란드":{x:440,y:88},
-  "에리트레아":{x:558,y:230},"에콰도르":{x:246,y:286},"요르단":{x:548,y:188},"우간다":{x:542,y:286},"우루과이":{x:264,y:340},
-  "적도기니":{x:472,y:322},"코스타리카":{x:188,y:240},"코트디부아르":{x:468,y:274},"쿠웨이트":{x:576,y:195},"크로아티아":{x:500,y:148},
-  "키프로스":{x:538,y:163},"타지키스탄":{x:676,y:188},"투르크메니스탄":{x:640,y:180},"튀니지":{x:488,y:170},"피지":{x:926,y:340},
   "세인트루시아":{x:27.4,y:54.5},
   "세인트키츠네비스":{x:26.8,y:52.8},
   "도미니카":{x:27.1,y:53.2}
 ,
-"도미니카공화국":{x:243,y:238},
-"아이티":{x:234,y:239},
-"파푸아뉴기니":{x:833,y:310},
-"동티모르":{x:808,y:330},
 "팔레스타인":{x:579,y:220},
 "코소보":{x:534,y:192},
 "북마케도니아":{x:536,y:195},
-"수단":{x:562,y:260},
 "소말리랜드":{x:580,y:275},
   "아프가니스탄":{x:615,y:182},
   "세인트빈센트그레나딘":{x:298,y:268},
-  "나미비아":{x:490,y:362}};
+  "나미비아":{x:490,y:362}  "과테말라": {x:220,y:218},
+  "그레나다": {x:262,y:234},
+  "기니": {x:430,y:237},
+  "네팔": {x:635,y:189},
+  "도미니카공화국": {x:247,y:220},
+  "동티모르": {x:720,y:290},
+  "라오스": {x:670,y:222},
+  "르완다": {x:527,y:272},
+  "리히텐슈타인": {x:462,y:138},
+  "마다가스카르": {x:547,y:310},
+  "말라위": {x:534,y:298},
+  "모나코": {x:452,y:145},
+  "모리타니": {x:437,y:208},
+  "모잠비크": {x:535,y:308},
+  "몬테네그로": {x:479,y:153},
+  "몰타": {x:473,y:163},
+  "미크로네시아": {x:740,y:267},
+  "바누아투": {x:773,y:318},
+  "산마리노": {x:466,y:148},
+  "솔로몬제도": {x:760,y:302},
+  "스리랑카": {x:635,y:220},
+  "슬로바키아": {x:476,y:133},
+  "시리아": {x:538,y:170},
+  "아이슬란드": {x:408,y:72},
+  "에리트레아": {x:535,y:210},
+  "에콰도르": {x:232,y:270},
+  "요르단": {x:535,y:180},
+  "우간다": {x:527,y:260},
+  "우루과이": {x:272,y:340},
+  "적도기니": {x:491,y:268},
+  "코스타리카": {x:224,y:232},
+  "코트디부아르": {x:451,y:247},
+  "쿠웨이트": {x:561,y:185},
+  "크로아티아": {x:472,y:148},
+  "키프로스": {x:519,y:168},
+  "타지키스탄": {x:603,y:166},
+  "튀니지": {x:467,y:165},
+  "피지": {x:793,y:320},
+};
 
 var CHARACTERS=[
   {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터",effect:"없음",effectType:"none"},
@@ -1800,7 +1828,7 @@ function onMapClick(evt){
   document.getElementById("feedback").className="feedback "+(ok?"ok":grade===2?"info":"fail");
   updateGameUI();updateComboUI();updateStreakFire(gCombo);updateBestIndicator(gScore);hapticComboFn(gCombo);
   triggerHitEffect(ok,gCombo,pts,document.getElementById("q-card"),evt);
-  if(ok){burst(evt.clientX,evt.clientY,8+gCombo*2);flyCoins(evt.clientX,evt.clientY,Math.min(coinEarned,4));sndCoin();showLearnCard(q);updateMissionProgress('mapCorrect',1);_sessionCorrect++;updateMissionProgress('sessionCorrect',1);}else if(grade===3&&gShield){
+  if(ok){burst(evt.clientX,evt.clientY,8+gCombo*2);flyCoins(evt.clientX,evt.clientY,Math.min(coinEarned,4));sndCoin();showLearnCard(q);updateMissionProgress('mapCorrect',1);}else if(grade===3&&gShield){
     // 방어막: 지도 모드 완전 빗나감(grade 3) 시 방어막 소모
     gShield=false;
     document.getElementById('feedback').textContent='🛡 방어막! 다시 클릭하세요!';
@@ -1941,7 +1969,7 @@ function endGame(){
       ST.perCountry[h.name].ans++;
     }
   });
-  if(gMode==='map')ST.mapCorrect=(ST.mapCorrect||0)+correct;
+  if(gMode==='map'||gMode.startsWith('continent_')&&!gMode.includes('_choseong')&&!gMode.includes('_flag'))ST.mapCorrect=(ST.mapCorrect||0)+correct;
   if(gMode==='focus')ST.focusCompleted=(ST.focusCompleted||0)+1;
   if(gMode==='daily'){ST.dailyCompleted=(ST.dailyCompleted||0)+1;}
   if(!ST.modesSet)ST.modesSet={};
