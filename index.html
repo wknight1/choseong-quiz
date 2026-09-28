@@ -820,7 +820,10 @@ var COUNTRIES=[
   {name:"요르단",flag:"🇯🇴",capital:"암만",continent:"asia",hint:"수도 암만, 장밋빛 도시 페트라(나바테아 왕국 유산). 사해(염도 33%) 위치"},
   {name:"튀니지",flag:"🇹🇳",capital:"튀니스",continent:"africa",hint:"수도 튀니스, 북아프리카 카르타고 문명 발상지. 아랍의 봄 시작점"},
   {name:"도미니카공화국",flag:"🇩🇴",capital:"산토도밍고",continent:"americas",hint:"수도 산토도밍고(신대륙 최초 유럽 정착지), 히스파니올라 섬 동쪽"},
-  {name:"우간다",flag:"🇺🇬",capital:"캄팔라",continent:"africa",hint:"수도 캄팔라, 빅토리아 호수 북안. 세계 마운틴 고릴라의 절반이 서식"}
+  {name:"우간다",flag:"🇺🇬",capital:"캄팔라",continent:"africa",hint:"수도 캄팔라, 빅토리아 호수 북안. 세계 마운틴 고릴라의 절반이 서식"},
+  {name:"스리랑카",flag:"🇱🇰",capital:"스리자야와르데네푸라코테",continent:"asia",hint:"수도 콜롬보(행정). 인도양 섬나라, 실론티(홍차)와 보석 원산지. 세계 최대 차 수출국"},
+  {name:"라오스",flag:"🇱🇦",capital:"비엔티안",continent:"asia",hint:"수도 비엔티안. 동남아 유일 내륙국. 메콩 강 따라 불교 사원과 열대우림"},
+  {name:"아이티",flag:"🇭🇹",capital:"포르토프랭스",continent:"americas",hint:"수도 포르토프랭스. 중미 최빈국 중 하나. 세계 최초 노예 해방 독립국(1804)"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -853,7 +856,7 @@ var MAP_COORDS={
   "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},
   "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
   "피지":{x:880,y:330},"바누아투":{x:862,y:320},"파라과이":{x:290,y:380},"쿠웨이트":{x:605,y:225},"요르단":{x:580,y:222},"튀니지":{x:495,y:188},"도미니카공화국":{x:257,y:255},
-  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270}
+  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270},"우간다":{x:540,y:305},"스리랑카":{x:700,y:275},"라오스":{x:770,y:248},"아이티":{x:215,y:248}
 };
 
 var CHARACTERS=[
@@ -907,7 +910,7 @@ var TOTAL_Q=20;
 
 // ═══════════════════════ STATE ═══════════════════════
 var SK="quizmaster_v3";var ST;
-function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0};}
+function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,mapCorrect:0};}
 function save(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
 function load(){try{var r=localStorage.getItem(SK);if(!r)return defaultState();var s=JSON.parse(r);var m=Object.assign({},defaultState(),s);if(!Array.isArray(m.ownedCharacters))m.ownedCharacters=["basic"];if(m.ownedCharacters.indexOf("basic")<0)m.ownedCharacters.unshift("basic");return m;}catch(e){return defaultState();}}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -1116,7 +1119,11 @@ var CONFUSION_PAIRS = {
   "미국": ["라이베리아","말레이시아"],
   "칠레": ["에콰도르","콜롬비아"],
   "콜롬비아": ["에콰도르","베네수엘라"],
-  "에콰도르": ["콜롬비아","베네수엘라"]
+  "에콰도르": ["콜롬비아","베네수엘라"],
+  "미얀마": ["캄보디아","태국","라오스"],
+  "캄보디아": ["미얀마","태국","베트남"],
+  "모로코": ["리비아","알제리","튀니지"],
+  "방글라데시": ["인도","스리랑카","파키스탄"]
 };
 
 function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.innerHTML="";
