@@ -71,6 +71,12 @@ body{
 .mode-btn.secondary{background:var(--card2);color:var(--fg);border:1.5px solid var(--border)}
 .btn-badge{font-size:10px;background:rgba(255,255,255,.2);padding:2px 7px;border-radius:99px;font-weight:700}
 
+
+/* Timer */
+#game-timer{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:200;background:var(--card);border:2px solid var(--sky);border-radius:20px;padding:4px 16px;font-size:18px;font-weight:900;color:var(--sky);display:none;min-width:60px;text-align:center;transition:color .3s}
+#game-timer.urgent{color:#ef4444;border-color:#ef4444;animation:pulse-timer .5s infinite alternate}
+@keyframes pulse-timer{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.08)}}
+
 /* ══ GAME ══ */
 #game{padding-top:10px}
 .game-header{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -645,6 +651,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   </div>
 
   <div class="screen" id="game">
+  <div id="game-timer" style="display:none">⚡30</div>
   <div class="game-header">
     <div class="coin-display"><span>🪙</span><span id="g-coins">0</span></div>
     <div id="g-mode-badge" style="font-size:12px;color:var(--sub);font-weight:600"></div>
@@ -803,6 +810,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   </div>
   <button class="restart-btn" id="restart-btn-main" onclick="restartSameMode()">🔄 다시 하기</button>
   <button class="restart-btn" id="btn-continent-pick" onclick="showContinentPicker()" style="display:none;background:linear-gradient(135deg,#0ea5e9,#6366f1)">🌍 대륙 선택하기</button>
+    <button class="mode-btn secondary" onclick="startSpeedQuiz()" style="background:linear-gradient(135deg,#dc2626,#f97316);color:#fff">⚡ 스피드 퀴즈 <span class="btn-badge">30초</span></button>
   <button class="home-btn2" onclick="goHome()">🏠 홈으로</button>
   <div id="r-next-suggest" style="display:none;margin-top:8px;padding:12px;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(6,182,212,.08));border:1.5px solid #10b981;border-radius:14px;text-align:center;">
     <div style="font-size:12px;color:var(--green);font-weight:700;margin-bottom:6px;">💡 다음 도전</div>
@@ -1032,7 +1040,9 @@ var COUNTRIES=[
   {name:"말라위",flag:"🇲🇼",continent:"africa",hint:"수도 릴롱궤. 아프리카 동부. 말라위 호수(세계 3위 아프리카 담수호) 보유."}
 
 {name:"벨라루스",flag:"🇧🇾",continent:"europe",capital:"민스크",hint:"수도 민스크, 유럽의 마지막 독재 국가. 러시아와 밀접한 관계. 체르노빌 피해국. 구소련 스타일 유지."},
-{name:"불가리아",flag:"🇧🇬",continent:"europe",capital:"소피아",hint:"수도 소피아, 발칸반도 동부. 장미 오일 세계 최대 생산국(70%). 키릴 문자 발원지. 마라톤 달리기의 실제 전투터."},];
+{name:"불가리아",flag:"🇧🇬",continent:"europe",capital:"소피아",hint:"수도 소피아, 발칸반도 동부. 장미 오일 세계 최대 생산국(70%). 키릴 문자 발원지. 마라톤 달리기의 실제 전투터."}
+  {name:"탄자니아",flag:"🇹🇿",continent:"africa",hint:"수도 도도마. 킬리만자로(아프리카 최고봉)의 나라. 세렝게티 대이동으로 유명."},
+,];
 
 // 지도 좌표 (1000x500 SVG 기준
 var MAP_COORDS={
@@ -1354,7 +1364,7 @@ function updateHomeUI(){
 
 // ═══════════════════════ SCREEN ═══════════════════════
 function showScreen(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");window.scrollTo(0,0);}
-function goHome(){if(gPaused){gPaused=false;var po=document.getElementById("pause-overlay");if(po)po.classList.remove("open");}clearTimer();_dangerActive=false;clearResume();showScreen("home");updateHomeUI();updateWeakModeBtnVisibility();checkResumeBanner();}
+function goHome(){stopSpeedTimer();if(gPaused){gPaused=false;var po=document.getElementById("pause-overlay");if(po)po.classList.remove("open");}clearTimer();_dangerActive=false;clearResume();showScreen("home");updateHomeUI();updateWeakModeBtnVisibility();checkResumeBanner();}
 
 // ═══════════════════════ GAME ═══════════════════════
 var gMode="choseong",gQuestions=[],gIdx=0,gScore=0,gCombo=0,gCoins=0;
@@ -1823,7 +1833,7 @@ function onMapClick(evt){
   if(!ST.perCountry)ST.perCountry={};
   if(!ST.perCountry[q.name])ST.perCountry[q.name]={ans:0,corr:0};
   ST.perCountry[q.name].ans++;
-  if(ok){gCombo++;ST.totalCorrect++;ST.perCountry[q.name].corr++;_sessionCorrect++;updateMissionProgress('sessionCorrect',1);if(gMode==='flag'||gMode.endsWith('_flag')){_flagCorrectToday++;updateMissionProgress('flagCorrect',1);}if(gCombo>_maxComboToday){updateMissionProgress('maxComboToday', gCombo - _maxComboToday);_maxComboToday=gCombo;}}else{gCombo=0;loseLife2();}
+  if(ok){gCombo++;checkComboMilestone(gCombo);ST.totalCorrect++;ST.perCountry[q.name].corr++;_sessionCorrect++;updateMissionProgress('sessionCorrect',1);if(gMode==='flag'||gMode.endsWith('_flag')){_flagCorrectToday++;updateMissionProgress('flagCorrect',1);}if(gCombo>_maxComboToday){updateMissionProgress('maxComboToday', gCombo - _maxComboToday);_maxComboToday=gCombo;}}else{gCombo=0;loseLife2();}
   if(ST.maxCombo<gCombo)ST.maxCombo=gCombo;
   // Apply combo multiplier like choseong/flag modes
   var mapMult=1;
@@ -1962,7 +1972,40 @@ function showNextSuggestion() {
   }
 }
 
+
+// ── SPEED QUIZ ──
+var _gTimerInterval = null;
+var _gTimerSecs = 0;
+
+function startSpeedQuiz() {
+  startGame('choseong');
+  gMode = 'speed';
+  _gTimerSecs = 30;
+  var timerEl = document.getElementById('game-timer');
+  if (timerEl) { timerEl.style.display = 'block'; timerEl.textContent = '⚡ 30'; timerEl.className = ''; }
+  clearInterval(_gTimerInterval);
+  _gTimerInterval = setInterval(function() {
+    _gTimerSecs--;
+    if (timerEl) {
+      timerEl.textContent = '⚡ ' + _gTimerSecs;
+      if (_gTimerSecs <= 10) timerEl.className = 'urgent';
+    }
+    if (_gTimerSecs <= 0) {
+      clearInterval(_gTimerInterval);
+      showToast('⏰ 시간 종료!');
+      setTimeout(endGame, 500);
+    }
+  }, 1000);
+}
+
+function stopSpeedTimer() {
+  clearInterval(_gTimerInterval);
+  var timerEl = document.getElementById('game-timer');
+  if (timerEl) timerEl.style.display = 'none';
+}
+
 function endGame(){
+  stopSpeedTimer();
   clearTimer();_dangerActive=false;
   document.getElementById("best-indicator").style.display="none";
   var correct=gHistory.filter(function(h){return h.ok;}).length;
@@ -2004,7 +2047,7 @@ function endGame(){
   // Animate coin count
   (function(){var el=document.getElementById("r-coins-num");var target=gCoins;var cur=0;var step=Math.max(1,Math.ceil(target/20));var iv=setInterval(function(){cur=Math.min(cur+step,target);el.textContent="+"+cur;if(cur>=target)clearInterval(iv);},40);})();
   // Mode badge
-  var modeLabels={choseong:'🔤 초성 퀴즈',flag:'🚩 국기 퀴즈',map:'🗺️ 지도 퀴즈',focus:'🎯 집중 퀴즈',daily:'📅 데일리 챌린지',weakspot:'🎯 약점 집중',continent_asia:'🌏 아시아 지도',continent_europe:'🌍 유럽 지도',continent_americas:'🌎 아메리카 지도',continent_africa:'🌍 아프리카 지도',continent_oceania:'🌊 오세아니아 지도',continent_all:'🌐 전체 지도',continent_asia_choseong:'🌏 아시아 초성',continent_asia_flag:'🌏 아시아 국기',continent_europe_choseong:'🌍 유럽 초성',continent_europe_flag:'🌍 유럽 국기',continent_americas_choseong:'🌎 아메리카 초성',continent_americas_flag:'🌎 아메리카 국기',continent_africa_choseong:'🌍 아프리카 초성',continent_africa_flag:'🌍 아프리카 국기',continent_oceania_choseong:'🌊 오세아니아 초성',continent_oceania_flag:'🌊 오세아니아 국기',continent_all_choseong:'🌐 전체 초성',continent_all_flag:'🌐 전체 국기'};
+  var modeLabels={choseong:'🔤 초성 퀴즈',flag:'🚩 국기 퀴즈',map:'🗺️ 지도 퀴즈',focus:'🎯 집중 퀴즈',daily:'📅 데일리 챌린지',weakspot:'🎯 약점 집중',continent_asia:'🌏 아시아 지도',continent_europe:'🌍 유럽 지도',continent_americas:'🌎 아메리카 지도',continent_africa:'🌍 아프리카 지도',continent_oceania:'🌊 오세아니아 지도',continent_all:'🌐 전체 지도',continent_asia_choseong:'🌏 아시아 초성',continent_asia_flag:'🌏 아시아 국기',continent_europe_choseong:'🌍 유럽 초성',continent_europe_flag:'🌍 유럽 국기',continent_americas_choseong:'🌎 아메리카 초성',continent_americas_flag:'🌎 아메리카 국기',continent_africa_choseong:'🌍 아프리카 초성',continent_africa_flag:'🌍 아프리카 국기',continent_oceania_choseong:'🌊 오세아니아 초성',continent_oceania_flag:'🌊 오세아니아 국기',continent_all_choseong:'🌐 전체 초성',continent_all_flag:'🌐 전체 국기',speed:'⚡ 스피드 퀴즈'};
   var mb=document.getElementById('r-mode-badge');
   if(mb)mb.textContent=modeLabels[gMode]||gMode;
   // XP row: show XP gained (10 per correct + combo bonus)
