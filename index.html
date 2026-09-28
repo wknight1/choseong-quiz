@@ -766,7 +766,8 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <button class="share-btn" onclick="copyShareText2()" style="flex:1;min-width:120px;">📤 결과 공유</button>
     <button class="share-btn" onclick="shareChallenge(gScore,gHistory.filter(function(h){return h.ok;}).length,gMode,ST.maxCombo)" style="flex:1;min-width:120px;background:linear-gradient(135deg,#0f3460,#533483);">🔗 챌린지 링크</button>
   </div>
-  <button class="restart-btn" onclick="restartSameMode()">🔄 다시 하기</button>
+  <button class="restart-btn" id="restart-btn-main" onclick="restartSameMode()">🔄 다시 하기</button>
+  <button class="restart-btn" id="btn-continent-pick" onclick="showContinentPicker()" style="display:none;background:linear-gradient(135deg,#0ea5e9,#6366f1)">🌍 대륙 선택하기</button>
   <button class="home-btn2" onclick="goHome()">🏠 홈으로</button>
 </div>
 
@@ -968,8 +969,13 @@ var COUNTRIES=[
   {name:"콩고공화국",flag:"🇨🇬",hint:"수도 브라자빌, 콩고민주공화국과 콩고강을 사이에 두고 마주보는 나라",capital:"브라자빌",continent:"africa"},
   {name:"시에라리온",flag:"🇸🇱",continent:"africa",capital:"프리타운",hint:"수도 프리타운(자유민의 도시), 서아프리카 다이아몬드 산지."},
   {name:"라이베리아",flag:"🇱🇷",continent:"americas",capital:"몬로비아",hint:"수도 몬로비아, 미국이 해방노예 귀환 위해 설립. 아프리카 유일 성조기 기반 국기."},
-  {name:"부룬디",flag:"🇧🇮",continent:"africa",capital:"기테가",hint:"수도 기테가, 아프리카 대호수 지역. 탄자니아와 국경 맞닿음."},
-  {name:"지부티",flag:"🇩🇯",continent:"africa",capital:"지부티시",hint:"수도 지부티시, 아프리카의 뿔 전략 요충지. 홍해·아덴만 관문."}
+  {name:"부룬디",flag:"🇧🇮",continent:"africa",capital:"기테가",hint:"수도 기테가, 아프리카 대호수 지역. 탄자니아와 국경 맞닿음."}
+,
+  // 추가 나라 v58 - 아프리카/오세아니아 보강
+  {name:"토고",flag:"🇹🇬",hint:"수도 로메, 아프리카에서 가장 좁고 긴 나라 중 하나. 커피·코코아 주요 수출",capital:"로메",continent:"africa"},
+  {name:"베냉",flag:"🇧🇯",hint:"수도 포르토노보, 부두교 발상지이며 아프리카 프랑스어권 소국",capital:"포르토노보",continent:"africa"},
+  {name:"가봉",flag:"🇬🇦",hint:"수도 리브르빌, 석유 부국으로 적도 밀림의 80%를 보유",capital:"리브르빌",continent:"africa"}
+  {name:"파푸아뉴기니",flag:"🇵🇬",hint:"수도 포트모르즈비, 800여 개 언어 사용으로 세계 최다 언어 국가",capital:"포트모르즈비",continent:"oceania"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -1024,7 +1030,7 @@ var MAP_COORDS={
   "수리남":{x:275,y:248},
   "잠비아":{x:537,y:300},
   "소말리아":{x:575,y:245},
-  "콩고민주공화국":{x:520,y:275},"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220},"남수단":{x:525,y:248},"아제르바이잔":{x:545,y:148},"조지아":{x:542,y:143},"안도라":{x:440,y:149},"콩고공화국":{x:510,y:268},"세이셸":{x:555,y:278},"베냉":{x:475,y:242},"토고":{x:467,y:244},
+  "콩고민주공화국":{x:520,y:275},"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220},"남수단":{x:525,y:248},"아제르바이잔":{x:545,y:148},"조지아":{x:542,y:143},"안도라":{x:440,y:149},"콩고공화국":{x:510,y:268},"세이셸":{x:555,y:278},"베냉":{x:475,y:242},"토고":{x:467,y:244},"가봉":{x:510,y:275},
   "시에라리온":{x:163,y:237},
   "라이베리아":{x:162,y:248},
   "부룬디":{x:254,y:270},
@@ -1033,7 +1039,8 @@ var MAP_COORDS={
   "볼리비아":{x:295,y:325},
   "예멘":{x:572,y:240},
   "오만":{x:590,y:228},
-  "키르기스스탄":{x:648,y:188},
+  "키르기스스탄":{x:648,y:188},,
+
 };
 
 var CHARACTERS=[
@@ -1079,10 +1086,7 @@ var LEVELS=[
   {level:19,min:24500,name:"전설의 탐험가",emoji:"🔱"},{level:20,min:29000,name:"지리 박사",emoji:"🎖️"},
   {name:"아르메니아",flag:"🇦🇲",continent:"asia",capital:"예레반",hint:"수도 예레반, 세계 최초 기독교 공식 채택 국가(301년). 아라라트 산 자락의 코카서스 소국."},
   {name:"알제리",flag:"🇩🇿",continent:"africa",capital:"알제",hint:"수도 알제, 아프리카 최대 면적 국가. 사하라 사막이 85%. 석유·가스 수출 대국."},
-  {name:"세이셸",flag:"🇸🇨",continent:"africa",capital:"빅토리아",hint:"수도 빅토리아, 인도양 115개 섬 군도. 세계 최상위 럭셔리 관광지. 자이언트 육지거북 서식."},
-  {name:"베냉",flag:"🇧🇯",continent:"africa",capital:"포르토노보",hint:"수도 포르토노보, 서아프리카. 부두교(Voodoo)의 본고장. 다호메이 왕국 역사 유적지."},
-  {name:"토고",flag:"🇹🇬",continent:"africa",capital:"로메",hint:"수도 로메, 아프리카 최슬림국 중 하나. 로메는 대서양 직접 면한 유일한 서아프리카 수도."},
-  {name:"파푸아뉴기니",flag:"🇵🇬",continent:"oceania",capital:"포트모르즈비",hint:"수도 포트모르즈비, 세계 최다 언어(800개+). 뉴기니 섬 동쪽. 오세아니아 최대 면적·인구."},
+  {name:"세이셸",flag:"🇸🇨",continent:"africa",capital:"빅토리아",hint:"수도 빅토리아, 인도양 115개 섬 군도. 세계 최상위 럭셔리 관광지. 자이언트 육지거북 서식."}
   {name:"통가",flag:"🇹🇴",continent:"oceania",capital:"누쿠알로파",hint:"수도 누쿠알로파, 태평양 왕국. 폴리네시아 유일 군주제 독립국. 2022년 해저화산 폭발."},
   {name:"투르크메니스탄",flag:"🇹🇲",continent:"asia",capital:"아슈하바트",hint:"수도 아슈하바트, 세계 최고 백색 대리석 건물 밀도. 다르바자 가스 분화구(지옥문) 60년째 연소 중."}
 ];
@@ -1614,16 +1618,34 @@ function endGame(){
   var xpGained=correct*10+Math.min(ST.maxCombo,10)*5;
   var xpEl=document.getElementById('r-xp-row');
   if(xpEl)xpEl.textContent=xpGained>0?('✨ +'+xpGained+' XP 획득'):'';
-  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점","continent_asia":"🌏 아시아","continent_europe":"🌍 유럽","continent_americas":"🌎 아메리카","continent_africa":"🌍 아프리카","continent_oceania":"🌊 오세아니아","continent_all":"🌐 전체"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=(_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점";
+  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점","continent_asia":"🌏 아시아","continent_europe":"🌍 유럽","continent_americas":"🌎 아메리카","continent_africa":"🌍 아프리카","continent_oceania":"🌊 오세아니아","continent_all":"🌐 전체","continent_asia_choseong":"🌏 아시아 초성","continent_asia_flag":"🌏 아시아 국기","continent_europe_choseong":"🌍 유럽 초성","continent_europe_flag":"🌍 유럽 국기","continent_americas_choseong":"🌎 아메리카 초성","continent_americas_flag":"🌎 아메리카 국기","continent_africa_choseong":"🌍 아프리카 초성","continent_africa_flag":"🌍 아프리카 국기","continent_oceania_choseong":"🌊 오세아니아 초성","continent_oceania_flag":"🌊 오세아니아 국기","continent_all_choseong":"🌐 전체 초성","continent_all_flag":"🌐 전체 국기"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=(_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점";
   renderStarResult(correct,gQuestions.length);
   // New record badge
   var nrEl=document.getElementById('r-new-record');
   if(nrEl)nrEl.style.display=isNewRecord?'block':'none';
+  // Show continent picker button for continent quiz modes
+  var contPickBtn=document.getElementById('btn-continent-pick');
+  var restartBtn=document.getElementById('restart-btn-main');
+  if(contPickBtn&&restartBtn){
+    var isCont=gMode.startsWith('continent_');
+    contPickBtn.style.display=isCont?'block':'none';
+    if(isCont){restartBtn.textContent='🔄 같은 대륙 다시';}else{restartBtn.textContent='🔄 다시 하기';}
+  }
   gResultFilter = "fail"; renderResultList(); // show wrong answers by default
   showScreen("result");
 }
 
-function restartSameMode(){startGame(gMode);}
+function restartSameMode(){
+  if(gMode.startsWith('continent_')){
+    // Re-run same continent quiz
+    startContinentQuiz(_gLastContinentId);
+  } else if(gMode==='focus'){
+    var fc=gHistory.length>0?gHistory[0].name:null;
+    if(fc){gFocusCountry=fc;startGame('choseong');}else{goHome();}
+  } else {
+    startGame(gMode);
+  }
+}
 
 // ═══════════════════════ AUTOSAVE / RESUME ═══════════════════════
 var RESUME_KEY = 'gameResume_v1';
@@ -1807,6 +1829,7 @@ function closeContinentPicker() {
 }
 
 var _continentQuizType = 'map'; // default
+var _gLastContinentId = 'all'; // last continent used for restartSameMode
 function setContinentType(type) {
   _continentQuizType = type;
   var btns = document.querySelectorAll('#continent-type-btns button');
@@ -1815,6 +1838,7 @@ function setContinentType(type) {
   if(active){ active.style.borderColor='var(--indigo)'; active.style.background='var(--indigo)'; active.style.color='#fff'; }
 }
 function startContinentQuiz(continentId) {
+  _gLastContinentId = continentId;
   var filterMap = (_continentQuizType === 'map');
   var pool = COUNTRIES.filter(function(c){
     if(continentId !== 'all' && c.continent !== continentId) return false;
@@ -2492,11 +2516,7 @@ loadChoiceMode();
   if (preset) setPreset(preset);
 })();
 
-setTimeout(function(){ checkChallengeParam2(); updateDailyChalBtn(); checkOnboarding(); },
-  {name:"파라과이",flag:"🇵🇾",hint:"수도 아순시온, 남미에서 유일하게 두 공용어(과라니어·스페인어). 수력발전 세계 1위",capital:"아순시온",continent:"americas"},
-  {name:"볼리비아",flag:"🇧🇴",hint:"수도 수크레(헌법)·라파스(행정), 세계 최고 수도. 우유니 소금사막",capital:"수크레",continent:"americas"},
-  {name:"예멘",flag:"🇾🇪",hint:"수도 사나, 아라비아반도 남쪽. 세계 최초 커피 수출국",capital:"사나",continent:"asia"},
-  {name:"오만",flag:"🇴🇲",hint:"수도 무스카트, 아라비아반도 동남쪽. 유향(몰약) 산지",capital:"무스카트",continent:"asia"},
+setTimeout(function(){ checkChallengeParam2(); updateDailyChalBtn(); checkOnboarding(); }
   {name:"키르기스스탄",flag:"🇰🇬",hint:"수도 비슈케크, 텐산 산맥과 이식쿨 호수. 중앙아시아 유목 문화",capital:"비슈케크",continent:"asia"}, 300);
 // Override startGame to init lives
 var _origStartGame = startGame;
