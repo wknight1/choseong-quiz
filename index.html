@@ -798,6 +798,10 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <button class="restart-btn" id="restart-btn-main" onclick="restartSameMode()">🔄 다시 하기</button>
   <button class="restart-btn" id="btn-continent-pick" onclick="showContinentPicker()" style="display:none;background:linear-gradient(135deg,#0ea5e9,#6366f1)">🌍 대륙 선택하기</button>
   <button class="home-btn2" onclick="goHome()">🏠 홈으로</button>
+  <div id="r-next-suggest" style="display:none;margin-top:8px;padding:12px;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(6,182,212,.08));border:1.5px solid #10b981;border-radius:14px;text-align:center;">
+    <div style="font-size:12px;color:var(--green);font-weight:700;margin-bottom:6px;">💡 다음 도전</div>
+    <button id="r-next-btn" onclick="" style="background:linear-gradient(135deg,#10b981,#0891b2);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:800;cursor:pointer;width:100%;"></button>
+  </div>
 </div>
 
 <!-- ══ SHOP ══ -->
@@ -1016,7 +1020,10 @@ var COUNTRIES=[
 
 {name:"팔레스타인",flag:"🇵🇸",continent:"asia",hint:"수도 라말라. 가자지구·요르단강 서안 지역. 2012년 유엔 옵서버 국가 승인."},
 {name:"코소보",flag:"🇽🇰",continent:"europe",hint:"수도 프리슈티나. 2008년 독립 선언. 발칸반도에서 가장 새로운 나라."},
-{name:"소말리랜드",flag:"🇸🇴",continent:"africa",hint:"수도 하르게이사. 소말리아에서 분리된 실질 자치 지역. 국제 미승인 국가."}
+{name:"소말리랜드",flag:"🇸🇴",continent:"africa",hint:"수도 하르게이사. 소말리아에서 분리된 실질 자치 지역. 국제 미승인 국가."},
+  {name:"아프가니스탄",flag:"🇦🇫",continent:"asia",hint:"수도 카불, 힌두쿠시 산악국가. 역사상 정복 불가능한 나라로 유명."},
+  {name:"세인트빈센트그레나딘",flag:"🇻🇨",continent:"americas",hint:"수도 킹스타운, 카리브해 화산 섬나라. 007 비치 촬영지."},
+  {name:"나미비아",flag:"🇳🇦",continent:"africa",hint:"수도 빈트후크, 나미브 사막(세계 최고령 4천만년). 사막에 사는 코끼리 서식."}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -1136,7 +1143,10 @@ var MAP_COORDS={
 "코소보":{x:534,y:192},
 "북마케도니아":{x:536,y:195},
 "수단":{x:562,y:260},
-"소말리랜드":{x:580,y:275}};
+"소말리랜드":{x:580,y:275},
+  "아프가니스탄":{x:615,y:182},
+  "세인트빈센트그레나딘":{x:298,y:268},
+  "나미비아":{x:490,y:362}};
 
 var CHARACTERS=[
   {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터",effect:"없음",effectType:"none"},
@@ -1678,6 +1688,43 @@ var CONFUSION_PAIRS = {
   "우크라이나": ["벨라루스","러시아","폴란드"],
   "알바니아": ["북마케도니아","몬테네그로","그리스"],
   "몬테네그로": ["알바니아","세르비아","보스니아"],
+  // 오세아니아
+  "오스트레일리아": ["뉴질랜드","피지"],
+  "뉴질랜드": ["오스트레일리아","피지"],
+  "피지": ["바누아투","솔로몬제도","사모아"],
+  "바누아투": ["솔로몬제도","피지","사모아"],
+  // 중앙아시아 - 비슷한 이름/외모
+  "카자흐스탄": ["우즈베키스탄","투르크메니스탄","키르기스스탄"],
+  "우즈베키스탄": ["카자흐스탄","타지키스탄","키르기스스탄"],
+  "타지키스탄": ["우즈베키스탄","키르기스스탄","아프가니스탄"],
+  "키르기스스탄": ["카자흐스탄","우즈베키스탄","타지키스탄"],
+  // 캅카스
+  "아제르바이잔": ["아르메니아","조지아"],
+  "아르메니아": ["아제르바이잔","조지아"],
+  // 동남아
+  "라오스": ["캄보디아","미얀마","태국"],
+  "캄보디아": ["라오스","미얀마","태국"],
+  "미얀마": ["라오스","캄보디아","태국"],
+  "동티모르": ["인도네시아","동티모르"],
+  // 아프리카 동부
+  "르완다": ["부룬디","우간다"],
+  "부룬디": ["르완다","말라위"],
+  "에리트레아": ["에티오피아","지부티"],
+  "지부티": ["에리트레아","소말리아"],
+  // 서아프리카
+  "시에라리온": ["라이베리아","기니"],
+  "라이베리아": ["시에라리온","기니"],
+  "기니비사우": ["기니","세네갈"],
+  "베냉": ["토고","나이지리아"],
+  "토고": ["베냉","가나"],
+  // 카리브해
+  "자메이카": ["바베이도스","앤티가바부다"],
+  "바베이도스": ["자메이카","세인트루시아"],
+  "아이티": ["도미니카공화국","쿠바"],
+  // 중동
+  "쿠웨이트": ["바레인","카타르","오만"],
+  "바레인": ["카타르","쿠웨이트"],
+  "카타르": ["바레인","쿠웨이트","아랍에미리트"],
 };
 
 function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.innerHTML="";
@@ -1832,6 +1879,46 @@ function updateComboUI(){var c=gCombo;var d=COMBO_DATA[Math.min(c,9)];var b=docu
 // ─── RESULT ───
 function renderStarResult(correct,total){var stars=Math.ceil((correct/total)*5);var container=document.getElementById("star-row");if(!container)return;container.innerHTML="";for(var i=1;i<=5;i++){var span=document.createElement("span");span.className="star-item"+(i<=stars?"":" dim");span.textContent="⭐";container.appendChild(span);(function(el,delay){setTimeout(function(){if(!el.classList.contains("dim"))el.classList.add("lit");else el.style.opacity=".18";},delay);})(span,280+i*170);}if(stars===5)setTimeout(function(){sndPerfectChord();},280+5*170+200);}
 
+
+// ── Next Challenge Suggestion ──
+function showNextSuggestion() {
+  var el = document.getElementById('r-next-suggest');
+  var btn = document.getElementById('r-next-btn');
+  if (!el || !btn) return;
+  // Suggest based on what they just played and weaknesses
+  var suggestions = [];
+  if (gMode === 'choseong') {
+    suggestions.push({label: '🚩 국기 퀴즈 도전!', action: "startGame('flag')"});
+    if (gHistory.filter(function(h){return !h.ok;}).length > 3) {
+      suggestions.push({label: '💪 약점 집중 모드', action: 'startWeakSpotMode()'});
+    }
+  } else if (gMode === 'flag') {
+    suggestions.push({label: '🗺️ 지도 퀴즈 도전!', action: "startGame('map')"});
+  } else if (gMode === 'map') {
+    suggestions.push({label: '🔤 초성 퀴즈 도전!', action: "startGame('choseong')"});
+  } else if (gMode === 'daily') {
+    suggestions.push({label: '🔤 초성 퀴즈 도전!', action: "startGame('choseong')"});
+  } else if (gMode === 'weakspot') {
+    suggestions.push({label: '🔄 다시 약점 집중', action: 'startWeakSpotMode()'});
+  } else if (gMode && gMode.startsWith('continent_')) {
+    suggestions.push({label: '🌍 다른 대륙 도전!', action: 'showContinentPicker()'});
+  }
+  // Fallback
+  if (!suggestions.length) suggestions.push({label: '🔄 다시 하기', action: 'restartSameMode()'});
+  var pick = suggestions[0];
+  // If wrong > 5, suggest encyclopedia
+  var wrongCount = gHistory.filter(function(h){return !h.ok;}).length;
+  if (wrongCount >= 5) {
+    el.style.display = 'block';
+    btn.textContent = pick.label + ' 또는 📚 오답 복습';
+    btn.onclick = new Function(pick.action + '; el.style.display="none"');
+  } else if (suggestions.length > 0) {
+    el.style.display = 'block';
+    btn.textContent = pick.label;
+    btn.setAttribute('onclick', pick.action + '; document.getElementById("r-next-suggest").style.display="none"');
+  }
+}
+
 function endGame(){
   clearTimer();_dangerActive=false;
   document.getElementById("best-indicator").style.display="none";
@@ -1863,7 +1950,7 @@ function endGame(){
   if(diff===1)ST.streak++;else if(diff>1)ST.streak=1;ST.lastPlayedDate=t2;
   // Session bonus: 2nd+ game gets +10% coins
   if(ST.gamesPlayed>=2&&gCoins>0){var bonus=Math.floor(gCoins*0.1);if(bonus>0){gCoins+=bonus;ST.coins+=bonus;}}
-  save();checkLevelUp(prevScore,ST.totalScore);checkAch();
+  save();checkLevelUp(prevScore,ST.totalScore);checkAch();showNextSuggestion();
   document.getElementById("r-emoji").textContent=emoji;
   document.getElementById("r-title").textContent=title;
   document.getElementById("r-score").textContent=gScore;
