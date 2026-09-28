@@ -766,6 +766,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
     <button class="share-btn" onclick="copyShareText2()" style="flex:1;min-width:120px;">📤 결과 공유</button>
     <button class="share-btn" onclick="shareChallenge(gScore,gHistory.filter(function(h){return h.ok;}).length,gMode,ST.maxCombo)" style="flex:1;min-width:120px;background:linear-gradient(135deg,#0f3460,#533483);">🔗 챌린지 링크</button>
+    <button id="btn-revive" onclick="reviveGame()" style="display:none;flex:1;min-width:120px;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">💊 부활</button>
   </div>
   <button class="restart-btn" id="restart-btn-main" onclick="restartSameMode()">🔄 다시 하기</button>
   <button class="restart-btn" id="btn-continent-pick" onclick="showContinentPicker()" style="display:none;background:linear-gradient(135deg,#0ea5e9,#6366f1)">🌍 대륙 선택하기</button>
@@ -1067,7 +1068,8 @@ var MAP_COORDS={
   "크로아티아":{"x":510,"y":172},
   "키프로스":{"x":542,"y":210},
   "튀니지":{"x":492,"y":208},
-  "피지":{"x":905,"y":378}
+  "피지":{"x":905,"y":378},
+  "투르크메니스탄":{"x":637,"y":186}
 };
 
 var CHARACTERS=[
@@ -1592,7 +1594,13 @@ function nextQ(){gIdx++;if(gIdx>=gQuestions.length){endGame();return;}autosave()
 
 function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);gAnswering=true;setTimeout(nextQ,700);}
 
-function updateGameUI(){document.getElementById("g-coins").textContent=ST.coins+gCoins;document.getElementById("g-score").textContent=gScore;}
+function updateGameUI(){
+  document.getElementById("g-coins").textContent=ST.coins+gCoins;
+  var scoreEl=document.getElementById("g-score");
+  var prevScore=parseInt(scoreEl.textContent)||0;
+  scoreEl.textContent=gScore;
+  if(gScore>prevScore){scoreEl.style.transform="scale(1.3)";scoreEl.style.color="var(--gold)";setTimeout(function(){scoreEl.style.transform="";scoreEl.style.color="";},250);}
+}
 function updateComboUI(){var c=gCombo;var d=COMBO_DATA[Math.min(c,9)];var b=document.getElementById("combo-badge");b.className="combo-badge "+(d?d.cls:"c1");document.getElementById("combo-emoji").textContent=d?d.emoji:"▶️";document.getElementById("combo-num").textContent=c>0?c:"";document.getElementById("combo-label").textContent=d&&c>0?d.lbl:"콤보";if(c>0)anim(b,"combo-bump",400);}
 
 // ─── RESULT ───
@@ -1659,9 +1667,30 @@ function endGame(){
     if(isCont){restartBtn.textContent='🔄 같은 대륙 다시';}else{restartBtn.textContent='🔄 다시 하기';}
   }
   gResultFilter = "fail"; renderResultList(); // show wrong answers by default
+  // Show revive button if less than 50% correct and has coins
+  var reviveBtn = document.getElementById('btn-revive');
+  if(reviveBtn){
+    var reviveCost = 10;
+    if(pct < 0.5 && ST.coins >= reviveCost && gMode !== 'daily'){
+      reviveBtn.style.display = 'block';
+      reviveBtn.textContent = '💊 부활 (🪙' + reviveCost + ')';
+    } else {
+      reviveBtn.style.display = 'none';
+    }
+  }
   showScreen("result");
 }
 
+function reviveGame(){
+  var reviveCost = 10;
+  if(ST.coins < reviveCost){showModal('💸','코인 부족','🪙 10코인이 필요해요!',null,null,'확인',null);return;}
+  showModal('💊','부활!','🪙 10코인으로 이어서 플레이!',function(){
+    ST.coins -= reviveCost;
+    // Continue from where left off - restart same mode
+    save();
+    restartSameMode();
+  }, function(){}, '부활!', '취소');
+}
 function restartSameMode(){
   if(gMode.startsWith('continent_')){
     // Re-run same continent quiz
