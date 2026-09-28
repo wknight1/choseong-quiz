@@ -621,8 +621,8 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
           <!-- marker layer on top -->
           <g id="map-marker-layer"></g>
         </svg>
-        <div class="map-tap-hint" id="map-tap-hint"
-<div class="map-zoom-controls" style="position:absolute;bottom:10px;right:10px;display:flex;flex-direction:column;gap:4px;z-index:10;"><button class="map-zoom-btn" onclick="mapZoomIn()">+</button><button class="map-zoom-btn" onclick="mapZoomOut()">-</button></div>>👆 지도를 탭하여 위치를 선택하세요</div>
+        <div class="map-zoom-controls" style="position:absolute;bottom:10px;right:10px;display:flex;flex-direction:column;gap:4px;z-index:10;"><button class="map-zoom-btn" onclick="mapZoomIn()">+</button><button class="map-zoom-btn" onclick="mapZoomOut()">-</button></div>
+        <div class="map-tap-hint" id="map-tap-hint">👆 지도를 탭하여 위치를 선택하세요</div>
       </div>
       <div class="map-legend">
         <div class="map-legend-item"><div class="map-dot-green"></div> 정답</div>
@@ -652,7 +652,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="result-coins-earned"><span>🪙</span><span id="r-coins-num">+0</span> 코인 획득!</div>
   <div id="r-xp-row" style="text-align:center;font-size:13px;color:var(--indigo);font-weight:700;margin-top:4px;min-height:18px;"></div>
   <div class="result-tabs" id="result-tabs">
-    <button class="rtab active" id="rtab-all" onclick="filterResult('all')">전체 20</button>
+    <button class="rtab" id="rtab-all" onclick="filterResult('all')">전체 20</button>
     <button class="rtab" id="rtab-ok" onclick="filterResult('ok')">✓ 정답</button>
     <button class="rtab active fail" id="rtab-fail" onclick="filterResult('fail')">✗ 오답</button>
   </div>
@@ -761,7 +761,7 @@ var COUNTRIES=[
   {name:"남아프리카공화국",flag:"🇿🇦",hint:"🌍 아프리카 최남단 희망봉",capital:"프리토리아",continent:"africa"},
   {name:"모로코",flag:"🇲🇦",hint:"🌍 북아프리카 마그레브 사하라",capital:"라바트",continent:"africa"},
   {name:"가나",flag:"🇬🇭",hint:"🌍 서아프리카 초콜릿 카카오",capital:"아크라",continent:"africa"},
-  {name:"탄자니아",flag:"🇹🇿",hint:"🌍 동아프리카 킬리만자로",capital:"도도마",continent:"africa"},,
+  {name:"탄자니아",flag:"🇹🇿",hint:"🌍 동아프리카 킬리만자로",capital:"도도마",continent:"africa"},
   {name:"아이슬란드",flag:"🇮🇸",continent:"europe",capital:"레이캬비크",hint:"🌍 북극에 가장 가까운 유럽 화산 섬나라"},
   {name:"네팔",flag:"🇳🇵",continent:"asia",capital:"카트만두",hint:"🌏 에베레스트가 있는 히말라야 왕국"},
   {name:"볼리비아",flag:"🇧🇴",continent:"americas",capital:"수크레",hint:"🌎 우유니 소금사막이 있는 내륙국"},
@@ -791,11 +791,11 @@ var MAP_COORDS={
   "방글라데시":{x:744,y:216},"쿠바":{x:218,y:208},"베네수엘라":{x:238,y:252},
   "가나":{x:476,y:262},"탄자니아":{x:558,y:296},"에티오피아":{x:562,y:252},
   "몽골":{x:762,y:130},"캄보디아":{x:798,y:252},"우즈베키스탄":{x:660,y:158},
-  "파푸아뉴기니":{x:868,y:296},"루마니아":{x:516,y:128},"우크라이나":{x:524,y:118},
-  "미얀마":{x:772,y:218},,
-    "아이슬란드":{x:300,y:65},"네팔":{x:728,y:202},"볼리비아":{x:250,y:328},
+  "파푸아뉴기니":{x:868,y:296},"루마니아":{x:516,y:128},
+  "미얀마":{x:772,y:218},
+  "아이슬란드":{x:300,y:65},"네팔":{x:728,y:202},"볼리비아":{x:250,y:328},
   "짐바브웨":{x:520,y:358},"파나마":{x:205,y:265},
-  "쿠바":{x:210,y:238},"조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},"에티오피아":{x:363,y:268},"탄자니아":{x:367,y:307},"파키스탄":{x:484,y:214}
+  "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264}
 };
 
 var CHARACTERS=[
@@ -1661,7 +1661,6 @@ checkLevelUp = function(prev, next) {
   if (b.level > a.level) {
     showLevelUpV4(b.level);
     hapticLevelUp();
-    if (!sfxEnabled) return;
   }
   _origCheckLevelUp(prev, next);
 };
