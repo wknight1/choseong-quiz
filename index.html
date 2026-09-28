@@ -937,16 +937,15 @@ var MAP_COORDS={
   ,"북마케도니아":{x:480,y:155}
   ,"몰도바":{x:510,y:130}
   ,"가이아나":{x:285,y:285}
+  ,"사모아":{x:136,y:270}
+  ,"통가":{x:140,y:278}
+  ,"키리바시":{x:128,y:222}
+  ,"팔라우":{x:93,y:222}
+  ,"마샬군도":{x:120,y:200}
 };
 
 var CHARACTERS=[
   {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터",effect:"없음",effectType:"none"},
-    "사모아":{x:136,y:270},
-    "통가":{x:140,y:278},
-    "키리바시":{x:128,y:222},
-    "팔라우":{x:93,y:222},
-    "마샬군도":{x:120,y:200},
-
   {id:"rocket",name:"로켓맨",emoji:"🚀",price:100,desc:"정답 시 🚀 파티클",effect:"파티클 업그레이드",effectType:"animation"},
   {id:"wizard",name:"마법사",emoji:"🧙",price:300,desc:"힌트 1개 추가",effect:"hint_bonus +1",effectType:"hint_bonus",effectValue:1},
   {id:"fire",name:"불꽃전사",emoji:"🔥",price:500,desc:"콤보 3부터 1.5배",effect:"combo_boost",effectType:"combo_multiplier",effectValue:1.5,comboThreshold:3},
@@ -996,7 +995,7 @@ var TOTAL_Q=20;
 
 // ═══════════════════════ STATE ═══════════════════════
 var SK="quizmaster_v3";var ST;
-function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,mapCorrect:0,perCountry:{}};}
+function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,mapCorrect:0,perCountry:{},bestScores:{},encViewed:{}};}
 function save(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
 function load(){try{var r=localStorage.getItem(SK);if(!r)return defaultState();var s=JSON.parse(r);var m=Object.assign({},defaultState(),s);if(!Array.isArray(m.ownedCharacters))m.ownedCharacters=["basic"];if(m.ownedCharacters.indexOf("basic")<0)m.ownedCharacters.unshift("basic");return m;}catch(e){return defaultState();}}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -1473,7 +1472,7 @@ function resumeGame() {
     var arr = pool.slice(); // just shuffle fresh -- user already answered gIdx questions
     gQuestions = shuffle(arr).slice(0, TOTAL_Q);
     showScreen('game');
-    document.getElementById('g-mode-badge').textContent = gMode==='flag'?'🚩 국기':gMode==='map'?'🗺️ 지도':'🔤 초성';
+    document.getElementById('g-mode-badge').textContent = gMode==='flag'?'🚩 국기':gMode==='map'?'🗺️ 지도':gMode==='focus'?'🎯 집중':gMode==='daily'?'📅 데일리':'🔤 초성';
     document.getElementById('best-indicator').style.display = 'block';
     clearResume();
     renderQuestion(); updateGameUI();
@@ -1863,13 +1862,13 @@ function copyShareText2(){
 function _fallbackCopy(text){  try{navigator.clipboard.writeText(text).then(function(){showModal("📋","클립보드 복사!","친구에게 공유해보세요!",null,null,"확인",null);});}catch(e){showModal("📋","공유 텍스트",text,null,null,"닫기",null);}
 }
 
-function loadStats2(){var s=localStorage.getItem('quizStats2');if(s)try{return JSON.parse(s);}catch(e){}return {plays:0,totalCorrect:0,totalAnswered:0,maxCombo:0,bestScores:{choseong:0,flag:0,map:0},wrongMap:{}};}
+function loadStats2(){var s=localStorage.getItem('quizStats2');if(s)try{return JSON.parse(s);}catch(e){}return {plays:0,totalCorrect:0,totalAnswered:0,maxCombo:0,bestScores:{choseong:0,flag:0,map:0,daily:0,focus:0,weakspot:0},wrongMap:{}};}
 function saveStats2(st){localStorage.setItem('quizStats2',JSON.stringify(st));}
 function recordGameStats2(mode,score,history,maxCombo){
   var st=loadStats2();st.plays++;
   history.forEach(function(h){st.totalAnswered++;if(h.ok)st.totalCorrect++;else st.wrongMap[h.name]=(st.wrongMap[h.name]||0)+1;});
   if(maxCombo>(st.maxCombo||0))st.maxCombo=maxCombo;
-  var k=mode==='flag'?'flag':mode==='map'?'map':'choseong';
+  var k=mode==='flag'?'flag':mode==='map'?'map':mode==='daily'?'daily':mode==='focus'?'focus':mode==='weakspot'?'weakspot':'choseong';
   if(score>(st.bestScores[k]||0))st.bestScores[k]=score;
   saveStats2(st);
 }
