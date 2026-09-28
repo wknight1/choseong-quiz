@@ -84,6 +84,8 @@ body{
 .streak-fire-count{font-size:.9rem;font-weight:900;color:var(--gold);letter-spacing:-.5px}
 
 .combo-zone{width:100%;display:flex;justify-content:center;align-items:center;height:38px;margin-bottom:6px}
+.score-pop{animation:scorePop .35s cubic-bezier(.17,.67,.83,.67)}
+@keyframes scorePop{0%{transform:scale(1)}50%{transform:scale(1.5);color:#fbbf24}100%{transform:scale(1)}}
 .combo-badge{display:flex;align-items:center;gap:5px;padding:5px 16px;border-radius:99px;font-size:13px;font-weight:900;background:var(--card2);border:1.5px solid var(--border);transition:background .3s,border-color .3s}
 .combo-badge .combo-num{font-size:20px;font-weight:900;transition:color .3s}
 .combo-badge.c1{background:#111827;border-color:#374151}.combo-badge.c1 .combo-num{color:var(--combo1)}
@@ -573,7 +575,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <!-- Bottom row: Stats / Daily / Sound / Encyclopedia -->
   <div class="home-bottom-row">
     <button class="home-icon-btn" onclick="openStats()">📊<br><span style="font-size:10px;">통계</span></button>
-    <button class="home-icon-btn" id="daily-chal-main-btn" onclick="startDailyChallenge()">📅<br><span style="font-size:10px;">데일리</span></button>
+    <button class="home-icon-btn" id="daily-chal-main-btn" onclick="startDailyChallenge()">📅<br><span style="font-size:10px;">데일리</span><span id="home-streak-badge" style="display:none;font-size:9px;color:#f59e0b;font-weight:700;"></span></button>
     <button class="home-icon-btn" onclick="toggleSoundPanel()">🎵<br><span style="font-size:10px;">사운드</span></button>
     <button class="home-icon-btn" onclick="openEncyclopedia()">🌍<br><span style="font-size:10px;">도감</span></button>
   </div>
@@ -747,6 +749,14 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 <div class="screen" id="result">
   <div id="r-mode-badge" style="display:inline-block;padding:4px 14px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:8px;background:rgba(56,189,248,0.15);color:var(--sky);border:1px solid var(--sky);"></div>
   <div id="r-mode-best" style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;min-height:16px;"></div>
+  <div id="r-vs-bar" style="display:none;width:100%;max-width:320px;margin:0 auto 8px;padding:0 16px;">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px;">
+      <span>이번</span><span id="r-vs-label">vs 최고</span>
+    </div>
+    <div style="background:var(--card2);border-radius:8px;height:8px;overflow:hidden;position:relative;">
+      <div id="r-vs-fill" style="height:100%;border-radius:8px;background:linear-gradient(90deg,#22d3ee,#818cf8);transition:width 1s ease-out;width:0%"></div>
+    </div>
+  </div>
   <div class="result-emoji" id="r-emoji">🎉</div>
   <div class="result-title" id="r-title">퀴즈 완료!</div>
   <div class="star-row" id="star-row"></div>
@@ -980,6 +990,7 @@ var COUNTRIES=[
   {name:"파푸아뉴기니",flag:"🇵🇬",hint:"수도 포트모르즈비, 800여 개 언어 사용으로 세계 최다 언어 국가",capital:"포트모르즈비",continent:"oceania"},
   {name:"모리타니",flag:"🇲🇷",hint:"사하라 사막 90% 이상. 세계 최장 화물열차(3km) 운행국",capital:"누악쇼트",continent:"africa"},
   {name:"시리아",flag:"🇸🇾",hint:"세계 최고(最古) 수도 다마스쿠스, 5000년 역사. 비단길 핵심 교역로",capital:"다마스쿠스",continent:"asia"}
+  ,{name:"타지키스탄",flag:"🇹🇯",hint:"수도 두샨베, 파미르 고원의 나라. 중앙아시아 최빈국.",continent:"asia"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -1071,45 +1082,10 @@ var MAP_COORDS={
   "키프로스":{"x":542,"y":210},
   "튀니지":{"x":492,"y":208},
   "피지":{"x":905,"y":378},
-  "투르크메니스탄":{"x":637,"y":186}
-  "파나마":{x:237,y:248},
-  "코스타리카":{x:228,y:246},
-  "쿠웨이트":{x:631,y:228},
-  "모리타니":{x:451,y:247},
-  "시리아":{x:609,y:204},
-  "이라크":{x:625,y:215},
-  "과테말라":{x:206,y:253},
-  "네팔":{x:705,y:225},
-  "도미니카공화국":{x:237,y:253},
-  "동티모르":{x:780,y:293},
-  "라오스":{x:748,y:245},
-  "르완다":{x:573,y:305},
-  "리히텐슈타인":{x:514,y:170},
-  "마다가스카르":{x:604,y:338},
-  "모나코":{x:508,y:180},
-  "모잠비크":{x:590,y:330},
-  "몬테네그로":{x:541,y:185},
-  "몰타":{x:526,y:200},
-  "바누아투":{x:852,y:325},
-  "산마리노":{x:525,y:182},
-  "솔로몬제도":{x:855,y:305},
-  "스리랑카":{x:703,y:270},
-  "슬로바키아":{x:537,y:170},
-  "아이슬란드":{x:454,y:128},
-  "에리트레아":{x:601,y:258},
-  "에콰도르":{x:218,y:298},
-  "요르단":{x:606,y:216},
-  "우간다":{x:581,y:293},
-  "우루과이":{x:254,y:360},
-  "적도기니":{x:533,y:290},
-  "코트디부아르":{x:482,y:277},
-  "크로아티아":{x:532,y:179},
-  "키프로스":{x:575,y:203},
-  "투르크메니스탄":{x:648,y:203},
-  "튀니지":{x:519,y:202},
-  "피지":{x:878,y:320},
-  "모리타니":{x:285,y:235},
-  "시리아":{x:618,y:198}
+  "투르크메니스탄":{"x":637,"y":186},
+  "모리타니":{"x":451,"y":247},
+  "시리아":{"x":609,"y":204},
+  "타지키스탄":{"x":668,"y":200},
 };
 
 var CHARACTERS=[
@@ -1257,7 +1233,13 @@ function updateTodaysCountryCard(){
   el.onclick=function(){gFocusCountry=c.name;startGame('choseong');};
   el.title="탭하면 "+c.name+" 집중 퀴즈 시작!";
 }
-function updateHomeUI(){document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;
+function updateHomeUI(){
+  // Streak badge on daily button
+  var sb = document.getElementById('home-streak-badge');
+  if(sb){
+    if(ST.streak > 0){ sb.textContent = '🔥'+ST.streak; sb.style.display='block'; }
+    else { sb.style.display='none'; }
+  }document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;
   // sync per-mode best to ST for leaderboard
   var _st2=loadStats2();if(_st2&&_st2.bestScores){var _mb=_st2.bestScores;if(!ST.modeScores)ST.modeScores={};ST.modeScores.choseong=_mb.choseong||0;ST.modeScores.flag=_mb.flag||0;ST.modeScores.map=_mb.map||0;}document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();var subEl=document.getElementById("home-sub-text");if(subEl)subEl.textContent=COUNTRIES.length+"개 나라 · 초성 · 국기 · 지도로 세계 정복!";}
 
@@ -1296,7 +1278,7 @@ function startGame(mode){
   gIdx=0;gScore=0;gCombo=0;gCoins=0;gHistory=[];gAnswering=false;gMapClicked=false;_dangerActive=false;_lastAlertAt=-999;
   var eq=getEquipped();gShield=eq.effectType==="shield";
   showScreen("game");
-  document.getElementById("g-mode-badge").textContent=gMode==="flag"?"🚩 국기":gMode==="map"?"🗺️ 지도":gMode==="focus"?"🎯 집중":gMode==="daily"?"📅 데일리":"🔤 초성";
+  document.getElementById("g-mode-badge").textContent=gMode.startsWith("continent_")?"🌍 대륙":gMode==="flag"?"🚩 국기":gMode==="map"?"🗺️ 지도":gMode==="focus"?"🎯 집중":gMode==="daily"?"📅 데일리":"🔤 초성";
   document.getElementById("best-indicator").style.display="block";
   renderQuestion();updateGameUI();
 }
@@ -1632,7 +1614,7 @@ function onCorrect(el,cls,e){
 
 function nextQ(){gWrong=0;gIdx++;if(gIdx>=gQuestions.length){endGame();return;}autosave();renderQuestion();updateGameUI();}
 
-function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);gAnswering=true;setTimeout(nextQ,700);}
+function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0,skipped:true});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);showLearnCard(q);gAnswering=true;setTimeout(nextQ,1100);}
 
 function updateGameUI(){
   document.getElementById("g-coins").textContent=ST.coins+gCoins;
@@ -1683,7 +1665,7 @@ function endGame(){
   document.getElementById("r-score").textContent=correct;
   document.getElementById("r-label").textContent="/ "+gQuestions.length+" 정답  ·  "+gScore+"점";
   var tabAll=document.getElementById("rtab-all");if(tabAll)tabAll.textContent="전체 "+gQuestions.length;
-  document.getElementById("r-sub").textContent=sub;
+  document.getElementById("r-sub").textContent=sub;var _skipped=gHistory.filter(function(h){return h.skipped;}).length;if(_skipped>0)document.getElementById("r-sub").textContent+=(" | 건너뜀 "+_skipped+"회");
   document.getElementById("r-coins-num").textContent="+"+gCoins;
   // Animate coin count
   (function(){var el=document.getElementById("r-coins-num");var target=gCoins;var cur=0;var step=Math.max(1,Math.ceil(target/20));var iv=setInterval(function(){cur=Math.min(cur+step,target);el.textContent="+"+cur;if(cur>=target)clearInterval(iv);},40);})();
@@ -1695,7 +1677,10 @@ function endGame(){
   var xpGained=correct*10+Math.min(ST.maxCombo,10)*5;
   var xpEl=document.getElementById('r-xp-row');
   if(xpEl)xpEl.textContent=xpGained>0?('✨ +'+xpGained+' XP 획득'):'';
-  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점","continent_asia":"🌏 아시아","continent_europe":"🌍 유럽","continent_americas":"🌎 아메리카","continent_africa":"🌍 아프리카","continent_oceania":"🌊 오세아니아","continent_all":"🌐 전체","continent_asia_choseong":"🌏 아시아 초성","continent_asia_flag":"🌏 아시아 국기","continent_europe_choseong":"🌍 유럽 초성","continent_europe_flag":"🌍 유럽 국기","continent_americas_choseong":"🌎 아메리카 초성","continent_americas_flag":"🌎 아메리카 국기","continent_africa_choseong":"🌍 아프리카 초성","continent_africa_flag":"🌍 아프리카 국기","continent_oceania_choseong":"🌊 오세아니아 초성","continent_oceania_flag":"🌊 오세아니아 국기","continent_all_choseong":"🌐 전체 초성","continent_all_flag":"🌐 전체 국기"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=(_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점";
+  var _st3=loadStats2();var _modeNames={"choseong":"🔤 초성","flag":"🚩 국기","map":"🗺️ 지도","focus":"🎯 집중","daily":"📅 데일리","weakspot":"🎯 약점","continent_asia":"🌏 아시아","continent_europe":"🌍 유럽","continent_americas":"🌎 아메리카","continent_africa":"🌍 아프리카","continent_oceania":"🌊 오세아니아","continent_all":"🌐 전체","continent_asia_choseong":"🌏 아시아 초성","continent_asia_flag":"🌏 아시아 국기","continent_europe_choseong":"🌍 유럽 초성","continent_europe_flag":"🌍 유럽 국기","continent_americas_choseong":"🌎 아메리카 초성","continent_americas_flag":"🌎 아메리카 국기","continent_africa_choseong":"🌍 아프리카 초성","continent_africa_flag":"🌍 아프리카 국기","continent_oceania_choseong":"🌊 오세아니아 초성","continent_oceania_flag":"🌊 오세아니아 국기","continent_all_choseong":"🌐 전체 초성","continent_all_flag":"🌐 전체 국기"};var _modeBest=(_st3&&_st3.bestScores)?(_st3.bestScores[gMode]||0):0;var _modeEl=document.getElementById("r-mode-best");if(_modeEl)_modeEl.textContent=_modeBest>0?((_modeNames[gMode]||gMode)+" 최고점: "+_modeBest+"점"):"";
+  // vs-bar
+  var vsBar=document.getElementById('r-vs-bar');var vsFill=document.getElementById('r-vs-fill');var vsLabel=document.getElementById('r-vs-label');
+  if(vsBar&&vsFill&&_modeBest>0){vsBar.style.display='block';vsLabel.textContent='vs 최고 '+_modeBest+'점';var _ratio=Math.min(gScore/_modeBest,1.5);var _pct=Math.min(_ratio/1.5*100,100);setTimeout(function(){vsFill.style.width=_pct+'%';vsFill.style.background=gScore>=_modeBest?'linear-gradient(90deg,#22c55e,#84cc16)':'linear-gradient(90deg,#22d3ee,#818cf8)';},300);}
   renderStarResult(correct,gQuestions.length);
   // New record badge
   var nrEl=document.getElementById('r-new-record');
@@ -1712,10 +1697,9 @@ function endGame(){
   // Show revive button if less than 50% correct and has coins
   var reviveBtn = document.getElementById('btn-revive');
   if(reviveBtn){
-    var reviveCost = 10;
     if(pct < 0.5 && ST.coins >= reviveCost && gMode !== 'daily'){
       reviveBtn.style.display = 'block';
-      reviveBtn.textContent = '💊 부활 (🪙' + reviveCost + ')';
+      reviveBtn.textContent = '💊 부활 (🪙5)';
     } else {
       reviveBtn.style.display = 'none';
     }
@@ -1724,9 +1708,9 @@ function endGame(){
 }
 
 function reviveGame(){
-  var reviveCost = 10;
-  if(ST.coins < reviveCost){showModal('💸','코인 부족','🪙 10코인이 필요해요!',null,null,'확인',null);return;}
-  showModal('💊','부활!','🪙 10코인으로 이어서 플레이!',function(){
+  var reviveCost = 5;
+  if(ST.coins < reviveCost){showModal('💸','코인 부족','🪙 5코인이 필요해요!',null,null,'확인',null);return;}
+  showModal('💊','부활!','🪙 5코인으로 이어서 플레이!',function(){
     ST.coins -= reviveCost;
     // Continue from where left off - restart same mode
     save();
