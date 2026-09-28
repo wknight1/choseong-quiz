@@ -675,6 +675,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="result-sub" id="r-sub"></div>
   <div class="result-coins-earned"><span>🪙</span><span id="r-coins-num">+0</span> 코인 획득!</div>
   <div id="r-xp-row" style="text-align:center;font-size:13px;color:var(--indigo);font-weight:700;margin-top:4px;min-height:18px;"></div>
+  <div id="r-new-record" style="display:none;text-align:center;font-size:15px;font-weight:900;color:var(--gold);background:rgba(251,191,36,0.15);border:1.5px solid var(--gold);border-radius:12px;padding:6px 20px;margin:6px auto;max-width:200px;animation:popIn .35s cubic-bezier(.34,1.56,.64,1);">🎉 신기록!</div>
   <div class="result-tabs" id="result-tabs">
     <button class="rtab" id="rtab-all" onclick="filterResult('all')">전체 20</button>
     <button class="rtab" id="rtab-ok" onclick="filterResult('ok')">✓ 정답</button>
@@ -808,6 +809,11 @@ var COUNTRIES=[
   {name:"앙골라",flag:"🇦🇴",capital:"루안다",continent:"africa",hint:"남부 아프리카, 아프리카에서 포르투갈어 사용"},
   {name:"피지",flag:"🇫🇯",capital:"수바",continent:"oceania",hint:"남태평양의 섬나라, 럭비 강국"},
   {name:"바누아투",flag:"🇻🇺",capital:"포트빌라",continent:"oceania",hint:"태평양 작은 섬나라, 행복 지수 높기로 유명"},
+  {name:"솔로몬제도",flag:"🇸🇧",capital:"호니아라",continent:"oceania",hint:"🌏 남태평양 수천 개의 섬으로 이루어진 나라"},
+  {name:"모잠비크",flag:"🇲🇿",capital:"마푸투",continent:"africa",hint:"🌍 아프리카 동남부, 인도양 연안의 나라"},
+  {name:"르완다",flag:"🇷🇼",capital:"키갈리",continent:"africa",hint:"🌍 아프리카 천 개의 언덕의 나라"},
+  {name:"에콰도르",flag:"🇪🇨",capital:"키토",continent:"americas",hint:"🌎 적도가 지나는 나라 (에콰도르=스페인어로 적도)"},
+  {name:"과테말라",flag:"🇬🇹",capital:"과테말라시티",continent:"americas",hint:"🌎 중앙아메리카 마야 문명의 땅"},
   {name:"파라과이",flag:"🇵🇾",capital:"아순시온",continent:"southamerica",hint:"남아메리카 내륙국, 과라니어 공용어"},
   {name:"쿠웨이트",flag:"🇰🇼",capital:"쿠웨이트시티",continent:"asia",hint:"페르시아만 산유국, 세계 최고 수준 1인당 GDP"},
   {name:"요르단",flag:"🇯🇴",capital:"암만",continent:"asia",hint:"장밋빛 도시 페트라의 나라, 사막 왕국"},
@@ -844,7 +850,8 @@ var MAP_COORDS={
   "짐바브웨":{x:520,y:358},"파나마":{x:205,y:265},
   "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},
   "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
-  "피지":{x:880,y:330},"바누아투":{x:862,y:320},"파라과이":{x:290,y:380},"쿠웨이트":{x:605,y:225},"요르단":{x:580,y:222},"튀니지":{x:495,y:188},"도미니카공화국":{x:257,y:255}
+  "피지":{x:880,y:330},"바누아투":{x:862,y:320},"파라과이":{x:290,y:380},"쿠웨이트":{x:605,y:225},"요르단":{x:580,y:222},"튀니지":{x:495,y:188},"도미니카공화국":{x:257,y:255},
+  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240}
 };
 
 var CHARACTERS=[
