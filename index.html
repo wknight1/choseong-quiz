@@ -986,11 +986,15 @@ var COUNTRIES=[
   // 추가 나라 v58 - 아프리카/오세아니아 보강
   {name:"토고",flag:"🇹🇬",hint:"수도 로메, 아프리카에서 가장 좁고 긴 나라 중 하나. 커피·코코아 주요 수출",capital:"로메",continent:"africa"},
   {name:"베냉",flag:"🇧🇯",hint:"수도 포르토노보, 부두교 발상지이며 아프리카 프랑스어권 소국",capital:"포르토노보",continent:"africa"},
-  {name:"가봉",flag:"🇬🇦",hint:"수도 리브르빌, 석유 부국으로 적도 밀림의 80%를 보유",capital:"리브르빌",continent:"africa"}
   {name:"파푸아뉴기니",flag:"🇵🇬",hint:"수도 포트모르즈비, 800여 개 언어 사용으로 세계 최다 언어 국가",capital:"포트모르즈비",continent:"oceania"},
   {name:"모리타니",flag:"🇲🇷",hint:"사하라 사막 90% 이상. 세계 최장 화물열차(3km) 운행국",capital:"누악쇼트",continent:"africa"},
   {name:"시리아",flag:"🇸🇾",hint:"세계 최고(最古) 수도 다마스쿠스, 5000년 역사. 비단길 핵심 교역로",capital:"다마스쿠스",continent:"asia"}
   ,{name:"타지키스탄",flag:"🇹🇯",hint:"수도 두샨베, 파미르 고원의 나라. 중앙아시아 최빈국.",continent:"asia"}
+  {name:"세르비아",flag:"🇷🇸",hint:"수도 베오그라드, 발칸반도 중심. 니콜라 테슬라의 고향",capital:"베오그라드",continent:"europe"},
+  {name:"보스니아헤르체고비나",flag:"🇧🇦",hint:"수도 사라예보, 1차 세계대전 발발지. 발칸 다문화 국가",capital:"사라예보",continent:"europe"},
+  {name:"가봉",flag:"🇬🇦",hint:"수도 리브르빌, 중앙아프리카 석유 부국. 열대우림 85%",capital:"리브르빌",continent:"africa"},
+  {name:"중앙아프리카공화국",flag:"🇨🇫",hint:"수도 방기, 아프리카 내륙 최빈국 중 하나. 다이아몬드 산지",capital:"방기",continent:"africa"},
+  
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -1039,8 +1043,7 @@ var MAP_COORDS={
   "수리남":{x:275,y:248},
   "잠비아":{x:537,y:300},
   "소말리아":{x:575,y:245},
-  "콩고민주공화국":{x:520,y:275},"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220},"남수단":{x:525,y:248},"아제르바이잔":{x:545,y:148},"조지아":{x:542,y:143},"안도라":{x:440,y:149},"콩고공화국":{x:510,y:268},"세이셸":{x:555,y:278},"베냉":{x:475,y:242},"토고":{x:467,y:244},"가봉":{x:510,y:275},
-  "시에라리온":{x:163,y:237},
+  "콩고민주공화국":{x:520,y:275},"아르메니아":{x:543,y:155},"알제리":{x:455,y:178},"아이티":{x:247,y:220},"남수단":{x:525,y:248},"아제르바이잔":{x:545,y:148},"조지아":{x:542,y:143},"안도라":{x:440,y:149},"콩고공화국":{x:510,y:268},"세이셸":{x:555,y:278},"베냉":{x:475,y:242},"토고":{x:467,y:244},"시에라리온":{x:163,y:237},
   "라이베리아":{x:162,y:248},
   "부룬디":{x:254,y:270},
   "지부티":{x:275,y:235}
@@ -1086,6 +1089,20 @@ var MAP_COORDS={
   "모리타니":{"x":451,"y":247},
   "시리아":{"x":609,"y":204},
   "타지키스탄":{"x":668,"y":200},
+  "세르비아":{x:520,y:183},
+  "보스니아헤르체고비나":{x:513,y:185},
+  "가봉":{x:470,y:340},
+  "중앙아프리카공화국":{x:490,y:330},
+  "수리남":{x:315,y:305},
+
+  "과테말라":{x:175,y:228},"네팔":{x:738,y:192},"도미니카공화국":{x:230,y:218},"동티모르":{x:840,y:290},"라오스":{x:800,y:230},
+  "르완다":{x:540,y:300},"리히텐슈타인":{x:482,y:130},"마다가스카르":{x:568,y:345},"모나코":{x:474,y:136},"모리타니":{x:446,y:210},
+  "모잠비크":{x:548,y:328},"몬테네그로":{x:510,y:155},"몰타":{x:494,y:155},"바누아투":{x:908,y:330},"산마리노":{x:488,y:138},
+  "솔로몬제도":{x:900,y:300},"스리랑카":{x:732,y:238},"슬로바키아":{x:503,y:128},"시리아":{x:556,y:175},"아이슬란드":{x:440,y:88},
+  "에리트레아":{x:558,y:230},"에콰도르":{x:246,y:286},"요르단":{x:548,y:188},"우간다":{x:542,y:286},"우루과이":{x:264,y:340},
+  "적도기니":{x:472,y:322},"코스타리카":{x:188,y:240},"코트디부아르":{x:468,y:274},"쿠웨이트":{x:576,y:195},"크로아티아":{x:500,y:148},
+  "키프로스":{x:538,y:163},"타지키스탄":{x:676,y:188},"투르크메니스탄":{x:640,y:180},"튀니지":{x:488,y:170},"피지":{x:926,y:340},
+
 };
 
 var CHARACTERS=[
@@ -1654,7 +1671,7 @@ function endGame(){
   if(gMode==='focus')ST.focusCompleted=(ST.focusCompleted||0)+1;
   if(gMode==='daily'){ST.dailyCompleted=(ST.dailyCompleted||0)+1;}
   if(!ST.modesSet)ST.modesSet={};
-  ST.modesSet[gMode]=true;ST.modesPlayed=Object.keys(ST.modesSet).length;if(['choseong','flag','map'].indexOf(gMode)>=0){if(!ST.realModesSet)ST.realModesSet={};ST.realModesSet[gMode]=true;}
+  ST.modesSet[gMode]=true;ST.modesPlayed=Object.keys(ST.modesSet).length;var _baseMode=gMode.replace(/^continent_[a-z]+_/,'');if(['choseong','flag','map'].indexOf(_baseMode)>=0||(gMode.startsWith('continent_')&&!gMode.includes('_choseong')&&!gMode.includes('_flag'))){if(!ST.realModesSet)ST.realModesSet={};ST.realModesSet[_baseMode||gMode]=true;}
   var t2=today();var diff=daysBetween(ST.lastPlayedDate,t2);
   if(diff===1)ST.streak++;else if(diff>1)ST.streak=1;ST.lastPlayedDate=t2;
   // Session bonus: 2nd+ game gets +10% coins
@@ -1662,15 +1679,15 @@ function endGame(){
   save();checkLevelUp(prevScore,ST.totalScore);checkAch();
   document.getElementById("r-emoji").textContent=emoji;
   document.getElementById("r-title").textContent=title;
-  document.getElementById("r-score").textContent=correct;
-  document.getElementById("r-label").textContent="/ "+gQuestions.length+" 정답  ·  "+gScore+"점";
+  document.getElementById("r-score").textContent=gScore;
+  document.getElementById("r-label").textContent=correct+"/"+gQuestions.length+" 정답";
   var tabAll=document.getElementById("rtab-all");if(tabAll)tabAll.textContent="전체 "+gQuestions.length;
   document.getElementById("r-sub").textContent=sub;var _skipped=gHistory.filter(function(h){return h.skipped;}).length;if(_skipped>0)document.getElementById("r-sub").textContent+=(" | 건너뜀 "+_skipped+"회");
   document.getElementById("r-coins-num").textContent="+"+gCoins;
   // Animate coin count
   (function(){var el=document.getElementById("r-coins-num");var target=gCoins;var cur=0;var step=Math.max(1,Math.ceil(target/20));var iv=setInterval(function(){cur=Math.min(cur+step,target);el.textContent="+"+cur;if(cur>=target)clearInterval(iv);},40);})();
   // Mode badge
-  var modeLabels={choseong:'🔤 초성 퀴즈',flag:'🚩 국기 퀴즈',map:'🗺️ 지도 퀴즈',focus:'🎯 집중 퀴즈',daily:'📅 데일리 챌린지'};
+  var modeLabels={choseong:'🔤 초성 퀴즈',flag:'🚩 국기 퀴즈',map:'🗺️ 지도 퀴즈',focus:'🎯 집중 퀴즈',daily:'📅 데일리 챌린지',weakspot:'🎯 약점 집중',continent_asia:'🌏 아시아 지도',continent_europe:'🌍 유럽 지도',continent_americas:'🌎 아메리카 지도',continent_africa:'🌍 아프리카 지도',continent_oceania:'🌊 오세아니아 지도',continent_all:'🌐 전체 지도',continent_asia_choseong:'🌏 아시아 초성',continent_asia_flag:'🌏 아시아 국기',continent_europe_choseong:'🌍 유럽 초성',continent_europe_flag:'🌍 유럽 국기',continent_americas_choseong:'🌎 아메리카 초성',continent_americas_flag:'🌎 아메리카 국기',continent_africa_choseong:'🌍 아프리카 초성',continent_africa_flag:'🌍 아프리카 국기',continent_oceania_choseong:'🌊 오세아니아 초성',continent_oceania_flag:'🌊 오세아니아 국기',continent_all_choseong:'🌐 전체 초성',continent_all_flag:'🌐 전체 국기'};
   var mb=document.getElementById('r-mode-badge');
   if(mb)mb.textContent=modeLabels[gMode]||gMode;
   // XP row: show XP gained (10 per correct + combo bonus)
@@ -1695,6 +1712,7 @@ function endGame(){
   }
   gResultFilter = "fail"; renderResultList(); // show wrong answers by default
   // Show revive button if less than 50% correct and has coins
+  var reviveCost = 5;
   var reviveBtn = document.getElementById('btn-revive');
   if(reviveBtn){
     if(pct < 0.5 && ST.coins >= reviveCost && gMode !== 'daily'){
