@@ -121,7 +121,7 @@ body{
 .submit-btn:active{opacity:.8;transform:scale(.97)}
 
 .flag-choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
-.choice-btn{background:var(--bg);border:2px solid var(--border);color:var(--fg);font-size:14px;font-weight:700;padding:14px 10px;border-radius:14px;cursor:pointer;text-align:center;-webkit-appearance:none;font-family:inherit;transition:border-color .2s,background .2s,transform .1s;line-height:1.3}
+.choice-btn{background:var(--bg);border:2px solid var(--border);color:var(--fg);min-height:72px;font-size:14px;font-weight:700;padding:14px 10px;border-radius:14px;cursor:pointer;text-align:center;-webkit-appearance:none;font-family:inherit;transition:border-color .2s,background .2s,transform .1s;line-height:1.3}
 .choice-btn:active{transform:scale(.97)}
 .choice-btn.correct-choice{border-color:var(--green);background:#052e16;color:var(--green)}
 .choice-btn.wrong-choice{border-color:var(--red);background:#2d0b0b;color:var(--red)}
@@ -433,7 +433,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <!-- Bottom row: Stats / Daily / Sound -->
   <div class="home-bottom-row">
     <button class="home-icon-btn" onclick="openStats()">📊<br><span style="font-size:10px;">통계</span></button>
-    <button class="home-icon-btn" onclick="startDailyChallenge()">📅<br><span style="font-size:10px;">데일리</span></button>
+    <button class="home-icon-btn" id="daily-chal-main-btn" onclick="startDailyChallenge()">📅<br><span style="font-size:10px;">데일리</span></button>
     <button class="home-icon-btn" onclick="toggleSoundPanel()">🎵<br><span style="font-size:10px;">사운드</span></button>
   </div>
 
@@ -652,6 +652,35 @@ var COUNTRIES=[
   {name:"그리스",flag:"🇬🇷",hint:"🌍 남유럽 민주주의",capital:"아테네",continent:"europe"},
   {name:"터키",flag:"🇹🇷",hint:"🌍🌏 두 대륙",capital:"앙카라",continent:"asia"},
   {name:"이집트",flag:"🇪🇬",hint:"🌍 북아프리카 피라미드",capital:"카이로",continent:"africa"},
+  {name:"나이지리아",flag:"🇳🇬",hint:"🌍 아프리카 인구 1위",capital:"아부자",continent:"africa"},
+  {name:"케냐",flag:"🇰🇪",hint:"🌍 동아프리카 마라톤",capital:"나이로비",continent:"africa"},
+  {name:"남아프리카공화국",flag:"🇿🇦",hint:"🌍 아프리카 최남단",capital:"프리토리아",continent:"africa"},
+  {name:"모로코",flag:"🇲🇦",hint:"🌍 북아프리카 마그레브",capital:"라바트",continent:"africa"},
+  {name:"에티오피아",flag:"🇪🇹",hint:"🌍 동아프리카 커피 원산지",capital:"아디스아바바",continent:"africa"},
+  {name:"그리스",flag:"🇬🇷",hint:"🌍 남유럽 올림픽 발상지",capital:"아테네",continent:"europe"},
+  {name:"스웨덴",flag:"🇸🇪",hint:"🌍 북유럽 바이킹",capital:"스톡홀름",continent:"europe"},
+  {name:"노르웨이",flag:"🇳🇴",hint:"🌍 북유럽 피요르드",capital:"오슬로",continent:"europe"},
+  {name:"덴마크",flag:"🇩🇰",hint:"🌍 북유럽 레고",capital:"코펜하겐",continent:"europe"},
+  {name:"핀란드",flag:"🇫🇮",hint:"🌍 북유럽 산타클로스",capital:"헬싱키",continent:"europe"},
+  {name:"폴란드",flag:"🇵🇱",hint:"🌍 동유럽 피에로기",capital:"바르샤바",continent:"europe"},
+  {name:"체코",flag:"🇨🇿",hint:"🌍 중부유럽 맥주 1위",capital:"프라하",continent:"europe"},
+  {name:"헝가리",flag:"🇭🇺",hint:"🌍 중부유럽 도나우강",capital:"부다페스트",continent:"europe"},
+  {name:"루마니아",flag:"🇷🇴",hint:"🌍 동유럽 드라큘라",capital:"부쿠레슈티",continent:"europe"},
+  {name:"칠레",flag:"🇨🇱",hint:"🌎 남아메리카 가장 긴 나라",capital:"산티아고",continent:"americas"},
+  {name:"콜롬비아",flag:"🇨🇴",hint:"🌎 남아메리카 커피",capital:"보고타",continent:"americas"},
+  {name:"페루",flag:"🇵🇪",hint:"🌎 남아메리카 마추픽추",capital:"리마",continent:"americas"},
+  {name:"베네수엘라",flag:"🇻🇪",hint:"🌎 남아메리카 석유 최대",capital:"카라카스",continent:"americas"},
+  {name:"쿠바",flag:"🇨🇺",hint:"🌎 카리브해 시가",capital:"아바나",continent:"americas"},
+  {name:"이란",flag:"🇮🇷",hint:"🌏 중동 페르시아",capital:"테헤란",continent:"asia"},
+  {name:"이라크",flag:"🇮🇶",hint:"🌏 중동 메소포타미아",capital:"바그다드",continent:"asia"},
+  {name:"아랍에미리트",flag:"🇦🇪",hint:"🌏 중동 두바이",capital:"아부다비",continent:"asia"},
+  {name:"이스라엘",flag:"🇮🇱",hint:"🌏 중동 성지",capital:"예루살렘",continent:"asia"},
+  {name:"카자흐스탄",flag:"🇰🇿",hint:"🌏 중앙아시아 최대 내륙국",capital:"아스타나",continent:"asia"},
+  {name:"우즈베키스탄",flag:"🇺🇿",hint:"🌏 중앙아시아 실크로드",capital:"타슈켄트",continent:"asia"},
+  {name:"몽골",flag:"🇲🇳",hint:"🌏 내륙 유목민 제국",capital:"울란바토르",continent:"asia"},
+  {name:"미얀마",flag:"🇲🇲",hint:"🌏 동남아 황금 사원",capital:"네피도",continent:"asia"},
+  {name:"캄보디아",flag:"🇰🇭",hint:"🌏 동남아 앙코르와트",capital:"프놈펜",continent:"asia"},
+  {name:"파푸아뉴기니",flag:"🇵🇬",hint:"🌏 오세아니아 열대우림",capital:"포트모르즈비",continent:"oceania"},
   {name:"남아프리카공화국",flag:"🇿🇦",hint:"🌍 아프리카 최남단",capital:"프리토리아",continent:"africa"},
   {name:"케냐",flag:"🇰🇪",hint:"🌍 동아프리카 사바나",capital:"나이로비",continent:"africa"},
   {name:"나이지리아",flag:"🇳🇬",hint:"🌍 서아프리카 최다인구",capital:"아부자",continent:"africa"},
@@ -844,7 +873,7 @@ function renderQuestion(){
     setTimeout(function(){inp.focus();},60);
   } else if(gMode==="flag"){
     document.getElementById("flag-mode").style.display="";
-    document.getElementById("q-flag").textContent=q.flag;
+    document.getElementById("q-flag").textContent=q.flag;var contMap={"asia":"아시아","europe":"유럽","americas":"아메리카","africa":"아프리카","oceania":"오세아니아"};document.getElementById("q-badge").textContent="🌍 "+(contMap[q.continent]||q.continent)+" 국기";
     renderFlagChoices(q);
   } else {
     document.getElementById("map-mode").style.display="flex";
@@ -874,8 +903,8 @@ function showHints(){var q=gQuestions[gIdx];var ha=document.getElementById("hint
 function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1){document.getElementById("feedback").textContent="❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className="feedback fail";showHints();gHintsUsed=1;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째)";document.getElementById("feedback").className="feedback fail";}triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
 
 // ─── 국기 ───
-function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.innerHTML="";var same=COUNTRIES.filter(function(c){return c.continent===q.continent&&c.name!==q.name;});var others=COUNTRIES.filter(function(c){return c.continent!==q.continent&&c.name!==q.name;});var pool=shuffle(same).concat(shuffle(others));var choices=shuffle([q].concat(pool.slice(0,3)));choices.forEach(function(c){var btn=document.createElement("button");btn.className="choice-btn";btn.textContent=c.name;btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
-function onFlagChoice(chosen,correct,btn,e){if(gAnswering)return;var ok=chosen.name===correct.name;if(ok){btn.classList.add("correct-choice");onCorrect(btn,"",e);}else{btn.classList.add("wrong-choice");anim(btn,"shake",400);var btns=document.querySelectorAll(".choice-btn");btns.forEach(function(b){if(b.textContent===correct.name)b.classList.add("reveal-choice");});gWrong++;if(gWrong===1)document.getElementById("q-badge").textContent="💡 힌트: "+correct.hint;if(gShield&&gWrong===1){gShield=false;document.getElementById("feedback").textContent="🛡 방어막! 콤보 유지!";document.getElementById("feedback").className="feedback info";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);setTimeout(function(){document.getElementById("flag-choices").innerHTML="";renderFlagChoices(correct);document.getElementById("feedback").textContent="";},800);return;}gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;document.getElementById("feedback").className="feedback fail";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);gCombo=0;updateComboUI();gAnswering=true;btns.forEach(function(b){b.disabled=true;});setTimeout(nextQ,1000);}}
+function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.innerHTML="";var same=COUNTRIES.filter(function(c){return c.continent===q.continent&&c.name!==q.name;});var others=COUNTRIES.filter(function(c){return c.continent!==q.continent&&c.name!==q.name;});var pool=shuffle(same).concat(shuffle(others));var choices=shuffle([q].concat(pool.slice(0,3)));choices.forEach(function(c){var btn=document.createElement("button");btn.className="choice-btn";btn.innerHTML='<span style="font-size:1.6em;display:block;margin-bottom:3px">'+c.flag+'</span><span style="font-size:13px">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
+function onFlagChoice(chosen,correct,btn,e){if(gAnswering)return;var ok=chosen.name===correct.name;if(ok){btn.classList.add("correct-choice");onCorrect(btn,"",e);}else{btn.classList.add("wrong-choice");anim(btn,"shake",400);var btns=document.querySelectorAll(".choice-btn");btns.forEach(function(b){if(b.innerHTML.includes(correct.name)||b.textContent===correct.name)b.classList.add("reveal-choice");});gWrong++;if(gWrong===1)document.getElementById("q-badge").textContent="💡 힌트: "+correct.hint;if(gShield&&gWrong===1){gShield=false;document.getElementById("feedback").textContent="🛡 방어막! 콤보 유지!";document.getElementById("feedback").className="feedback info";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);setTimeout(function(){document.getElementById("flag-choices").innerHTML="";renderFlagChoices(correct);document.getElementById("feedback").textContent="";},800);return;}gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;document.getElementById("feedback").className="feedback fail";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);gCombo=0;updateComboUI();gAnswering=true;btns.forEach(function(b){b.disabled=true;});setTimeout(nextQ,1000);}}
 
 // ─── 지도 ───
 document.getElementById("map-svg-container").addEventListener("click",onMapClick);
@@ -1000,9 +1029,9 @@ function endGame(){
   gHistory.forEach(function(h,idx){
     var div=document.createElement("div");div.className="result-item";
     var q=gQuestions[idx];
-    var left=gMode==="map"?(q?q.flag+" ":""):(gMode==="choseong"?getCS(h.name)+"→ ":"");
+    var left=(q?q.flag+" ":"")+(gMode==="choseong"?getCS(h.name)+"→ ":(gMode==="map"?"":""));
     var rt=h.ok?"✓ "+(h.pts||"")+"점":h.userAns==="(건너뜀)"?"⏭":h.userAns==="(시간초과)"?"⏱":"✗ "+(h.userAns||"?");
-    div.innerHTML='<span class="r-left">'+left+'<b style="color:var(--fg)">'+h.name+'</b></span><span class="r-right '+(h.ok?"ok2":"fail2")+'">'+rt+'</span>';
+    var cap=q?(" · "+q.capital):"";div.innerHTML='<span class="r-left">'+left+'<b style="color:var(--fg)">'+h.name+'</b><span style="color:var(--muted);font-size:11px">'+cap+'</span></span><span class="r-right '+(h.ok?"ok2":"fail2")+'">'+rt+'</span>';
     list.appendChild(div);
   });
   showScreen("result");
