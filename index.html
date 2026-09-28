@@ -36,9 +36,7 @@ body{
 .home-title span{background:linear-gradient(135deg,var(--sky),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .home-sub{font-size:13px;color:var(--sub);text-align:center}
 .stat-row{display:flex;gap:10px;width:100%}
-.stat-card{flex:1;background:var(--card);border-radius:14px;padding:12px;text-align:center;border:1px solid var(--border)}
-.stat-val{font-size:20px;font-weight:800;color:var(--gold)}
-.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.stat-row .stat-card{flex:1;background:var(--card);border-radius:14px;padding:12px;text-align:center;border:1px solid var(--border)}.stat-val{font-size:20px;font-weight:800;color:var(--gold)}
 .daily-banner{width:100%;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1.5px solid var(--gold);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:opacity .15s}
 .daily-banner:active{opacity:.8}
 .db-icon{font-size:26px}.db-text{flex:1}
@@ -263,7 +261,6 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 .card-slide-in{animation:cardSlideIn .45s cubic-bezier(.34,1.56,.64,1) forwards}
 .card-exit-left{animation:cardExitLeft .35s ease-in forwards}
 .card-exit-right{animation:cardExitRight .35s ease-in forwards}
-.diff-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
 .diff-btn{flex:1;min-width:60px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;color:var(--sub);font-size:12px;font-weight:700;padding:8px 4px;cursor:pointer;-webkit-appearance:none;font-family:inherit;transition:border-color .2s,color .2s;}
 .diff-btn.active{border-color:var(--sky);color:var(--sky);background:rgba(56,189,248,.08);}
 .lives-row{display:flex;justify-content:center;gap:6px;margin-bottom:6px;min-height:28px;}
@@ -272,19 +269,14 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 @keyframes heartFlash{0%{transform:scale(1)}20%{transform:scale(.5);opacity:.3}50%{transform:scale(1.3);opacity:1}100%{transform:scale(1)}}
 .heart-icon.flashing{animation:heartFlash .6s ease;}
 .stat-card{background:var(--card);border-radius:14px;padding:16px 12px;text-align:center;border:1.5px solid var(--border);}
+#stats-screen .stat-card{border:1.5px solid var(--border);}
 #stats-screen .stat-val{font-size:28px;font-weight:900;color:var(--sky);line-height:1;margin-bottom:4px;}
 .stat-lbl{font-size:11px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
-.sound-panel{background:var(--card);border-radius:16px;padding:16px;border:1.5px solid var(--border);display:none;margin-bottom:12px;}
-.sound-panel.open{display:block;}
-.sound-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);gap:8px;}
-.sound-row:last-child{border-bottom:none;}
 .sound-label{font-size:13px;color:var(--sub);font-weight:600;white-space:nowrap;}
 .toggle-btn2{width:44px;height:24px;border-radius:99px;border:none;cursor:pointer;background:var(--border);position:relative;transition:background .2s;flex-shrink:0;}
 .toggle-btn2::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;}
 .toggle-btn2.on{background:var(--sky);}
 .toggle-btn2.on::after{left:23px;}
-.preset-btn{background:var(--bg);border:1.5px solid var(--border);color:var(--sub);font-size:11px;font-weight:700;padding:5px 8px;border-radius:8px;cursor:pointer;-webkit-appearance:none;font-family:inherit;white-space:nowrap;}
-.preset-btn.active{border-color:var(--sky);color:var(--sky);background:rgba(56,189,248,.08);}
 .challenge-popup{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:980;padding:24px;}
 .challenge-card{background:var(--card);border-radius:24px;padding:28px 24px;text-align:center;width:100%;max-width:360px;border:2px solid var(--sky);}
 .daily-chal-btn{width:100%;background:linear-gradient(135deg,#0f3460,#16213e);border:1.5px solid var(--sky);color:var(--sky);font-size:14px;font-weight:700;padding:13px;border-radius:14px;cursor:pointer;-webkit-appearance:none;font-family:inherit;margin-bottom:8px;}
@@ -553,7 +545,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
         <div class="hint-chips" id="hint-chips"></div>
       </div>
       <div class="word-hint-row" id="word-hint-row" style="display:none"></div>
-      <div class="input-row">
+      <div class="input-row" id="text-input-row">
         <input class="answer-input" id="ans-input" type="text" placeholder="나라 이름 입력…"
           autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text">
         <button class="submit-btn" onclick="submitChoseong()">→</button>
@@ -1634,6 +1626,7 @@ endGame = function() {
 // ── INIT v4 ──
 loadTheme();
 loadDifficulty2();
+loadChoiceMode();
 setTimeout(function(){ checkChallengeParam2(); updateDailyChalBtn(); }, 300);
 // Override startGame to init lives
 var _origStartGame = startGame;
