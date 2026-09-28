@@ -977,7 +977,9 @@ var COUNTRIES=[
   {name:"토고",flag:"🇹🇬",hint:"수도 로메, 아프리카에서 가장 좁고 긴 나라 중 하나. 커피·코코아 주요 수출",capital:"로메",continent:"africa"},
   {name:"베냉",flag:"🇧🇯",hint:"수도 포르토노보, 부두교 발상지이며 아프리카 프랑스어권 소국",capital:"포르토노보",continent:"africa"},
   {name:"가봉",flag:"🇬🇦",hint:"수도 리브르빌, 석유 부국으로 적도 밀림의 80%를 보유",capital:"리브르빌",continent:"africa"}
-  {name:"파푸아뉴기니",flag:"🇵🇬",hint:"수도 포트모르즈비, 800여 개 언어 사용으로 세계 최다 언어 국가",capital:"포트모르즈비",continent:"oceania"}
+  {name:"파푸아뉴기니",flag:"🇵🇬",hint:"수도 포트모르즈비, 800여 개 언어 사용으로 세계 최다 언어 국가",capital:"포트모르즈비",continent:"oceania"},
+  {name:"모리타니",flag:"🇲🇷",hint:"사하라 사막 90% 이상. 세계 최장 화물열차(3km) 운행국",capital:"누악쇼트",continent:"africa"},
+  {name:"시리아",flag:"🇸🇾",hint:"세계 최고(最古) 수도 다마스쿠스, 5000년 역사. 비단길 핵심 교역로",capital:"다마스쿠스",continent:"asia"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -1076,6 +1078,38 @@ var MAP_COORDS={
   "모리타니":{x:451,y:247},
   "시리아":{x:609,y:204},
   "이라크":{x:625,y:215},
+  "과테말라":{x:206,y:253},
+  "네팔":{x:705,y:225},
+  "도미니카공화국":{x:237,y:253},
+  "동티모르":{x:780,y:293},
+  "라오스":{x:748,y:245},
+  "르완다":{x:573,y:305},
+  "리히텐슈타인":{x:514,y:170},
+  "마다가스카르":{x:604,y:338},
+  "모나코":{x:508,y:180},
+  "모잠비크":{x:590,y:330},
+  "몬테네그로":{x:541,y:185},
+  "몰타":{x:526,y:200},
+  "바누아투":{x:852,y:325},
+  "산마리노":{x:525,y:182},
+  "솔로몬제도":{x:855,y:305},
+  "스리랑카":{x:703,y:270},
+  "슬로바키아":{x:537,y:170},
+  "아이슬란드":{x:454,y:128},
+  "에리트레아":{x:601,y:258},
+  "에콰도르":{x:218,y:298},
+  "요르단":{x:606,y:216},
+  "우간다":{x:581,y:293},
+  "우루과이":{x:254,y:360},
+  "적도기니":{x:533,y:290},
+  "코트디부아르":{x:482,y:277},
+  "크로아티아":{x:532,y:179},
+  "키프로스":{x:575,y:203},
+  "투르크메니스탄":{x:648,y:203},
+  "튀니지":{x:519,y:202},
+  "피지":{x:878,y:320},
+  "모리타니":{x:285,y:235},
+  "시리아":{x:618,y:198}
 };
 
 var CHARACTERS=[
@@ -1344,13 +1378,7 @@ function showHints(){
   });
   document.getElementById("hint-area").classList.add("visible");
 }
-function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1&&gShield){gShield=false;var _inp=document.getElementById("ans-input");_inp.value="";_inp.className="answer-input";document.getElementById("feedback").textContent="🛡 방어막! 한 번 더!";document.getElementById("feedback").className="feedback info";setTimeout(function(){document.getElementById("feedback").textContent="";if(!gAnswering)_inp.focus();},800);gWrong=0;return;}if(gWrong===1){var _ac=DIFF_CFG[gDifficulty2  {name:"파나마",flag:"🇵🇦",hint:"운하로 태평양과 대서양을 연결. 파나마시티는 중미 금융 허브",capital:"파나마시티",continent:"americas"},
-  {name:"코스타리카",flag:"🇨🇷",hint:"중미 유일 상비군 없는 평화국. 열대우림·나비·개구리의 낙원",capital:"산호세",continent:"americas"},
-  {name:"쿠웨이트",flag:"🇰🇼",hint:"세계 석유 매장량 6위. 1인당 GDP 세계 최고 수준 부유국",capital:"쿠웨이트시티",continent:"asia"},
-  {name:"모리타니",flag:"🇲🇷",hint:"사하라 사막 90% 이상. 세계 최장 화물열차(3km) 운행국",capital:"누악쇼트",continent:"africa"},
-  {name:"시리아",flag:"🇸🇾",hint:"세계 최고(最古) 수도 다마스쿠스, 5000년 역사. 비단길 핵심 도시",capital:"다마스쿠스",continent:"asia"},
-  {name:"이라크",flag:"🇮🇶",hint:"티그리스·유프라테스강 사이 메소포타미아 문명 발상지",capital:"바그다드",continent:"asia"},
-];document.getElementById("feedback").textContent=_ac&&_ac.autoHint?"💡 쉬움 모드: 힌트 자동 표시!":"❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className=_ac&&_ac.autoHint?"feedback info":"feedback fail";showHints();gHintsUsed=1;}else if(gWrong>=3){document.getElementById("feedback").textContent="💡 정답: "+q.name;document.getElementById("feedback").className="feedback info";gHistory.push({name:q.name,userAns:inp.value,ok:false,wrong:gWrong});clearTimer();loseLife2();gCombo=0;updateComboUI();gAnswering=true;exitCardAnim(false,function(){nextQ();});return;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째) — 한 번 더!";document.getElementById("feedback").className="feedback fail";}renderWordHints(q);triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
+function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1&&gShield){gShield=false;var _inp=document.getElementById("ans-input");_inp.value="";_inp.className="answer-input";document.getElementById("feedback").textContent="🛡 방어막! 한 번 더!";document.getElementById("feedback").className="feedback info";setTimeout(function(){document.getElementById("feedback").textContent="";if(!gAnswering)_inp.focus();},800);gWrong=0;return;}if(gWrong===1){var _ac=DIFF_CFG[gDifficulty2];document.getElementById("feedback").textContent=_ac&&_ac.autoHint?"💡 쉬움 모드: 힌트 자동 표시!":"❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className=_ac&&_ac.autoHint?"feedback info":"feedback fail";showHints();gHintsUsed=1;}else if(gWrong>=3){document.getElementById("feedback").textContent="💡 정답: "+q.name;document.getElementById("feedback").className="feedback info";gHistory.push({name:q.name,userAns:inp.value,ok:false,wrong:gWrong});clearTimer();loseLife2();gCombo=0;updateComboUI();gAnswering=true;exitCardAnim(false,function(){nextQ();});return;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째) — 한 번 더!";document.getElementById("feedback").className="feedback fail";}renderWordHints(q);triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
 
 // ─── 국기 ───
 
@@ -1492,7 +1520,7 @@ function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.
   var choices=shuffle([q].concat(pool.slice(0,3)));
   var numLabels=['①','②','③','④'];
   choices.forEach(function(c,i){var btn=document.createElement("button");btn.className="choice-btn";btn.style.position='relative';btn.innerHTML='<span style="position:absolute;top:4px;left:7px;font-size:10px;opacity:0.45;font-weight:400;line-height:1">'+numLabels[i]+'</span><span style="font-size:1.6em;display:block;margin-bottom:3px">'+c.flag+'</span><span style="font-size:13px">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
-function onFlagChoice(chosen,correct,btn,e){if(gAnswering)return;var ok=chosen.name===correct.name;if(ok){btn.classList.add("correct-choice");onCorrect(btn,"",e);}else{btn.classList.add("wrong-choice");anim(btn,"shake",400);var btns=document.querySelectorAll(".choice-btn");btns.forEach(function(b){if(b.innerHTML.includes(correct.name)||b.textContent===correct.name)b.classList.add("reveal-choice");});gWrong++;if(gWrong===1)document.getElementById("q-badge").textContent="💡 힌트: "+correct.hint;if(gShield&&gWrong===1){gShield=false;document.getElementById("feedback").textContent="🛡 방어막! 콤보 유지!";document.getElementById("feedback").className="feedback info";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);setTimeout(function(){document.getElementById("flag-choices").innerHTML="";renderFlagChoices(correct);document.getElementById("feedback").textContent="";},800);return;}gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;document.getElementById("feedback").className="feedback fail";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);gCombo=0;updateComboUI();gAnswering=true;btns.forEach(function(b){b.disabled=true;});setTimeout(nextQ,1000);}}
+function onFlagChoice(chosen,correct,btn,e){if(gAnswering)return;var ok=chosen.name===correct.name;if(ok){btn.classList.add("correct-choice");onCorrect(btn,"",e);}else{btn.classList.add("wrong-choice");anim(btn,"shake",400);var btns=document.querySelectorAll(".choice-btn");btns.forEach(function(b){if(b.innerHTML.includes(correct.name)||b.textContent===correct.name)b.classList.add("reveal-choice");});gWrong++;if(gWrong===1)document.getElementById("q-badge").textContent="💡 힌트: "+correct.hint;if(gShield&&gWrong===1){gShield=false;document.getElementById("feedback").textContent="🛡 방어막! 콤보 유지!";document.getElementById("feedback").className="feedback info";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);setTimeout(function(){document.getElementById("flag-choices").innerHTML="";renderFlagChoices(correct);document.getElementById("feedback").textContent="";},800);return;}gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;document.getElementById("feedback").className="feedback fail";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);gCombo=0;updateComboUI();loseLife2();gAnswering=true;btns.forEach(function(b){b.disabled=true;});setTimeout(nextQ,1000);}}
 
 // ─── 지도 ───
 document.getElementById("map-svg-container").addEventListener("click",onMapClick);
@@ -1536,7 +1564,7 @@ function onMapClick(evt){
   if(!ST.perCountry)ST.perCountry={};
   if(!ST.perCountry[q.name])ST.perCountry[q.name]={ans:0,corr:0};
   ST.perCountry[q.name].ans++;
-  if(ok){gCombo++;ST.totalCorrect++;ST.perCountry[q.name].corr++;}else{gCombo=0;}
+  if(ok){gCombo++;ST.totalCorrect++;ST.perCountry[q.name].corr++;}else{gCombo=0;loseLife2();}
   if(ST.maxCombo<gCombo)ST.maxCombo=gCombo;
   // Apply combo multiplier like choseong/flag modes
   var mapMult=1;
@@ -1602,7 +1630,7 @@ function onCorrect(el,cls,e){
   setTimeout(nextQ,700);
 }
 
-function nextQ(){gIdx++;if(gIdx>=gQuestions.length){endGame();return;}autosave();renderQuestion();updateGameUI();}
+function nextQ(){gWrong=0;gIdx++;if(gIdx>=gQuestions.length){endGame();return;}autosave();renderQuestion();updateGameUI();}
 
 function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);gAnswering=true;setTimeout(nextQ,700);}
 
@@ -1845,6 +1873,7 @@ function renderChoiceBtns() {
         document.getElementById('feedback').textContent = '❌ 오답! 정답: ' + q.name;
         document.getElementById('feedback').className = 'feedback fail';
         triggerHitEffect(false, gCombo, 0, document.getElementById('q-card'), e);
+        loseLife2();
         gCombo = 0; updateComboUI(); gAnswering = true;
         row.querySelectorAll('.choice-btn').forEach(function(b){ b.disabled = true; });
         setTimeout(nextQ, 900);
