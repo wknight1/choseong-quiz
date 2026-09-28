@@ -807,7 +807,12 @@ var COUNTRIES=[
   {name:"카메룬",flag:"🇨🇲",capital:"야운데",continent:"africa",hint:"아프리카의 축구 강국, 서아프리카 위치"},
   {name:"앙골라",flag:"🇦🇴",capital:"루안다",continent:"africa",hint:"남부 아프리카, 아프리카에서 포르투갈어 사용"},
   {name:"피지",flag:"🇫🇯",capital:"수바",continent:"oceania",hint:"남태평양의 섬나라, 럭비 강국"},
-  {name:"바누아투",flag:"🇻🇺",capital:"포트빌라",continent:"oceania",hint:"태평양 작은 섬나라, 행복 지수 높기로 유명"}
+  {name:"바누아투",flag:"🇻🇺",capital:"포트빌라",continent:"oceania",hint:"태평양 작은 섬나라, 행복 지수 높기로 유명"},
+  {name:"파라과이",flag:"🇵🇾",capital:"아순시온",continent:"southamerica",hint:"남아메리카 내륙국, 과라니어 공용어"},
+  {name:"쿠웨이트",flag:"🇰🇼",capital:"쿠웨이트시티",continent:"asia",hint:"페르시아만 산유국, 세계 최고 수준 1인당 GDP"},
+  {name:"요르단",flag:"🇯🇴",capital:"암만",continent:"asia",hint:"장밋빛 도시 페트라의 나라, 사막 왕국"},
+  {name:"튀니지",flag:"🇹🇳",capital:"튀니스",continent:"africa",hint:"북아프리카 지중해 연안, 고대 카르타고 유적지"},
+  {name:"도미니카공화국",flag:"🇩🇴",capital:"산토도밍고",continent:"americas",hint:"카리브해 히스파니올라섬 동쪽, 라틴음악 발원지"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -839,7 +844,7 @@ var MAP_COORDS={
   "짐바브웨":{x:520,y:358},"파나마":{x:205,y:265},
   "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},
   "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
-  "피지":{x:880,y:330},"바누아투":{x:862,y:320}
+  "피지":{x:880,y:330},"바누아투":{x:862,y:320},"파라과이":{x:290,y:380},"쿠웨이트":{x:605,y:225},"요르단":{x:580,y:222},"튀니지":{x:495,y:188},"도미니카공화국":{x:257,y:255}
 };
 
 var CHARACTERS=[
@@ -1160,7 +1165,8 @@ function onMapClick(evt){
     if(eqm.effectType==="ultimate")mapMult=eqm.effectValue.multiplier;
     if(gCombo>=5)mapMult=Math.max(mapMult,3);else if(gCombo>=4)mapMult=Math.max(mapMult,2);else if(gCombo>=3)mapMult=Math.max(mapMult,1.5);else if(gCombo>=2)mapMult=Math.max(mapMult,1.2);
     if(gCombo>=5)coinEarned+=5;
-    pts=Math.round(pts*mapMult);
+    pts=Math.round(pts*mapMult*(DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].scoreMult||1));
+    coinEarned=Math.round(coinEarned*(DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].coinMult||1));
   }
   gScore+=pts;gCoins+=coinEarned;
   gHistory.push({name:q.name,userAns:gradeLabel,ok:ok,pts:pts,wrong:grade>1?1:0});
@@ -1186,8 +1192,10 @@ function onCorrect(el,cls,e){
   if(eq.effectType==="combo_multiplier"&&gCombo>=eq.comboThreshold)mult=eq.effectValue;
   if(eq.effectType==="ultimate")mult=eq.effectValue.multiplier;
   if(gCombo>=5)mult=Math.max(mult,3);else if(gCombo>=4)mult=Math.max(mult,2);else if(gCombo>=3)mult=Math.max(mult,1.5);else if(gCombo>=2)mult=Math.max(mult,1.2);
-  var pts=Math.round(basePts*mult);
-  var coinEarned=gHintsUsed===0?2:1;
+  var _sm=DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].scoreMult||1;
+  var _cm=DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].coinMult||1;
+  var pts=Math.round(basePts*mult*_sm);
+  var coinEarned=Math.round((gHintsUsed===0?2:1)*_cm);
   if(eq.effectType==="coin_bonus")coinEarned+=eq.effectValue;
   if(eq.effectType==="ultimate")coinEarned+=eq.effectValue.coin;
   if(gCombo>=5)coinEarned+=5;
@@ -1573,7 +1581,7 @@ function updateBgDyn(correct,combo){if(combo>=5&&bgParts.length<40){initBgCv();s
 
 // ── DIFFICULTY SYSTEM ──
 var gDifficulty2='normal';
-var DIFF_CFG={easy:{timerMult:1.67,autoHint:true,coinMult:.8},normal:{timerMult:1,autoHint:false,coinMult:1},hard:{timerMult:.67,autoHint:false,coinMult:1.5,penalty:1},expert:{timerMult:.33,autoHint:false,coinMult:3,lives:3}};
+var DIFF_CFG={easy:{timerMult:1.67,autoHint:true,coinMult:.8,scoreMult:.8},normal:{timerMult:1,autoHint:false,coinMult:1,scoreMult:1},hard:{timerMult:.67,autoHint:false,coinMult:1.5,scoreMult:1.5,penalty:1},expert:{timerMult:.33,autoHint:false,coinMult:3,scoreMult:2,lives:3}};
 function setDifficulty2(key){
   gDifficulty2=key;localStorage.setItem('difficulty',key);
   ['easy','normal','hard','expert'].forEach(function(k){var btn=document.getElementById('diff-'+k);if(btn)btn.classList.toggle('active',k===key);});
