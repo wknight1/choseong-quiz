@@ -431,7 +431,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 <div class="screen active" id="home">
   <div class="home-logo">🌍</div>
   <div class="home-title">나라 <span>퀴즈마스터</span></div>
-  <div class="home-sub">초성 · 국기 · 지도로 세계를 정복하라!</div>
+  <div class="home-sub" id="home-sub-text">초성 · 국기 · 지도로 세계를 정복하라!</div>
 
   <div class="stat-row">
     <div class="stat-card"><div class="stat-val" id="h-coins">0</div><div class="stat-lbl">🪙 코인</div></div>
@@ -992,7 +992,7 @@ function updateTodaysCountryCard(){
   document.getElementById("tc-capital").textContent="수도: "+c.capital;
   document.getElementById("tc-hint").textContent=c.hint;
 }
-function updateHomeUI(){document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();}
+function updateHomeUI(){document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();var subEl=document.getElementById("home-sub-text");if(subEl)subEl.textContent=COUNTRIES.length+"개 나라 · 초성 · 국기 · 지도로 세계 정복!";}
 
 // ═══════════════════════ SCREEN ═══════════════════════
 function showScreen(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");window.scrollTo(0,0);}
@@ -1196,7 +1196,7 @@ function onMapClick(evt){
   document.getElementById("feedback").className="feedback "+(ok?"ok":grade===2?"info":"fail");
   updateGameUI();updateComboUI();updateStreakFire(gCombo);updateBestIndicator(gScore);hapticComboFn(gCombo);
   triggerHitEffect(ok,gCombo,pts,document.getElementById("q-card"),evt);
-  if(ok){burst(evt.clientX,evt.clientY,8+gCombo*2);flyCoins(evt.clientX,evt.clientY,Math.min(coinEarned,4));sndCoin();}
+  if(ok){burst(evt.clientX,evt.clientY,8+gCombo*2);flyCoins(evt.clientX,evt.clientY,Math.min(coinEarned,4));sndCoin();showLearnCard(q);}
   var c=gHistory.filter(function(h){return h.ok;}).length;
   showMidGameAlert(c,gIdx+1);
   setTimeout(nextQ,1400);
@@ -1724,7 +1724,13 @@ function copyShareText2(){
   var stars=Math.ceil((correct/TOTAL_Q)*5);
   var starStr="⭐".repeat(stars)+"☆".repeat(5-stars);
   var modeLabel=gMode==="flag"?"🚩국기":gMode==="map"?"🗺️지도":"🔤초성";
-  var text=["🌍 나라 퀴즈마스터 "+modeLabel,starStr,"점수: "+gScore+"점  정답: "+correct+"/"+TOTAL_Q,"최대 콤보: "+ST.maxCombo+"🔥","https://wknight1.github.io/choseong-quiz/"].join("\n");
+  // Wordle-style emoji grid
+  var gridCells=gHistory.map(function(h){return h.ok?"🟩":"🟥";});
+  var gridRows=[];
+  for(var gi=0;gi<gridCells.length;gi+=5)gridRows.push(gridCells.slice(gi,gi+5).join(""));
+  var emojiGrid=gridRows.join("\n");
+  var sessionMaxCombo=gHistory.reduce(function(mx,_,idx){var run=0;for(var j=idx;j>=0&&gHistory[j].ok;j--)run++;return Math.max(mx,run);},0);
+  var text=["🌍 나라 퀴즈마스터 "+modeLabel+" "+correct+"/"+TOTAL_Q,starStr,emojiGrid,"점수: "+gScore+"점  최대콤보: "+sessionMaxCombo+"🔥","https://wknight1.github.io/choseong-quiz/"].join("\n");
   if(navigator.share){navigator.share({title:"나라 퀴즈마스터",text:text,url:"https://wknight1.github.io/choseong-quiz/"}).catch(function(){_fallbackCopy(text);});}
   else{_fallbackCopy(text);}
 }
