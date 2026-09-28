@@ -811,16 +811,16 @@ var COUNTRIES=[
   {name:"바누아투",flag:"🇻🇺",capital:"포트빌라",continent:"oceania",hint:"수도 포빌라, 행복지수 세계 1위 기록. 활화산 직접 트레킹 가능"},
   {name:"솔로몬제도",flag:"🇸🇧",capital:"호니아라",continent:"oceania",hint:"수도 호니아라, 7개 주요 섬+900개 소도서. 2차대전 과달카날 전투지"},
   {name:"코트디부아르",flag:"🇨🇮",hint:"수도 야무수크로, 카카오 세계 1위 생산국. 서아프리카 경제 중심",capital:"야무수크로",continent:"africa"},
-  {name:"에스토니아",flag:"🇪🇪",hint:"수도 탈린, 발트 3국 최북단. 세계 최초 인터넷 투표 실시 국가",capital:"탈린",continent:"europe"},
   {name:"모잠비크",flag:"🇲🇿",capital:"마푸투",continent:"africa",hint:"수도 마푸투, 포르투갈어 사용 아프리카. 인도양 연안 긴 해안선"},
   {name:"르완다",flag:"🇷🇼",capital:"키갈리",continent:"africa",hint:"수도 키갈리, '천 개의 언덕의 나라'. 1994년 제노사이드 후 급성장"},
   {name:"에콰도르",flag:"🇪🇨",capital:"키토",continent:"americas",hint:"수도 키토(적도에서 22km), 에콰도르=스페인어로 '적도'. 갈라파고스 영토"},
   {name:"과테말라",flag:"🇬🇹",capital:"과테말라시티",continent:"americas",hint:"수도 과테말라시티, 마야 문명의 심장부. 활화산 37개 보유"},
-  {name:"파라과이",flag:"🇵🇾",capital:"아순시온",continent:"southamerica",hint:"수도 아순시온, 남미 내륙국. 과라니어 공식 사용하는 이중언어 국가"},
+  {name:"파라과이",flag:"🇵🇾",capital:"아순시온",continent:"americas",hint:"수도 아순시온, 남미 내륙국. 과라니어를 공식 사용하는 세계 유일의 이중언어 국가"},
   {name:"쿠웨이트",flag:"🇰🇼",capital:"쿠웨이트시티",continent:"asia",hint:"수도 쿠웨이트시티, 세계 6위 석유 매장. 1인당 GDP 세계 상위권"},
   {name:"요르단",flag:"🇯🇴",capital:"암만",continent:"asia",hint:"수도 암만, 장밋빛 도시 페트라(나바테아 왕국 유산). 사해(염도 33%) 위치"},
   {name:"튀니지",flag:"🇹🇳",capital:"튀니스",continent:"africa",hint:"수도 튀니스, 북아프리카 카르타고 문명 발상지. 아랍의 봄 시작점"},
-  {name:"도미니카공화국",flag:"🇩🇴",capital:"산토도밍고",continent:"americas",hint:"수도 산토도밍고(신대륙 최초 유럽 정착지), 히스파니올라 섬 동쪽"}
+  {name:"도미니카공화국",flag:"🇩🇴",capital:"산토도밍고",continent:"americas",hint:"수도 산토도밍고(신대륙 최초 유럽 정착지), 히스파니올라 섬 동쪽"},
+  {name:"우간다",flag:"🇺🇬",capital:"캄팔라",continent:"africa",hint:"수도 캄팔라, 빅토리아 호수 북안. 세계 마운틴 고릴라의 절반이 서식"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -853,7 +853,7 @@ var MAP_COORDS={
   "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},
   "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
   "피지":{x:880,y:330},"바누아투":{x:862,y:320},"파라과이":{x:290,y:380},"쿠웨이트":{x:605,y:225},"요르단":{x:580,y:222},"튀니지":{x:495,y:188},"도미니카공화국":{x:257,y:255},
-  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270},"에스토니아":{x:535,y:130}
+  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270}
 };
 
 var CHARACTERS=[
@@ -1126,7 +1126,8 @@ function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.
   var others=COUNTRIES.filter(function(c){return c.continent!==q.continent&&c.name!==q.name&&confusePeers.indexOf(c)<0;});
   var pool=shuffle(confusePeers).concat(shuffle(same)).concat(shuffle(others));
   var choices=shuffle([q].concat(pool.slice(0,3)));
-  choices.forEach(function(c){var btn=document.createElement("button");btn.className="choice-btn";btn.innerHTML='<span style="font-size:1.6em;display:block;margin-bottom:3px">'+c.flag+'</span><span style="font-size:13px">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
+  var numLabels=['①','②','③','④'];
+  choices.forEach(function(c,i){var btn=document.createElement("button");btn.className="choice-btn";btn.style.position='relative';btn.innerHTML='<span style="position:absolute;top:4px;left:7px;font-size:10px;opacity:0.45;font-weight:400;line-height:1">'+numLabels[i]+'</span><span style="font-size:1.6em;display:block;margin-bottom:3px">'+c.flag+'</span><span style="font-size:13px">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
 function onFlagChoice(chosen,correct,btn,e){if(gAnswering)return;var ok=chosen.name===correct.name;if(ok){btn.classList.add("correct-choice");onCorrect(btn,"",e);}else{btn.classList.add("wrong-choice");anim(btn,"shake",400);var btns=document.querySelectorAll(".choice-btn");btns.forEach(function(b){if(b.innerHTML.includes(correct.name)||b.textContent===correct.name)b.classList.add("reveal-choice");});gWrong++;if(gWrong===1)document.getElementById("q-badge").textContent="💡 힌트: "+correct.hint;if(gShield&&gWrong===1){gShield=false;document.getElementById("feedback").textContent="🛡 방어막! 콤보 유지!";document.getElementById("feedback").className="feedback info";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);setTimeout(function(){document.getElementById("flag-choices").innerHTML="";renderFlagChoices(correct);document.getElementById("feedback").textContent="";},800);return;}gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;document.getElementById("feedback").className="feedback fail";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);gCombo=0;updateComboUI();gAnswering=true;btns.forEach(function(b){b.disabled=true;});setTimeout(nextQ,1000);}}
 
 // ─── 지도 ───
@@ -1463,7 +1464,7 @@ function updateWeakModeBtnVisibility() {
 function showLearnCard(q){
   var el=document.createElement('div');el.className='learn-card';
   var cap=q.capital?' · 수도: '+q.capital:'';
-  var cont=q.continent?' ('+q.continent+')':'';
+  var cont=q.continent?(function(){var m={asia:'🌏 아시아',europe:'🌍 유럽',americas:'🌎 아메리카',africa:'🌍 아프리카',oceania:'🌏 오세아니아'};return ' · '+(m[q.continent]||q.continent);})():'';
   el.innerHTML='<div class="lc-flag">'+q.flag+'</div><div class="lc-name">'+q.name+cont+'</div><div class="lc-info">'+cap+'</div>';
   document.body.appendChild(el);
   setTimeout(function(){el.classList.add('show');},30);
@@ -1475,6 +1476,21 @@ updateHomeUI();
   if(ST.streak>=2&&!document.getElementById("streak-banner-el"))showStreakBanner(ST.streak);
 
 document.getElementById("ans-input").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();submitChoseong();}});
+// 전역 키보드 단축키: 1-4 선택지, Escape=일시정지
+document.addEventListener("keydown",function(e){
+  var screen=document.getElementById("game");
+  if(!screen||screen.style.display==="none")return;
+  // 1-4: choice buttons (국기/선택 모드)
+  if(e.key>='1'&&e.key<='4'){
+    var btns=document.querySelectorAll(".choice-btn:not([disabled])");
+    var idx=parseInt(e.key)-1;
+    if(btns[idx]){e.preventDefault();btns[idx].click();}
+  }
+  // Escape: 일시정지 토글
+  if(e.key==="Escape"&&!document.activeElement.matches("input")){
+    e.preventDefault();togglePause();
+  }
+});
 
 // ═══════════════════════════════════════════
 // v4 ADDITIONS
