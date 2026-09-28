@@ -293,6 +293,33 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 .settings-btn{flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:var(--sub);font-size:13px;font-weight:700;padding:10px 8px;cursor:pointer;-webkit-appearance:none;font-family:inherit;min-width:80px;text-align:center;}
 .map-zoom-btn{width:30px;height:30px;background:rgba(30,41,59,.9);border:1.5px solid var(--border);border-radius:8px;color:var(--fg);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-appearance:none;line-height:1;}
 #stats-screen{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto;padding:16px;}
+
+/* ══ SOUND PANEL ══ */
+.sound-panel{background:var(--card);border-radius:16px;padding:14px;margin-bottom:0;border:1.5px solid var(--border);display:none}
+.sound-panel.open{display:block}
+.sound-panel-header{font-size:13px;font-weight:800;margin-bottom:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+.sound-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);gap:8px}
+.sound-row:last-child{border-bottom:none}
+.sound-lbl{font-size:13px;color:var(--sub);font-weight:600;white-space:nowrap}
+.toggle-btn{width:44px;height:24px;border-radius:99px;border:none;cursor:pointer;background:var(--border);position:relative;transition:background .2s;flex-shrink:0}
+.toggle-btn::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s}
+.toggle-btn.on{background:var(--sky)}
+.toggle-btn.on::after{left:23px}
+.preset-btn{background:var(--bg);border:1.5px solid var(--border);color:var(--sub);font-size:11px;font-weight:700;padding:4px 7px;border-radius:8px;cursor:pointer;-webkit-appearance:none;font-family:inherit;white-space:nowrap}
+.preset-btn.active{border-color:var(--sky);color:var(--sky);background:rgba(56,189,248,.08)}
+/* ══ DIFFICULTY SELECTOR ══ */
+.diff-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;width:100%}
+.diff-btn{background:var(--card);border:1.5px solid var(--border);color:var(--sub);font-size:11px;font-weight:700;padding:8px 4px;border-radius:10px;cursor:pointer;-webkit-appearance:none;font-family:inherit;text-align:center;transition:border-color .2s,color .2s,background .2s}
+.diff-btn.active{border-color:var(--sky);color:var(--sky);background:rgba(56,189,248,.08)}
+/* ══ HOME BOTTOM ROW ══ */
+.home-bottom-row{display:flex;gap:7px;width:100%}
+.home-icon-btn{flex:1;background:var(--card);border:1.5px solid var(--border);color:var(--fg);font-size:13px;font-weight:700;padding:11px 6px;border-radius:12px;cursor:pointer;-webkit-appearance:none;font-family:inherit;text-align:center;transition:opacity .15s}
+.home-icon-btn:active{opacity:.75}
+/* ══ THEME BTNS ══ */
+.theme-row{display:flex;gap:6px;width:100%;margin-top:2px}
+.theme-btn{flex:1;background:var(--card);border:1.5px solid var(--border);color:var(--sub);font-size:12px;font-weight:700;padding:8px 4px;border-radius:10px;cursor:pointer;-webkit-appearance:none;font-family:inherit;text-align:center;transition:border-color .2s,color .2s}
+.theme-btn.active{border-color:var(--indigo);color:var(--indigo);background:rgba(129,140,248,.08)}
+
 </style>
 </head>
 <body>
@@ -380,6 +407,63 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <button class="mode-btn primary" onclick="startGame('flag')" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🚩 국기 퀴즈 <span class="btn-badge">4지선다</span></button>
     <button class="mode-btn primary" onclick="startGame('map')" style="background:linear-gradient(135deg,#10b981,#0891b2)">🗺️ 지도 찾기 <span class="btn-badge">NEW</span></button>
     <button class="mode-btn secondary" onclick="showShop()">🏪 캐릭터 상점 <span style="font-size:11px;color:var(--muted)" id="shop-char-preview"></span></button>
+  </div>
+
+  <!-- Difficulty -->
+  <div style="width:100%">
+    <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">⚡ 난이도</div>
+    <div class="diff-row">
+      <button class="diff-btn active" id="diff-easy" onclick="setDifficulty2('easy')">🌱<br>쉬움</button>
+      <button class="diff-btn" id="diff-normal" onclick="setDifficulty2('normal')">🌍<br>보통</button>
+      <button class="diff-btn" id="diff-hard" onclick="setDifficulty2('hard')">🔥<br>어려움</button>
+      <button class="diff-btn" id="diff-expert" onclick="setDifficulty2('expert')">💀<br>전문가</button>
+    </div>
+  </div>
+
+  <!-- Theme -->
+  <div style="width:100%">
+    <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">🎨 테마</div>
+    <div class="theme-row">
+      <button class="theme-btn active" id="theme-btn-dark" onclick="setTheme('dark')">🌙 다크</button>
+      <button class="theme-btn" id="theme-btn-neon" onclick="setTheme('neon')">🔮 네온</button>
+      <button class="theme-btn" id="theme-btn-earth" onclick="setTheme('earth')">🌿 어스</button>
+    </div>
+  </div>
+
+  <!-- Bottom row: Stats / Daily / Sound -->
+  <div class="home-bottom-row">
+    <button class="home-icon-btn" onclick="openStats()">📊<br><span style="font-size:10px;">통계</span></button>
+    <button class="home-icon-btn" onclick="startDailyChallenge()">📅<br><span style="font-size:10px;">데일리</span></button>
+    <button class="home-icon-btn" onclick="toggleSoundPanel()">🎵<br><span style="font-size:10px;">사운드</span></button>
+  </div>
+
+  <!-- Sound panel (collapsed by default) -->
+  <div class="sound-panel" id="sound-panel">
+    <div class="sound-panel-header">🎵 사운드 설정</div>
+    <div class="sound-row">
+      <span class="sound-lbl">효과음</span>
+      <button class="toggle-btn on" id="sfx-toggle" onclick="toggleSFX2()"></button>
+    </div>
+    <div class="sound-row">
+      <span class="sound-lbl">BGM</span>
+      <button class="toggle-btn" id="bgm-toggle" onclick="toggleBGMBtn()"></button>
+    </div>
+    <div class="sound-row">
+      <span class="sound-lbl">BGM 볼륨</span>
+      <input type="range" id="bgm-vol" min="0" max="100" value="35" oninput="setBgmVolume(this.value/280)" style="flex:1;accent-color:var(--sky);">
+    </div>
+    <div class="sound-row">
+      <span class="sound-lbl">햅틱</span>
+      <button class="toggle-btn on" id="haptic-toggle" onclick="onHapticToggle()"></button>
+    </div>
+    <div class="sound-row">
+      <span class="sound-lbl">프리셋</span>
+      <div style="display:flex;gap:5px;">
+        <button class="preset-btn active" id="preset-classic" onclick="setPreset('classic')">🎵 클래식</button>
+        <button class="preset-btn" id="preset-gameboy" onclick="setPreset('gameboy')">🎮 게임보이</button>
+        <button class="preset-btn" id="preset-orch" onclick="setPreset('orchestra')">🎻 오케스트라</button>
+      </div>
+    </div>
   </div>
 </div>
 
