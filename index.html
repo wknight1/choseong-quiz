@@ -854,7 +854,7 @@ function anim(el,cls,ms){if(!el)return;el.classList.remove("shake","bounce-anim"
 
 // ═══════════════════════ HIT EFFECTS ═══════════════════════
 function showScreenFlash(ok){var el=document.createElement("div");el.className=ok?"screen-flash":"screen-flash-red";document.body.appendChild(el);setTimeout(function(){el.remove();},500);}
-function showComboSplash(combo){if(combo<2)return;var el=document.createElement("div");el.className="combo-splash";var labels={2:"x1.2!",3:"x1.5!",4:"x2!",5:"MAX x3!",6:"MAX x3!",7:"MAX x3!",8:"GODLIKE!"};var colors={2:"#4ade80",3:"#f59e0b",4:"#ef4444",5:"#a855f7",6:"#a855f7",7:"#a855f7",8:"#fbbf24"};el.textContent=labels[Math.min(combo,8)]||"MAX!";el.style.color=colors[Math.min(combo,8)]||"#a855f7";document.body.appendChild(el);setTimeout(function(){el.remove();},900);}
+function showComboSplash(combo){if(combo<2)return;var el=document.createElement("div");el.className="combo-splash";var labels={2:"x1.2! 🔥",3:"x1.5! ⚡",4:"x2! 🌟",5:"MAX x3! 💥",6:"GODLIKE! 👑",7:"GODLIKE! 👑",8:"전설! 🌌",9:"전설! 🌌"};var colors={2:"#4ade80",3:"#f59e0b",4:"#ef4444",5:"#a855f7",6:"#fbbf24",7:"#fbbf24",8:"#e879f9",9:"#e879f9"};el.textContent=labels[Math.min(combo,8)]||"MAX!";el.style.color=colors[Math.min(combo,8)]||"#a855f7";document.body.appendChild(el);setTimeout(function(){el.remove();},900);}
 function showScoreFloat(pts,x,y,isSpeed){var el=document.createElement("div");el.className="score-float";el.style.left=x+"px";el.style.top=y+"px";el.textContent="+"+pts+(isSpeed?" ⚡":"");document.body.appendChild(el);setTimeout(function(){el.remove();},1100);}
 function triggerHitEffect(ok,combo,pts,cardEl,e){var x=e?e.clientX:window.innerWidth/2;var y=e?e.clientY:window.innerHeight*.42;if(ok){showScreenFlash(true);showScoreFloat(pts,x-20,y-40,pts>120);if(combo>=2){showComboSplash(combo);sndComboElectric(combo);}var grade=combo>=5?5:combo>=3?4:combo>=2?3:pts>130?3:pts>80?2:1;sndHitGrade(grade);if(cardEl){cardEl.classList.remove("card-golden","card-electric");void cardEl.offsetWidth;if(combo>=5)cardEl.classList.add("card-electric");else cardEl.classList.add("card-golden");setTimeout(function(){if(cardEl)cardEl.classList.remove("card-golden","card-electric");},800);}if(combo>=5)sndPerfectChord();}else{showScreenFlash(false);sndWrong();if(cardEl)anim(cardEl,"card-rumble",500);}}
 
@@ -1009,7 +1009,41 @@ function showHints(){
 function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1){document.getElementById("feedback").textContent="❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className="feedback fail";showHints();gHintsUsed=1;}else if(gWrong>=3){document.getElementById("feedback").textContent="💡 정답: "+q.name;document.getElementById("feedback").className="feedback info";gHistory.push({name:q.name,userAns:inp.value,ok:false,wrong:gWrong});clearTimer();gCombo=0;updateComboUI();gAnswering=true;setTimeout(nextQ,1200);return;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째) — 한 번 더!";document.getElementById("feedback").className="feedback fail";}renderWordHints(q);triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
 
 // ─── 국기 ───
-function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.innerHTML="";var same=COUNTRIES.filter(function(c){return c.continent===q.continent&&c.name!==q.name;});var others=COUNTRIES.filter(function(c){return c.continent!==q.continent&&c.name!==q.name;});var pool=shuffle(same).concat(shuffle(others));var choices=shuffle([q].concat(pool.slice(0,3)));choices.forEach(function(c){var btn=document.createElement("button");btn.className="choice-btn";btn.innerHTML='<span style="font-size:1.6em;display:block;margin-bottom:3px">'+c.flag+'</span><span style="font-size:13px">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
+
+// 혼동하기 쉬운 국기 쌍 (국기 모양/색상이 유사한 것들)
+var CONFUSION_PAIRS = {
+  "인도네시아": ["모나코","폴란드","싱가포르"],
+  "모나코": ["인도네시아","폴란드"],
+  "폴란드": ["인도네시아","모나코"],
+  "아일랜드": ["코트디부아르","이탈리아"],
+  "이탈리아": ["아일랜드","멕시코","헝가리"],
+  "멕시코": ["이탈리아","나이지리아"],
+  "나이지리아": ["멕시코","아일랜드"],
+  "뉴질랜드": ["호주","피지"],
+  "호주": ["뉴질랜드","피지"],
+  "네덜란드": ["룩셈부르크","러시아","크로아티아"],
+  "룩셈부르크": ["네덜란드","러시아"],
+  "러시아": ["네덜란드","슬로바키아"],
+  "노르웨이": ["아이슬란드","핀란드","덴마크"],
+  "아이슬란드": ["노르웨이","핀란드"],
+  "덴마크": ["노르웨이","스위스"],
+  "루마니아": ["차드","안도라"],
+  "차드": ["루마니아"],
+  "대한민국": ["일본"],
+  "미국": ["라이베리아","말레이시아"],
+  "칠레": ["에콰도르","콜롬비아"],
+  "콜롬비아": ["에콰도르","베네수엘라"],
+  "에콰도르": ["콜롬비아","베네수엘라"]
+};
+
+function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.innerHTML="";
+  // 혼동 페어링: 같은 대륙 우선, 그 중 confusion pairs 앞에 배치
+  var confusePeers=(CONFUSION_PAIRS[q.name]||[]).map(function(n){return COUNTRIES.find(function(c){return c.name===n;});}).filter(Boolean);
+  var same=COUNTRIES.filter(function(c){return c.continent===q.continent&&c.name!==q.name&&confusePeers.indexOf(c)<0;});
+  var others=COUNTRIES.filter(function(c){return c.continent!==q.continent&&c.name!==q.name&&confusePeers.indexOf(c)<0;});
+  var pool=shuffle(confusePeers).concat(shuffle(same)).concat(shuffle(others));
+  var choices=shuffle([q].concat(pool.slice(0,3)));
+  choices.forEach(function(c){var btn=document.createElement("button");btn.className="choice-btn";btn.innerHTML='<span style="font-size:1.6em;display:block;margin-bottom:3px">'+c.flag+'</span><span style="font-size:13px">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
 function onFlagChoice(chosen,correct,btn,e){if(gAnswering)return;var ok=chosen.name===correct.name;if(ok){btn.classList.add("correct-choice");onCorrect(btn,"",e);}else{btn.classList.add("wrong-choice");anim(btn,"shake",400);var btns=document.querySelectorAll(".choice-btn");btns.forEach(function(b){if(b.innerHTML.includes(correct.name)||b.textContent===correct.name)b.classList.add("reveal-choice");});gWrong++;if(gWrong===1)document.getElementById("q-badge").textContent="💡 힌트: "+correct.hint;if(gShield&&gWrong===1){gShield=false;document.getElementById("feedback").textContent="🛡 방어막! 콤보 유지!";document.getElementById("feedback").className="feedback info";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);setTimeout(function(){document.getElementById("flag-choices").innerHTML="";renderFlagChoices(correct);document.getElementById("feedback").textContent="";},800);return;}gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;document.getElementById("feedback").className="feedback fail";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);gCombo=0;updateComboUI();gAnswering=true;btns.forEach(function(b){b.disabled=true;});setTimeout(nextQ,1000);}}
 
 // ─── 지도 ───
