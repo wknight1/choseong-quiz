@@ -462,7 +462,12 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <div class="enc-detail-capital" id="enc-detail-capital"></div>
     <div class="enc-detail-hint" id="enc-detail-hint"></div>
     <div class="enc-detail-stats" id="enc-detail-stats"></div>
-    <button onclick="closeEncDetail(null)" style="margin-top:14px;padding:8px 24px;border-radius:10px;background:var(--indigo);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;">닫기</button>
+    <div id="enc-detail-acc" style="margin:10px 0 4px;font-size:12px;color:var(--sub);"></div>
+    <div id="enc-detail-accbar" style="height:6px;border-radius:4px;background:var(--border);overflow:hidden;margin-bottom:14px;"><div id="enc-detail-accbar-fill" style="height:100%;border-radius:4px;transition:width .4s;"></div></div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <button onclick="startFocusCountry(document.getElementById('enc-detail-name').textContent)" style="padding:8px 16px;border-radius:10px;background:var(--sky);color:#000;border:none;font-size:13px;font-weight:800;cursor:pointer;">🎯 이 나라만 퀴즈</button>
+      <button onclick="closeEncDetail(null)" style="padding:8px 16px;border-radius:10px;background:var(--indigo);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;">닫기</button>
+    </div>
   </div>
 </div>
 
@@ -969,7 +974,7 @@ var TOTAL_Q=20;
 
 // ═══════════════════════ STATE ═══════════════════════
 var SK="quizmaster_v3";var ST;
-function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,mapCorrect:0};}
+function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,mapCorrect:0,perCountry:{}};}
 function save(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
 function load(){try{var r=localStorage.getItem(SK);if(!r)return defaultState();var s=JSON.parse(r);var m=Object.assign({},defaultState(),s);if(!Array.isArray(m.ownedCharacters))m.ownedCharacters=["basic"];if(m.ownedCharacters.indexOf("basic")<0)m.ownedCharacters.unshift("basic");return m;}catch(e){return defaultState();}}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -1050,6 +1055,9 @@ function updateTodaysCountryCard(){
   document.getElementById("tc-name").textContent=c.name;
   document.getElementById("tc-capital").textContent="수도: "+c.capital;
   document.getElementById("tc-hint").textContent=c.hint;
+  // Clicking card starts a focus quiz for today's country
+  el.onclick=function(){gFocusCountry=c.name;startGame('choseong');};
+  el.title="탭하면 "+c.name+" 집중 퀴즈 시작!";
 }
 function updateHomeUI(){document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;
   // sync per-mode best to ST for leaderboard
@@ -1073,7 +1081,19 @@ function norm(s){return s.replace(/\s/g,"").replace(/[·•\-]/g,"");}
 function startGame(mode){
   gMode=mode||"choseong";
   var pool=COUNTRIES.filter(function(c){return MAP_COORDS[c.name];});
-  gQuestions=shuffle(gMode==="map"?pool:COUNTRIES).slice(0,TOTAL_Q);
+  if (gFocusCountry) {
+    // Focus mode: repeat the same country 10 times
+    var fc = COUNTRIES.find(function(c){return c.name===gFocusCountry;});
+    if (fc) {
+      gQuestions = [];
+      for (var _i=0; _i<10; _i++) gQuestions.push(fc);
+    } else {
+      gQuestions=shuffle(gMode==="map"?pool:COUNTRIES).slice(0,TOTAL_Q);
+    }
+    gFocusCountry = null;
+  } else {
+    gQuestions=shuffle(gMode==="map"?pool:COUNTRIES).slice(0,TOTAL_Q);
+  }
   gIdx=0;gScore=0;gCombo=0;gCoins=0;gHistory=[];gAnswering=false;gMapClicked=false;_dangerActive=false;_lastAlertAt=-999;
   var eq=getEquipped();gShield=eq.effectType==="shield";
   showScreen("game");
@@ -1289,6 +1309,11 @@ function onCorrect(el,cls,e){
   document.getElementById("feedback").className="feedback ok";showLearnCard(q);
   if(cls)el.className=cls+" correct";
   ST.totalCorrect++;if(ST.maxCombo<gCombo)ST.maxCombo=gCombo;
+  // Track per-country stats
+  if (!ST.perCountry) ST.perCountry = {};
+  if (!ST.perCountry[q.name]) ST.perCountry[q.name] = {ans:0, corr:0};
+  ST.perCountry[q.name].ans++;
+  ST.perCountry[q.name].corr++;
   updateGameUI();updateComboUI();updateStreakFire(gCombo);updateBestIndicator(gScore);hapticComboFn(gCombo);
   triggerHitEffect(true,gCombo,pts,document.getElementById("q-card"),e);
   var ex=e||{clientX:window.innerWidth/2,clientY:window.innerHeight*.42};
@@ -1322,6 +1347,14 @@ function endGame(){
   var prevScore=ST.totalScore;
   var isNewRecord=gScore>0&&gScore>=ST.bestScore&&ST.gamesPlayed>0;
   ST.totalScore+=gScore;if(gScore>ST.bestScore)ST.bestScore=gScore;ST.coins+=gCoins;ST.gamesPlayed++;
+  // Track per-country stats for wrong answers
+  if (!ST.perCountry) ST.perCountry = {};
+  gHistory.forEach(function(h) {
+    if (!h.ok) {
+      if (!ST.perCountry[h.name]) ST.perCountry[h.name] = {ans:0, corr:0};
+      ST.perCountry[h.name].ans++;
+    }
+  });
   if(gMode==='map')ST.mapCorrect=(ST.mapCorrect||0)+correct;
   if(!ST.modesSet)ST.modesSet={};
   ST.modesSet[gMode]=true;ST.modesPlayed=Object.keys(ST.modesSet).length;
@@ -1914,9 +1947,29 @@ function showEncDetail(name) {
   document.getElementById('enc-detail-name').textContent = c.name;
   document.getElementById('enc-detail-capital').textContent = c.capital ? '🏛️ 수도: ' + c.capital : '';
   document.getElementById('enc-detail-hint').textContent = c.hint || '';
+  // Accuracy stats from ST
+  var totalAns = (ST.perCountry && ST.perCountry[c.name]) ? ST.perCountry[c.name].ans : 0;
+  var totalCorr = (ST.perCountry && ST.perCountry[c.name]) ? ST.perCountry[c.name].corr : 0;
+  var accPct = totalAns > 0 ? Math.round(totalCorr / totalAns * 100) : -1;
+
   document.getElementById('enc-detail-stats').innerHTML =
     '<div class="enc-detail-stat" style="color:var(--sky);">' + (CONT_LABEL[c.continent] || c.continent || '?') + '</div>' +
-    (wrongCount > 0 ? '<div class="enc-detail-stat" style="color:#f87171;">❌ ' + wrongCount + '회 오답</div>' : '<div class="enc-detail-stat" style="color:#4ade80;">✅ 완벽</div>');
+    (wrongCount > 0 ? '<div class="enc-detail-stat" style="color:#f87171;">❌ ' + wrongCount + '회 오답</div>' : '<div class="enc-detail-stat" style="color:#4ade80;">✅ 완벽</div>') +
+    (totalAns > 0 ? '<div class="enc-detail-stat" style="color:var(--sub);">📊 ' + totalAns + '번 출제</div>' : '');
+
+  var accEl = document.getElementById('enc-detail-acc');
+  var accBar = document.getElementById('enc-detail-accbar-fill');
+  if (accEl && accBar) {
+    if (accPct >= 0) {
+      accEl.textContent = '정답률 ' + accPct + '% (' + totalCorr + '/' + totalAns + ')';
+      var barColor = accPct >= 80 ? '#4ade80' : accPct >= 50 ? '#facc15' : '#f87171';
+      accBar.style.width = accPct + '%';
+      accBar.style.background = barColor;
+    } else {
+      accEl.textContent = '아직 출제되지 않은 나라';
+      accBar.style.width = '0%';
+    }
+  }
 
   var ov = document.getElementById('enc-detail-overlay');
   if (ov) ov.classList.add('open');
@@ -1930,6 +1983,18 @@ function closeEncDetail(e) {
   var ov = document.getElementById('enc-detail-overlay');
   if (ov) ov.classList.remove('open');
 }
+
+// Start a 1-country focus quiz from encyclopedia
+function startFocusCountry(name) {
+  var c = COUNTRIES.find(function(x){return x.name===name;});
+  if (!c) return;
+  closeEncDetail(null);
+  closeEncyclopedia();
+  // Set up a temporary single-country quiz (10 questions, same country)
+  gFocusCountry = name;
+  startGame('choseong');
+}
+var gFocusCountry = null;
 function drawRadar(st){
   var svg=document.getElementById('radar-chart');if(!svg)return;
   var axes=[{label:'초성',value:Math.min(100,Math.round((st.bestScores.choseong||0)/5))},{label:'국기',value:Math.min(100,Math.round((st.bestScores.flag||0)/5))},{label:'지도',value:Math.min(100,Math.round((st.bestScores.map||0)/5))},{label:'정확도',value:st.totalAnswered?Math.round(st.totalCorrect/st.totalAnswered*100):0},{label:'콤보',value:Math.min(100,(st.maxCombo||0)*10)}];
