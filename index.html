@@ -529,7 +529,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 
 
   <!-- 일일 미션 패널 -->
-  <div id="daily-missions-panel" style="width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:8px;display:none;">
+  <div id="daily-missions-panel" style="width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:8px;display:block;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
       <span style="font-size:13px;font-weight:800;color:var(--fg);">📋 오늘의 미션</span>
       <span id="mission-reset-time" style="font-size:10px;color:var(--muted);">자정 초기화</span>
@@ -593,6 +593,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <button class="home-icon-btn" id="daily-chal-main-btn" onclick="startDailyChallenge()">📅<br><span style="font-size:10px;">데일리</span><span id="home-streak-badge" style="display:none;font-size:9px;color:#f59e0b;font-weight:700;"></span></button>
     <button class="home-icon-btn" onclick="toggleSoundPanel()">🎵<br><span style="font-size:10px;">사운드</span></button>
     <button class="home-icon-btn" onclick="openEncyclopedia()">🌍<br><span style="font-size:10px;">도감</span></button>
+    <button class="home-icon-btn" onclick="toggleDailyMissions()" id="mission-toggle-btn">📋<br><span style="font-size:10px;">미션</span><span id="mission-badge" style="display:none;font-size:9px;color:#f59e0b;font-weight:700;"></span></button>
   </div>
 
   <!-- Sound panel (collapsed by default) -->
@@ -1283,6 +1284,7 @@ function updateHomeUI(){
   // sync per-mode best to ST for leaderboard
   var _st2=loadStats2();if(_st2&&_st2.bestScores){var _mb=_st2.bestScores;if(!ST.modeScores)ST.modeScores={};ST.modeScores.choseong=_mb.choseong||0;ST.modeScores.flag=_mb.flag||0;ST.modeScores.map=_mb.map||0;}document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();var subEl=document.getElementById("home-sub-text");if(subEl)subEl.textContent=COUNTRIES.length+"개 나라 · 초성 · 국기 · 지도로 세계 정복!";
   renderDailyMissions();
+  updateMissionBadge();
 }
 
 // ═══════════════════════ SCREEN ═══════════════════════
@@ -1434,6 +1436,31 @@ function claimMissionReward(missionId) {
   updateHomeUI();
 }
 
+function toggleDailyMissions() {
+  var panel = document.getElementById('daily-missions-panel');
+  var isHidden = panel.style.display === 'none' || panel.style.display === '';
+  panel.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) renderDailyMissions();
+}
+
+function updateMissionBadge() {
+  var dm = getDailyMissions();
+  var badge = document.getElementById('mission-badge');
+  if (!badge) return;
+  var pending = dm.missions.filter(function(m){ return m.done && !m.claimed; }).length;
+  var incomplete = dm.missions.filter(function(m){ return !m.done; }).length;
+  if (pending > 0) {
+    badge.textContent = '🎁';
+    badge.style.display = 'block';
+  } else if (incomplete > 0) {
+    badge.textContent = incomplete + '';
+    badge.style.display = 'block';
+    badge.style.color = 'var(--sky)';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
 function renderDailyMissions() {
   var panel = document.getElementById('daily-missions-panel');
   var listEl = document.getElementById('mission-list');
@@ -1466,6 +1493,7 @@ function renderDailyMissions() {
     bonusDiv.textContent = '🎉 오늘 미션 완료! 내일 또 오세요!';
     listEl.appendChild(bonusDiv);
   }
+  updateMissionBadge();
 }
 // ═══════════════════════ END DAILY MISSIONS ═══════════════════════
 
@@ -1711,7 +1739,16 @@ function onMapClick(evt){
   document.getElementById("feedback").className="feedback "+(ok?"ok":grade===2?"info":"fail");
   updateGameUI();updateComboUI();updateStreakFire(gCombo);updateBestIndicator(gScore);hapticComboFn(gCombo);
   triggerHitEffect(ok,gCombo,pts,document.getElementById("q-card"),evt);
-  if(ok){burst(evt.clientX,evt.clientY,8+gCombo*2);flyCoins(evt.clientX,evt.clientY,Math.min(coinEarned,4));sndCoin();showLearnCard(q);}
+  if(ok){burst(evt.clientX,evt.clientY,8+gCombo*2);flyCoins(evt.clientX,evt.clientY,Math.min(coinEarned,4));sndCoin();showLearnCard(q);}else if(grade===3&&gShield){
+    // 방어막: 지도 모드 완전 빗나감(grade 3) 시 방어막 소모
+    gShield=false;
+    document.getElementById('feedback').textContent='🛡 방어막! 다시 클릭하세요!';
+    document.getElementById('feedback').className='feedback info';
+    document.getElementById('map-marker-layer').innerHTML='';
+    gMapClicked=false;gAnswering=false;
+    setTimeout(function(){if(!gAnswering)document.getElementById('feedback').textContent='';},1200);
+    return;
+  }
   var c=gHistory.filter(function(h){return h.ok;}).length;
   showMidGameAlert(c,gIdx+1);
   setTimeout(nextQ,1400);
