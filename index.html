@@ -822,12 +822,20 @@ var CHARACTERS=[
 var ACHIEVEMENTS=[
   {id:"first",name:"첫 발걸음 🌱",check:function(s){return s.totalCorrect>=1},coins:10},
   {id:"combo5",name:"불꽃 콤보 🔥",check:function(s){return s.maxCombo>=5},coins:20},
+  {id:"combo10",name:"10연속 폭발! 💥",check:function(s){return s.maxCombo>=10},coins:50},
   {id:"perfect",name:"퍼펙트! 💯",check:function(s){return s.perfectGames>=1},coins:50},
+  {id:"perfect3",name:"완벽주의자 🏆",check:function(s){return s.perfectGames>=3},coins:80},
   {id:"streak7",name:"7일의 기적 📅",check:function(s){return s.dailyStreakCount>=7},coins:70},
+  {id:"streak30",name:"한 달 개근 🗓️",check:function(s){return s.dailyStreakCount>=30},coins:200},
   {id:"correct100",name:"세계 마스터 🌍",check:function(s){return s.totalCorrect>=100},coins:100},
+  {id:"correct500",name:"지리 박사 🎓",check:function(s){return s.totalCorrect>=500},coins:300},
   {id:"coins500",name:"코인 부자 💰",check:function(s){return s.coins>=500},coins:0},
+  {id:"coins2000",name:"대부호 💎",check:function(s){return s.coins>=2000},coins:0},
   {id:"nohint50",name:"힌트 거부자 🙅",check:function(s){return s.noHintCorrect>=50},coins:60},
   {id:"legend",name:"전설의 퀴즈왕 👑",check:function(s){return s.bestScore>=1500},coins:150},
+  {id:"games10",name:"단골 퀴즈왕 🎮",check:function(s){return s.gamesPlayed>=10},coins:30},
+  {id:"games50",name:"퀴즈 중독자 🎯",check:function(s){return s.gamesPlayed>=50},coins:100},
+  {id:"allchars",name:"컬렉터 🗂️",check:function(s){return s.ownedCharacters&&s.ownedCharacters.length>=6},coins:150},
 ];
 
 var LEVELS=[
@@ -848,6 +856,9 @@ var COMBO_DATA=[
   {c:0,lbl:"",emoji:"▶️",cls:"c1"},{c:1,lbl:"시작",emoji:"▶️",cls:"c1"},
   {c:2,lbl:"웜업!",emoji:"🔥",cls:"c2"},{c:3,lbl:"연속!",emoji:"⚡",cls:"c3"},
   {c:4,lbl:"불꽃!",emoji:"🌟",cls:"c4"},{c:5,lbl:"MAX!",emoji:"💥",cls:"c5"},
+  {c:6,lbl:"GODLIKE!",emoji:"👑",cls:"c5"},{c:7,lbl:"GODLIKE!",emoji:"👑",cls:"c5"},
+  {c:8,lbl:"전설!",emoji:"🌌",cls:"c5"},{c:9,lbl:"전설!",emoji:"🌌",cls:"c5"},
+  {c:10,lbl:"신의경지!",emoji:"✨",cls:"c5"},
 ];
 var TOTAL_Q=20;
 
@@ -897,7 +908,7 @@ function updateBestIndicator(cur){var el=document.getElementById("best-indicator
 // ═══════════════════════ ACHIEVEMENT / LEVEL ═══════════════════════
 var achTimer=null;
 function showAch(txt){var p=document.getElementById("ach-popup");document.getElementById("ach-body").textContent=txt;clearTimeout(achTimer);p.classList.remove("show");void p.offsetWidth;p.classList.add("show");achTimer=setTimeout(function(){p.classList.remove("show");},3200);}
-function checkAch(){ACHIEVEMENTS.forEach(function(a){if(ST.achievements[a.id])return;if(a.check(ST)){ST.achievements[a.id]=true;if(a.coins)ST.coins+=a.coins;save();setTimeout(function(){showAch(a.name+(a.coins?" (+"+a.coins+"🪙)":""));},300);}});}
+function checkAch(){ACHIEVEMENTS.forEach(function(a){if(ST.achievements[a.id])return;if(a.check(ST)){ST.achievements[a.id]=true;if(a.coins)ST.coins+=a.coins;save();(function(n,c){setTimeout(function(){showAch(n+(c?" (+"+c+"🪙)":""));if(typeof sndLevelup==="function")sndLevelup();},300);})(a.name,a.coins);}});}
 
 function getLevel(score){var cur=LEVELS[0];for(var i=0;i<LEVELS.length;i++){if(score>=LEVELS[i].min)cur=LEVELS[i];else break;}return cur;}
 function getLevelProgress(score){var cur=getLevel(score);var idx=LEVELS.indexOf(cur);var nxt=LEVELS[idx+1];if(!nxt)return{pct:100,cur:cur};return{pct:Math.round((score-cur.min)/(nxt.min-cur.min)*100),cur:cur,nxt:nxt};}
@@ -1176,7 +1187,7 @@ function nextQ(){gIdx++;if(gIdx>=TOTAL_Q){endGame();return;}autosave();renderQue
 function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);gAnswering=true;setTimeout(nextQ,700);}
 
 function updateGameUI(){document.getElementById("g-coins").textContent=ST.coins+gCoins;document.getElementById("g-score").textContent=gScore;}
-function updateComboUI(){var c=gCombo;var d=COMBO_DATA[Math.min(c,5)];var b=document.getElementById("combo-badge");b.className="combo-badge "+(d?d.cls:"c1");document.getElementById("combo-emoji").textContent=d?d.emoji:"▶️";document.getElementById("combo-num").textContent=c>0?c:"";document.getElementById("combo-label").textContent=d&&c>0?d.lbl:"콤보";if(c>0)anim(b,"combo-bump",400);}
+function updateComboUI(){var c=gCombo;var d=COMBO_DATA[Math.min(c,10)];var b=document.getElementById("combo-badge");b.className="combo-badge "+(d?d.cls:"c1");document.getElementById("combo-emoji").textContent=d?d.emoji:"▶️";document.getElementById("combo-num").textContent=c>0?c:"";document.getElementById("combo-label").textContent=d&&c>0?d.lbl:"콤보";if(c>0)anim(b,"combo-bump",400);}
 
 // ─── RESULT ───
 function renderStarResult(correct,total){var stars=Math.ceil((correct/total)*5);var container=document.getElementById("star-row");if(!container)return;container.innerHTML="";for(var i=1;i<=5;i++){var span=document.createElement("span");span.className="star-item"+(i<=stars?"":" dim");span.textContent="⭐";container.appendChild(span);(function(el,delay){setTimeout(function(){if(!el.classList.contains("dim"))el.classList.add("lit");else el.style.opacity=".18";},delay);})(span,280+i*170);}if(stars===5)setTimeout(function(){sndPerfectChord();},280+5*170+200);}
