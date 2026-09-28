@@ -900,7 +900,10 @@ var COUNTRIES=[
   ,{name:"통가",flag:"🇹🇴",capital:"누쿠알로파",continent:"oceania",hint:"수도 누쿠알로파, 태평양의 유일한 입헌군주국"}
   ,{name:"키리바시",flag:"🇰🇮",capital:"타라와",continent:"oceania",hint:"수도 타라와, 날짜변경선에 걸친 산호초 섬나라. 해수면 상승으로 수몰 위기"}
   ,{name:"팔라우",flag:"🇵🇼",capital:"응게룰무드",continent:"oceania",hint:"수도 응게룰무드, 미크로네시아 다이빙 천국. 해파리 호수로 유명"}
-  ,{name:"마샬군도",flag:"🇲🇭",capital:"마주로",continent:"oceania",hint:"수도 마주로, 29개 환초로 이뤄진 태평양 섬나라. 비키니 환초 핵실험 지역"}
+  ,{name:"마샬군도",flag:"🇲🇭",capital:"마주로",continent:"oceania",hint:"수도 마주로, 29개 환초로 이뤄진 태평양 섬나라. 비키니 환초 핵실험 지역"},
+  {name:"자메이카",flag:"🇯🇲",capital:"킹스턴",continent:"americas",hint:"카리브해 섬나라, 레게 음악(밥 말리) 발상지. 스프린트 강국(우사인 볼트의 나라)"},
+  {name:"트리니다드토바고",flag:"🇹🇹",capital:"포트오브스페인",continent:"americas",hint:"카리브해 쌍둥이 섬나라, 세계 최초 스틸팬 드럼·칼립소 음악 발상지"},
+  {name:"우즈베키스탄",flag:"🇺🇿",capital:"타슈켄트",continent:"asia",hint:"중앙아시아 내륙국, 실크로드 핵심(사마르칸트·부하라), 세계 5위 면화 수출국"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -925,7 +928,7 @@ var MAP_COORDS={
   "페루":{x:218,y:296},"모로코":{x:450,y:172},
   "방글라데시":{x:744,y:216},"쿠바":{x:218,y:208},"베네수엘라":{x:238,y:252},
   "가나":{x:476,y:262},"탄자니아":{x:558,y:296},"에티오피아":{x:562,y:252},
-  "몽골":{x:762,y:130},"캄보디아":{x:798,y:252},"우즈베키스탄":{x:660,y:158},
+  "몽골":{x:762,y:130},"캄보디아":{x:798,y:252},
   "파푸아뉴기니":{x:868,y:296},"루마니아":{x:516,y:128},
   "미얀마":{x:772,y:218},
   "아이슬란드":{x:300,y:65},"네팔":{x:728,y:202},"볼리비아":{x:250,y:328},
@@ -941,7 +944,7 @@ var MAP_COORDS={
   ,"통가":{x:140,y:278}
   ,"키리바시":{x:128,y:222}
   ,"팔라우":{x:93,y:222}
-  ,"마샬군도":{x:120,y:200}
+  ,"마샬군도":{x:120,y:200},"자메이카":{x:205,y:220},"트리니다드토바고":{x:225,y:252},"우즈베키스탄":{x:600,y:148}
 };
 
 var CHARACTERS=[
@@ -968,6 +971,10 @@ var ACHIEVEMENTS=[
   {id:"mapmaster",name:"지도 마스터 🗺️",check:function(s){return (s.mapCorrect||0)>=30},coins:80},
   {id:"modes3",name:"올라운더 🎯",check:function(s){return (s.modesPlayed||0)>=3},coins:60},
   {id:"games20",name:"단골손님 🏅",check:function(s){return s.gamesPlayed>=20},coins:100},
+  {id:"daily3",name:"3일 연속 📅",check:function(s){return s.dailyStreakCount>=3},coins:40},
+  {id:"enc50",name:"도감 탐험가 📚",check:function(s){return (s.encViewedCount||Object.keys(s.encViewed||{}).length)>=50},coins:80},
+  {id:"enc100",name:"세계 백과 👓",check:function(s){return (s.encViewedCount||Object.keys(s.encViewed||{}).length)>=100},coins:200},
+  {id:"focus10",name:"집중력의 달인 🎯",check:function(s){return (s.focusCompleted||0)>=10},coins:100},
 ];
 
 var LEVELS=[
