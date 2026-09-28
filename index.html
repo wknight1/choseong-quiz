@@ -964,7 +964,8 @@ var MAP_COORDS={
 
   "감비아":{x:424,y:234},"카타르":{x:597,y:218},
 "동티모르":{x:838,y:320},"수리남":{x:300,y:310},"적도기니":{x:495,y:315},"몬테네그로":{x:530,y:188},
-  "수단":{x:590,y:251}
+  "수단":{x:590,y:251},
+  "니카라과":{x:220,y:250},"온두라스":{x:215,y:242},"엘살바도르":{x:210,y:248},"벨리즈":{x:210,y:238},"니제르":{x:500,y:228}
 };
 
 var CHARACTERS=[
@@ -1017,7 +1018,12 @@ var COMBO_DATA=[
   {c:4,lbl:"불꽃!",emoji:"🌟",cls:"c4"},{c:5,lbl:"MAX!",emoji:"💥",cls:"c5"},
   {c:6,lbl:"GODLIKE!",emoji:"👑",cls:"c5"},{c:7,lbl:"전설!",emoji:"🌌",cls:"c5"},
   {c:8,lbl:"신급!",emoji:"🪐",cls:"c5"},{c:9,lbl:"우주적!",emoji:"☄️",cls:"c5"},
-  {name:"수단",flag:"🇸🇩",capital:"하르툼",continent:"africa",hint:"수도 하르툼, 아프리카 최대 면적 국가 중 하나. 나일강이 흐르고 고대 메로에 피라미드 보유"}
+  {name:"수단",flag:"🇸🇩",capital:"하르툼",continent:"africa",hint:"수도 하르툼, 아프리카 최대 면적 국가 중 하나. 나일강이 흐르고 고대 메로에 피라미드 보유"},
+  {name:"니카라과",flag:"🇳🇮",capital:"마나과",continent:"americas",hint:"수도 마나과, 중앙아메리카 최대 국가. 니카라과 호수(담수어 상어 서식)가 있는 화산의 나라"},
+  {name:"온두라스",flag:"🇭🇳",capital:"테구시갈파",continent:"americas",hint:"수도 테구시갈파, 마야 문명 유적 코판 보유. 중미에서 두 번째로 큰 나라"},
+  {name:"엘살바도르",flag:"🇸🇻",capital:"산살바도르",continent:"americas",hint:"수도 산살바도르, 중미 최소 국가이자 최고 인구밀도. 세계 최초 비트코인 법정화폐 채택"},
+  {name:"벨리즈",flag:"🇧🇿",capital:"벨모판",continent:"americas",hint:"수도 벨모판, 중미 유일 영어 공용국. 마야 유적과 세계 2위 산호초(벨리즈 배리어 리프) 보유"},
+  {name:"니제르",flag:"🇳🇪",capital:"니아메",continent:"africa",hint:"수도 니아메, 사하라 사막이 국토 80%를 차지. 세계 최대 우라늄 생산국 중 하나"}
 ];
 var TOTAL_Q=20;
 
@@ -1308,7 +1314,10 @@ function onMapClick(evt){
   var ok=grade<=1;
   var coinEarned=grade===0?3:grade===1?2:1;
   var eq=getEquipped();if(eq.effectType==="coin_bonus")coinEarned+=eq.effectValue;if(eq.effectType==="ultimate")coinEarned+=eq.effectValue.coin;
-  if(ok){gCombo++;ST.totalCorrect++;}else{gCombo=0;}
+  if(!ST.perCountry)ST.perCountry={};
+  if(!ST.perCountry[q.name])ST.perCountry[q.name]={ans:0,corr:0};
+  ST.perCountry[q.name].ans++;
+  if(ok){gCombo++;ST.totalCorrect++;ST.perCountry[q.name].corr++;}else{gCombo=0;}
   if(ST.maxCombo<gCombo)ST.maxCombo=gCombo;
   // Apply combo multiplier like choseong/flag modes
   var mapMult=1;
