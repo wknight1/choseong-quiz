@@ -1118,6 +1118,10 @@ var MAP_COORDS={
   "적도기니":{x:472,y:322},"코스타리카":{x:188,y:240},"코트디부아르":{x:468,y:274},"쿠웨이트":{x:576,y:195},"크로아티아":{x:500,y:148},
   "키프로스":{x:538,y:163},"타지키스탄":{x:676,y:188},"투르크메니스탄":{x:640,y:180},"튀니지":{x:488,y:170},"피지":{x:926,y:340},
 
+,
+  "세인트루시아":{x:27.4,y:54.5},
+  "세인트키츠네비스":{x:26.8,y:52.8},
+  "도미니카":{x:27.1,y:53.2}
 };
 
 var CHARACTERS=[
@@ -1168,7 +1172,11 @@ var LEVELS=[
   {name:"투르크메니스탄",flag:"🇹🇲",continent:"asia",capital:"아슈하바트",hint:"수도 아슈하바트, 세계 최고 백색 대리석 건물 밀도. 다르바자 가스 분화구(지옥문) 60년째 연소 중."}
 ];
 
-var DAILY_BONUS=[10,15,25,35,50,75,120];
+var DAILY_BONUS=[10,15,25,35,50,75,120,
+  {name:"세인트루시아",flag:"🇱🇨",hint:"수도 캐스트리스. 카리브해 피통 쌍봉 유네스코 세계유산.",continent:"americas"},
+  {name:"세인트키츠네비스",flag:"🇰🇳",hint:"수도 바스테르. 카리브해 최소 국가 중 하나. 설탕 산업으로 유명.",continent:"americas"},
+  {name:"도미니카",flag:"🇩🇲",hint:"수도 로조. 카리브해 화산섬. 세계 두 번째로 큰 담수호 보유.",continent:"americas"}
+];
 var COMBO_DATA=[
   {c:0,lbl:"",emoji:"▶️",cls:"c1"},{c:1,lbl:"시작",emoji:"▶️",cls:"c1"},
   {c:2,lbl:"웜업!",emoji:"🔥",cls:"c2"},{c:3,lbl:"연속!",emoji:"⚡",cls:"c3"},
@@ -1294,6 +1302,7 @@ function norm(s){return s.replace(/\s/g,"").replace(/[·•\-]/g,"");}
 
 function startGame(mode){
   gMode=mode||"choseong";
+  _sessionCorrect=0;_flagCorrectToday=0;_maxComboToday=0;
   var pool=COUNTRIES.filter(function(c){return MAP_COORDS[c.name];});
   if (gFocusCountry) {
     // Focus mode: repeat the same country 10 times
@@ -1376,7 +1385,7 @@ function getDailyMissions() {
     // 새 날 - 무작위 3개 선택
     var shuffled = shuffle(DAILY_MISSION_DEFS.slice());
     var selected = shuffled.slice(0, 3);
-    stored = {date: t, missions: selected.map(function(m){ return {id:m.id, progress:0, done:false}; })};
+    stored = {date: t, missions: selected.map(function(m){ return {id:m.id, progress:0, done:false, claimed:false}; })};
     localStorage.setItem('dailyMissions', JSON.stringify(stored));
   }
   return stored;
@@ -1411,6 +1420,20 @@ var _sessionCorrect = 0;
 var _maxComboToday = 0;
 var _flagCorrectToday = 0;
 
+function claimMissionReward(missionId) {
+  var dm = getDailyMissions();
+  var ms = dm.missions.filter(function(m){ return m.id === missionId; })[0];
+  var def = DAILY_MISSION_DEFS.filter(function(d){ return d.id === missionId; })[0];
+  if (!ms || !def || !ms.done || ms.claimed) return;
+  ms.claimed = true;
+  ST.coins += def.reward;
+  save();
+  localStorage.setItem('dailyMissions', JSON.stringify(dm));
+  showToast('🎁 미션 보상! +' + def.reward + '🪙');
+  renderDailyMissions();
+  updateHomeUI();
+}
+
 function renderDailyMissions() {
   var panel = document.getElementById('daily-missions-panel');
   var listEl = document.getElementById('mission-list');
@@ -1425,12 +1448,15 @@ function renderDailyMissions() {
     var pct = Math.min(100, Math.round((ms.progress / def.goal) * 100));
     var div = document.createElement('div');
     div.className = 'mission-item' + (ms.done ? ' done' : '');
+    var claimBtn = ms.done && !ms.claimed ?
+      '<button onclick="claimMissionReward(\''+ms.id+'\');event.stopPropagation();" style="font-size:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:3px 8px;cursor:pointer;white-space:nowrap;margin-left:4px;">🎁 수령</button>' : '';
     div.innerHTML = '<span style="font-size:16px">' + def.icon + '</span>' +
       '<div style="flex:1;min-width:0;">' +
         '<div style="font-size:12px;font-weight:700;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (ms.done ? '✅ ' : '') + def.label + '</div>' +
         '<div class="mission-bar-wrap"><div class="mission-bar" style="width:' + pct + '%"></div></div>' +
       '</div>' +
       '<span style="font-size:10px;color:var(--muted);white-space:nowrap">' + ms.progress + '/' + def.goal + '</span>' +
+      claimBtn+
       '<span class="mission-reward">+' + def.reward + '🪙</span>';
     listEl.appendChild(div);
   });
@@ -1698,7 +1724,7 @@ function onCorrect(el,cls,e){
   var speedBonus=timerLeft>66?50:timerLeft>50?30:timerLeft>33?10:0;
   var hintPenalty=gHintsUsed>0?30:0;
   var basePts=100-hintPenalty+speedBonus;
-  gCombo++;
+  gCombo++;checkComboMilestone(gCombo);
   var eq=getEquipped();var mult=1;
   if(eq.effectType==="combo_multiplier"&&gCombo>=eq.comboThreshold)mult=eq.effectValue;
   if(eq.effectType==="ultimate")mult=eq.effectValue.multiplier;
@@ -1741,6 +1767,14 @@ function updateGameUI(){
   var prevScore=parseInt(scoreEl.textContent)||0;
   scoreEl.textContent=gScore;
   if(gScore>prevScore){scoreEl.style.transform="scale(1.3)";scoreEl.style.color="var(--gold)";setTimeout(function(){scoreEl.style.transform="";scoreEl.style.color="";},250);}
+}
+
+// Combo milestone check - called from onCorrect
+function checkComboMilestone(combo) {
+  if(combo===3)showToast('🔥 3콤보 시작!');
+  else if(combo===5)showToast('🔥🔥 5콤보! 점수 x3!');
+  else if(combo===10)showToast('💥 10콤보!! 전설!');
+  else if(combo===20)showToast('⚡ 20콤보!!! 신의 경지!!!');
 }
 function updateComboUI(){var c=gCombo;var d=COMBO_DATA[Math.min(c,9)];var b=document.getElementById("combo-badge");b.className="combo-badge "+(d?d.cls:"c1");document.getElementById("combo-emoji").textContent=d?d.emoji:"▶️";document.getElementById("combo-num").textContent=c>0?c:"";document.getElementById("combo-label").textContent=d&&c>0?d.lbl:"콤보";if(c>0)anim(b,"combo-bump",400);}
 
@@ -2824,6 +2858,14 @@ function renderWordHints(q) {
 }
 
 // ═══ STREAK BANNER INJECTION ═══
+function showToast(msg, duration) {
+  duration = duration || 2000;
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:9999;pointer-events:none;animation:fadeInUp .3s ease;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, duration);
+}
 function showStreakBanner(streak) {
   if (streak < 2) return;
   var existing = document.getElementById('streak-banner-el');
