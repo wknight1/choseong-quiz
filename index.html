@@ -796,7 +796,6 @@ var COUNTRIES=[
   {name:"방글라데시",flag:"🇧🇩",hint:"수도 다카, 세계 최고 인구밀도 국가 중 하나. 황마 산지",capital:"다카",continent:"asia"},
   // 중앙아시아
   {name:"카자흐스탄",flag:"🇰🇿",hint:"수도 아스타나, 러시아 다음 세계 2위 내륙국. 우주센터 바이코누르",capital:"아스타나",continent:"asia"},
-  {name:"우즈베키스탄",flag:"🇺🇿",hint:"수도 타슈켄트, 실크로드의 요충지 사마르칸트·부하라 보유",capital:"타슈켄트",continent:"asia"},
   // 중동
   {name:"사우디아라비아",flag:"🇸🇦",hint:"수도 리야드, 이슬람 성지 메카·메디나 위치. 세계 2위 석유 매장",capital:"리야드",continent:"asia"},
   {name:"이란",flag:"🇮🇷",hint:"수도 테헤란, 페르시아 제국의 후예. 세계 4위 원유 보유국",capital:"테헤란",continent:"asia"},
@@ -904,6 +903,8 @@ var COUNTRIES=[
   {name:"자메이카",flag:"🇯🇲",capital:"킹스턴",continent:"americas",hint:"카리브해 섬나라, 레게 음악(밥 말리) 발상지. 스프린트 강국(우사인 볼트의 나라)"},
   {name:"트리니다드토바고",flag:"🇹🇹",capital:"포트오브스페인",continent:"americas",hint:"카리브해 쌍둥이 섬나라, 세계 최초 스틸팬 드럼·칼립소 음악 발상지"},
   {name:"우즈베키스탄",flag:"🇺🇿",capital:"타슈켄트",continent:"asia",hint:"중앙아시아 내륙국, 실크로드 핵심(사마르칸트·부하라), 세계 5위 면화 수출국"}
+  ,{name:"바하마",flag:"🇧🇸",capital:"나소",continent:"americas",hint:"카리브해 700개 이상 섬으로 이뤄진 군도 국가. 크리스토퍼 콜럼버스 첫 상륙지(1492)"}
+  ,{name:"부탄",flag:"🇧🇹",capital:"팀푸",continent:"asia",hint:"GDP 대신 GNH(국민총행복) 지표 사용하는 유일한 나라. 히말라야 왕국, 세계 탄소 음성 국가"}
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -944,7 +945,7 @@ var MAP_COORDS={
   ,"통가":{x:140,y:278}
   ,"키리바시":{x:128,y:222}
   ,"팔라우":{x:93,y:222}
-  ,"마샬군도":{x:120,y:200},"자메이카":{x:205,y:220},"트리니다드토바고":{x:225,y:252},"우즈베키스탄":{x:600,y:148}
+  ,"마샬군도":{x:120,y:200},"자메이카":{x:205,y:220},"트리니다드토바고":{x:225,y:252},"우즈베키스탄":{x:600,y:148},"바하마":{x:210,y:215},"부탄":{x:697,y:210}
 };
 
 var CHARACTERS=[
@@ -1950,6 +1951,12 @@ function renderEncyclopedia() {
   });
 
   var viewedCount = Object.keys(viewed).length;
+  // Sync to ST.encViewed so enc50/enc100 achievements can track
+  if (!ST.encViewed) ST.encViewed = {};
+  if (Object.keys(viewed).length > Object.keys(ST.encViewed).length) {
+    ST.encViewed = viewed;
+    save();
+  }
   prog.textContent = '📖 ' + viewedCount + ' / ' + COUNTRIES.length + '개 나라 열람';
 
   grid.innerHTML = filtered.map(function(c) {
@@ -1976,6 +1983,13 @@ function showEncDetail(name) {
   var viewed = JSON.parse(localStorage.getItem('enc_viewed') || '{}');
   viewed[name] = true;
   localStorage.setItem('enc_viewed', JSON.stringify(viewed));
+  // Sync to ST so enc50/enc100 achievements work
+  if (!ST.encViewed) ST.encViewed = {};
+  if (!ST.encViewed[name]) {
+    ST.encViewed[name] = true;
+    save();
+    checkAch();
+  }
 
   var wm = getWrongMap() || {};
   var wrongCount = wm[name] || 0;
