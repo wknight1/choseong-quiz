@@ -393,6 +393,17 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     </div>
   </div>
 
+  <!-- 오늘의 나라 카드 -->
+  <div id="todays-country-card" style="width:100%;background:linear-gradient(135deg,#0f2040,#1a1a3e);border:1.5px solid #1e3a5f;border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .15s" onclick="startGame('choseong')" title="초성 퀴즈로 이 나라 맞춰보기">
+    <div style="font-size:2.4rem;min-width:44px;text-align:center" id="tc-flag">🌍</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:10px;font-weight:700;color:var(--sky);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">🗓 오늘의 나라</div>
+      <div style="font-size:15px;font-weight:900;color:var(--fg)" id="tc-name">-</div>
+      <div style="font-size:11px;color:var(--sub);margin-top:1px" id="tc-capital">-</div>
+    </div>
+    <div style="font-size:10px;color:var(--muted);max-width:80px;text-align:right;line-height:1.4" id="tc-hint">-</div>
+  </div>
+
   <div id="daily-banner" class="daily-banner" onclick="claimDaily()">
     <div class="db-icon">🎁</div>
     <div class="db-text">
@@ -615,85 +626,83 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 <script>
 // ═══════════════════════ DATA ═══════════════════════
 var COUNTRIES=[
-  {name:"대한민국",flag:"🇰🇷",hint:"🌏 동아시아 반도",capital:"서울",continent:"asia"},
+  // 동아시아
+  {name:"대한민국",flag:"🇰🇷",hint:"🌏 동아시아 반도국",capital:"서울",continent:"asia"},
   {name:"일본",flag:"🇯🇵",hint:"🌏 동아시아 섬나라",capital:"도쿄",continent:"asia"},
-  {name:"중국",flag:"🇨🇳",hint:"🌏 동아시아",capital:"베이징",continent:"asia"},
-  {name:"미국",flag:"🇺🇸",hint:"🌎 북아메리카 초강대국",capital:"워싱턴 D.C.",continent:"americas"},
-  {name:"영국",flag:"🇬🇧",hint:"🌍 서유럽 섬나라",capital:"런던",continent:"europe"},
-  {name:"프랑스",flag:"🇫🇷",hint:"🌍 서유럽 에펠탑",capital:"파리",continent:"europe"},
-  {name:"독일",flag:"🇩🇪",hint:"🌍 중부유럽 자동차",capital:"베를린",continent:"europe"},
-  {name:"이탈리아",flag:"🇮🇹",hint:"🌍 남유럽 장화 모양",capital:"로마",continent:"europe"},
-  {name:"스페인",flag:"🇪🇸",hint:"🌍 남유럽 투우",capital:"마드리드",continent:"europe"},
-  {name:"포르투갈",flag:"🇵🇹",hint:"🌍 남유럽 대항해",capital:"리스본",continent:"europe"},
-  {name:"브라질",flag:"🇧🇷",hint:"🌎 남아메리카 최대",capital:"브라질리아",continent:"americas"},
-  {name:"아르헨티나",flag:"🇦🇷",hint:"🌎 남아메리카 탱고",capital:"부에노스아이레스",continent:"americas"},
-  {name:"캐나다",flag:"🇨🇦",hint:"🌎 북아메리카 단풍",capital:"오타와",continent:"americas"},
-  {name:"멕시코",flag:"🇲🇽",hint:"🌎 북아메리카 선인장",capital:"멕시코시티",continent:"americas"},
-  {name:"호주",flag:"🇦🇺",hint:"🌏 오세아니아 캥거루",capital:"캔버라",continent:"oceania"},
-  {name:"뉴질랜드",flag:"🇳🇿",hint:"🌏 오세아니아 키위새",capital:"웰링턴",continent:"oceania"},
-  {name:"인도",flag:"🇮🇳",hint:"🌏 남아시아 1위 인구",capital:"뉴델리",continent:"asia"},
-  {name:"파키스탄",flag:"🇵🇰",hint:"🌏 남아시아 이슬람",capital:"이슬라마바드",continent:"asia"},
+  {name:"중국",flag:"🇨🇳",hint:"🌏 동아시아 인구 2위",capital:"베이징",continent:"asia"},
+  {name:"몽골",flag:"🇲🇳",hint:"🌏 내륙 유목민 제국",capital:"울란바토르",continent:"asia"},
+  // 동남아시아
   {name:"인도네시아",flag:"🇮🇩",hint:"🌏 동남아 섬 17000개",capital:"자카르타",continent:"asia"},
-  {name:"태국",flag:"🇹🇭",hint:"🌏 동남아 사원",capital:"방콕",continent:"asia"},
-  {name:"베트남",flag:"🇻🇳",hint:"🌏 동남아 S자",capital:"하노이",continent:"asia"},
+  {name:"태국",flag:"🇹🇭",hint:"🌏 동남아 황금 사원",capital:"방콕",continent:"asia"},
+  {name:"베트남",flag:"🇻🇳",hint:"🌏 동남아 S자 모양",capital:"하노이",continent:"asia"},
   {name:"필리핀",flag:"🇵🇭",hint:"🌏 동남아 7000개 섬",capital:"마닐라",continent:"asia"},
   {name:"말레이시아",flag:"🇲🇾",hint:"🌏 동남아 쌍둥이 빌딩",capital:"쿠알라룸푸르",continent:"asia"},
   {name:"싱가포르",flag:"🇸🇬",hint:"🌏 동남아 도시 국가",capital:"싱가포르",continent:"asia"},
-  {name:"러시아",flag:"🇷🇺",hint:"🌍🌏 세계 최대 면적",capital:"모스크바",continent:"europe"},
-  {name:"폴란드",flag:"🇵🇱",hint:"🌍 동유럽",capital:"바르샤바",continent:"europe"},
-  {name:"네덜란드",flag:"🇳🇱",hint:"🌍 서유럽 풍차",capital:"암스테르담",continent:"europe"},
-  {name:"벨기에",flag:"🇧🇪",hint:"🌍 서유럽 와플",capital:"브뤼셀",continent:"europe"},
-  {name:"스웨덴",flag:"🇸🇪",hint:"🌍 북유럽 노벨상",capital:"스톡홀름",continent:"europe"},
-  {name:"노르웨이",flag:"🇳🇴",hint:"🌍 북유럽 피오르드",capital:"오슬로",continent:"europe"},
-  {name:"덴마크",flag:"🇩🇰",hint:"🌍 북유럽 동화",capital:"코펜하겐",continent:"europe"},
-  {name:"핀란드",flag:"🇫🇮",hint:"🌍 북유럽 산타",capital:"헬싱키",continent:"europe"},
-  {name:"스위스",flag:"🇨🇭",hint:"🌍 중부유럽 알프스",capital:"베른",continent:"europe"},
-  {name:"오스트리아",flag:"🇦🇹",hint:"🌍 중부유럽 음악",capital:"빈",continent:"europe"},
-  {name:"그리스",flag:"🇬🇷",hint:"🌍 남유럽 민주주의",capital:"아테네",continent:"europe"},
-  {name:"터키",flag:"🇹🇷",hint:"🌍🌏 두 대륙",capital:"앙카라",continent:"asia"},
-  {name:"이집트",flag:"🇪🇬",hint:"🌍 북아프리카 피라미드",capital:"카이로",continent:"africa"},
-  {name:"나이지리아",flag:"🇳🇬",hint:"🌍 아프리카 인구 1위",capital:"아부자",continent:"africa"},
-  {name:"케냐",flag:"🇰🇪",hint:"🌍 동아프리카 마라톤",capital:"나이로비",continent:"africa"},
-  {name:"남아프리카공화국",flag:"🇿🇦",hint:"🌍 아프리카 최남단",capital:"프리토리아",continent:"africa"},
-  {name:"모로코",flag:"🇲🇦",hint:"🌍 북아프리카 마그레브",capital:"라바트",continent:"africa"},
-  {name:"에티오피아",flag:"🇪🇹",hint:"🌍 동아프리카 커피 원산지",capital:"아디스아바바",continent:"africa"},
-  {name:"그리스",flag:"🇬🇷",hint:"🌍 남유럽 올림픽 발상지",capital:"아테네",continent:"europe"},
-  {name:"스웨덴",flag:"🇸🇪",hint:"🌍 북유럽 바이킹",capital:"스톡홀름",continent:"europe"},
-  {name:"노르웨이",flag:"🇳🇴",hint:"🌍 북유럽 피요르드",capital:"오슬로",continent:"europe"},
-  {name:"덴마크",flag:"🇩🇰",hint:"🌍 북유럽 레고",capital:"코펜하겐",continent:"europe"},
-  {name:"핀란드",flag:"🇫🇮",hint:"🌍 북유럽 산타클로스",capital:"헬싱키",continent:"europe"},
-  {name:"폴란드",flag:"🇵🇱",hint:"🌍 동유럽 피에로기",capital:"바르샤바",continent:"europe"},
-  {name:"체코",flag:"🇨🇿",hint:"🌍 중부유럽 맥주 1위",capital:"프라하",continent:"europe"},
-  {name:"헝가리",flag:"🇭🇺",hint:"🌍 중부유럽 도나우강",capital:"부다페스트",continent:"europe"},
-  {name:"루마니아",flag:"🇷🇴",hint:"🌍 동유럽 드라큘라",capital:"부쿠레슈티",continent:"europe"},
-  {name:"칠레",flag:"🇨🇱",hint:"🌎 남아메리카 가장 긴 나라",capital:"산티아고",continent:"americas"},
-  {name:"콜롬비아",flag:"🇨🇴",hint:"🌎 남아메리카 커피",capital:"보고타",continent:"americas"},
-  {name:"페루",flag:"🇵🇪",hint:"🌎 남아메리카 마추픽추",capital:"리마",continent:"americas"},
-  {name:"베네수엘라",flag:"🇻🇪",hint:"🌎 남아메리카 석유 최대",capital:"카라카스",continent:"americas"},
-  {name:"쿠바",flag:"🇨🇺",hint:"🌎 카리브해 시가",capital:"아바나",continent:"americas"},
-  {name:"이란",flag:"🇮🇷",hint:"🌏 중동 페르시아",capital:"테헤란",continent:"asia"},
-  {name:"이라크",flag:"🇮🇶",hint:"🌏 중동 메소포타미아",capital:"바그다드",continent:"asia"},
-  {name:"아랍에미리트",flag:"🇦🇪",hint:"🌏 중동 두바이",capital:"아부다비",continent:"asia"},
-  {name:"이스라엘",flag:"🇮🇱",hint:"🌏 중동 성지",capital:"예루살렘",continent:"asia"},
+  {name:"미얀마",flag:"🇲🇲",hint:"🌏 동남아 황금 불탑",capital:"네피도",continent:"asia"},
+  {name:"캄보디아",flag:"🇰🇭",hint:"🌏 동남아 앙코르와트",capital:"프놈펜",continent:"asia"},
+  // 남아시아
+  {name:"인도",flag:"🇮🇳",hint:"🌏 남아시아 인구 1위",capital:"뉴델리",continent:"asia"},
+  {name:"파키스탄",flag:"🇵🇰",hint:"🌏 남아시아 이슬람 공화국",capital:"이슬라마바드",continent:"asia"},
+  {name:"방글라데시",flag:"🇧🇩",hint:"🌏 남아시아 벵갈 삼각주",capital:"다카",continent:"asia"},
+  // 중앙아시아
   {name:"카자흐스탄",flag:"🇰🇿",hint:"🌏 중앙아시아 최대 내륙국",capital:"아스타나",continent:"asia"},
   {name:"우즈베키스탄",flag:"🇺🇿",hint:"🌏 중앙아시아 실크로드",capital:"타슈켄트",continent:"asia"},
-  {name:"몽골",flag:"🇲🇳",hint:"🌏 내륙 유목민 제국",capital:"울란바토르",continent:"asia"},
-  {name:"미얀마",flag:"🇲🇲",hint:"🌏 동남아 황금 사원",capital:"네피도",continent:"asia"},
-  {name:"캄보디아",flag:"🇰🇭",hint:"🌏 동남아 앙코르와트",capital:"프놈펜",continent:"asia"},
-  {name:"파푸아뉴기니",flag:"🇵🇬",hint:"🌏 오세아니아 열대우림",capital:"포트모르즈비",continent:"oceania"},
-  {name:"남아프리카공화국",flag:"🇿🇦",hint:"🌍 아프리카 최남단",capital:"프리토리아",continent:"africa"},
-  {name:"케냐",flag:"🇰🇪",hint:"🌍 동아프리카 사바나",capital:"나이로비",continent:"africa"},
-  {name:"나이지리아",flag:"🇳🇬",hint:"🌍 서아프리카 최다인구",capital:"아부자",continent:"africa"},
+  // 중동
   {name:"사우디아라비아",flag:"🇸🇦",hint:"🌏 중동 석유 왕국",capital:"리야드",continent:"asia"},
-  {name:"이란",flag:"🇮🇷",hint:"🌏 중동 페르시아",capital:"테헤란",continent:"asia"},
+  {name:"이란",flag:"🇮🇷",hint:"🌏 중동 페르시아 제국",capital:"테헤란",continent:"asia"},
   {name:"이라크",flag:"🇮🇶",hint:"🌏 중동 메소포타미아",capital:"바그다드",continent:"asia"},
-  {name:"UAE",flag:"🇦🇪",hint:"🌏 중동 두바이",capital:"아부다비",continent:"asia"},
-  {name:"이스라엘",flag:"🇮🇱",hint:"🌏 중동 성지",capital:"예루살렘",continent:"asia"},
-  {name:"우크라이나",flag:"🇺🇦",hint:"🌍 동유럽",capital:"키이우",continent:"europe"},
-  {name:"칠레",flag:"🇨🇱",hint:"🌎 남아메리카 세로",capital:"산티아고",continent:"americas"},
-  {name:"콜롬비아",flag:"🇨🇴",hint:"🌎 남아메리카 커피",capital:"보고타",continent:"americas"},
-  {name:"페루",flag:"🇵🇪",hint:"🌎 남아메리카 잉카",capital:"리마",continent:"americas"},
-  {name:"모로코",flag:"🇲🇦",hint:"🌍 북아프리카 사하라",capital:"라바트",continent:"africa"},
+  {name:"아랍에미리트",flag:"🇦🇪",hint:"🌏 중동 두바이 사막의 도시",capital:"아부다비",continent:"asia"},
+  {name:"이스라엘",flag:"🇮🇱",hint:"🌏 중동 성지의 나라",capital:"예루살렘",continent:"asia"},
+  {name:"터키",flag:"🇹🇷",hint:"🌍🌏 두 대륙에 걸친 나라",capital:"앙카라",continent:"asia"},
+  // 오세아니아
+  {name:"호주",flag:"🇦🇺",hint:"🌏 오세아니아 캥거루 대륙",capital:"캔버라",continent:"oceania"},
+  {name:"뉴질랜드",flag:"🇳🇿",hint:"🌏 오세아니아 키위새의 나라",capital:"웰링턴",continent:"oceania"},
+  {name:"파푸아뉴기니",flag:"🇵🇬",hint:"🌏 오세아니아 열대우림",capital:"포트모르즈비",continent:"oceania"},
+  // 서유럽
+  {name:"영국",flag:"🇬🇧",hint:"🌍 서유럽 섬나라 연합왕국",capital:"런던",continent:"europe"},
+  {name:"프랑스",flag:"🇫🇷",hint:"🌍 서유럽 에펠탑의 나라",capital:"파리",continent:"europe"},
+  {name:"독일",flag:"🇩🇪",hint:"🌍 중부유럽 자동차 강국",capital:"베를린",continent:"europe"},
+  {name:"이탈리아",flag:"🇮🇹",hint:"🌍 남유럽 장화 모양 반도",capital:"로마",continent:"europe"},
+  {name:"스페인",flag:"🇪🇸",hint:"🌍 남유럽 투우의 나라",capital:"마드리드",continent:"europe"},
+  {name:"포르투갈",flag:"🇵🇹",hint:"🌍 남유럽 대항해 시대 선구자",capital:"리스본",continent:"europe"},
+  {name:"네덜란드",flag:"🇳🇱",hint:"🌍 서유럽 풍차와 튤립",capital:"암스테르담",continent:"europe"},
+  {name:"벨기에",flag:"🇧🇪",hint:"🌍 서유럽 와플과 초콜릿",capital:"브뤼셀",continent:"europe"},
+  {name:"스위스",flag:"🇨🇭",hint:"🌍 중부유럽 알프스 시계",capital:"베른",continent:"europe"},
+  {name:"오스트리아",flag:"🇦🇹",hint:"🌍 중부유럽 음악의 도시",capital:"빈",continent:"europe"},
+  // 북유럽
+  {name:"스웨덴",flag:"🇸🇪",hint:"🌍 북유럽 노벨상 발상지",capital:"스톡홀름",continent:"europe"},
+  {name:"노르웨이",flag:"🇳🇴",hint:"🌍 북유럽 피오르드 해안",capital:"오슬로",continent:"europe"},
+  {name:"덴마크",flag:"🇩🇰",hint:"🌍 북유럽 레고와 동화",capital:"코펜하겐",continent:"europe"},
+  {name:"핀란드",flag:"🇫🇮",hint:"🌍 북유럽 산타클로스 고향",capital:"헬싱키",continent:"europe"},
+  // 동유럽
+  {name:"러시아",flag:"🇷🇺",hint:"🌍🌏 세계 최대 면적 국가",capital:"모스크바",continent:"europe"},
+  {name:"폴란드",flag:"🇵🇱",hint:"🌍 동유럽 피에로기의 나라",capital:"바르샤바",continent:"europe"},
+  {name:"체코",flag:"🇨🇿",hint:"🌍 중부유럽 맥주 소비 1위",capital:"프라하",continent:"europe"},
+  {name:"헝가리",flag:"🇭🇺",hint:"🌍 중부유럽 도나우 강변",capital:"부다페스트",continent:"europe"},
+  {name:"루마니아",flag:"🇷🇴",hint:"🌍 동유럽 드라큘라 전설",capital:"부쿠레슈티",continent:"europe"},
+  {name:"그리스",flag:"🇬🇷",hint:"🌍 남유럽 민주주의 발상지",capital:"아테네",continent:"europe"},
+  {name:"우크라이나",flag:"🇺🇦",hint:"🌍 동유럽 해바라기 들판",capital:"키이우",continent:"europe"},
+  // 북미
+  {name:"미국",flag:"🇺🇸",hint:"🌎 북아메리카 초강대국",capital:"워싱턴 D.C.",continent:"americas"},
+  {name:"캐나다",flag:"🇨🇦",hint:"🌎 북아메리카 단풍나무",capital:"오타와",continent:"americas"},
+  {name:"멕시코",flag:"🇲🇽",hint:"🌎 북아메리카 선인장 사막",capital:"멕시코시티",continent:"americas"},
+  {name:"쿠바",flag:"🇨🇺",hint:"🌎 카리브해 시가의 섬",capital:"아바나",continent:"americas"},
+  // 남미
+  {name:"브라질",flag:"🇧🇷",hint:"🌎 남아메리카 최대 국가",capital:"브라질리아",continent:"americas"},
+  {name:"아르헨티나",flag:"🇦🇷",hint:"🌎 남아메리카 탱고 발상지",capital:"부에노스아이레스",continent:"americas"},
+  {name:"칠레",flag:"🇨🇱",hint:"🌎 남아메리카 가장 긴 나라",capital:"산티아고",continent:"americas"},
+  {name:"콜롬비아",flag:"🇨🇴",hint:"🌎 남아메리카 커피 왕국",capital:"보고타",continent:"americas"},
+  {name:"페루",flag:"🇵🇪",hint:"🌎 남아메리카 마추픽추 잉카",capital:"리마",continent:"americas"},
+  {name:"베네수엘라",flag:"🇻🇪",hint:"🌎 남아메리카 엔젤폭포",capital:"카라카스",continent:"americas"},
+  // 아프리카
+  {name:"이집트",flag:"🇪🇬",hint:"🌍 북아프리카 피라미드 나일강",capital:"카이로",continent:"africa"},
+  {name:"나이지리아",flag:"🇳🇬",hint:"🌍 서아프리카 인구 1위",capital:"아부자",continent:"africa"},
+  {name:"에티오피아",flag:"🇪🇹",hint:"🌍 동아프리카 커피 원산지",capital:"아디스아바바",continent:"africa"},
+  {name:"케냐",flag:"🇰🇪",hint:"🌍 동아프리카 마라톤 강국",capital:"나이로비",continent:"africa"},
+  {name:"남아프리카공화국",flag:"🇿🇦",hint:"🌍 아프리카 최남단 희망봉",capital:"프리토리아",continent:"africa"},
+  {name:"모로코",flag:"🇲🇦",hint:"🌍 북아프리카 마그레브 사하라",capital:"라바트",continent:"africa"},
+  {name:"가나",flag:"🇬🇭",hint:"🌍 서아프리카 초콜릿 카카오",capital:"아크라",continent:"africa"},
+  {name:"탄자니아",flag:"🇹🇿",hint:"🌍 동아프리카 킬리만자로",capital:"도도마",continent:"africa"},
 ];
 
 // 지도 좌표 (1000x500 SVG 기준)
@@ -708,9 +717,14 @@ var MAP_COORDS={
   "스웨덴":{x:492,y:96},"노르웨이":{x:480,y:90},"덴마크":{x:485,y:105},"핀란드":{x:504,y:93},
   "스위스":{x:478,y:130},"오스트리아":{x:490,y:127},"그리스":{x:506,y:148},"터키":{x:538,y:145},
   "이집트":{x:538,y:190},"남아프리카공화국":{x:522,y:365},"케냐":{x:556,y:280},"나이지리아":{x:498,y:260},
-  "사우디아라비아":{x:578,y:206},"이란":{x:612,y:186},"이라크":{x:576,y:180},"UAE":{x:618,y:212},
+  "사우디아라비아":{x:578,y:206},"이란":{x:612,y:186},"이라크":{x:576,y:180},"아랍에미리트":{x:618,y:212},
   "이스라엘":{x:546,y:176},"우크라이나":{x:528,y:115},"칠레":{x:232,y:352},"콜롬비아":{x:222,y:266},
   "페루":{x:218,y:296},"모로코":{x:450,y:172},
+  "방글라데시":{x:744,y:216},"쿠바":{x:218,y:208},"베네수엘라":{x:238,y:252},
+  "가나":{x:476,y:262},"탄자니아":{x:558,y:296},"에티오피아":{x:562,y:252},
+  "몽골":{x:762,y:130},"캄보디아":{x:798,y:252},"우즈베키스탄":{x:660,y:158},
+  "파푸아뉴기니":{x:868,y:296},"루마니아":{x:516,y:128},"우크라이나":{x:524,y:118},
+  "미얀마":{x:772,y:218},
 };
 
 var CHARACTERS=[
@@ -824,7 +838,22 @@ function closeShop(){showScreen("home");}
 function showModal(emoji,title,body,onConfirm,onCancel,confirmTxt,cancelTxt){var ov=document.createElement("div");ov.className="modal-overlay";var btns='<button class="modal-btn confirm" id="_mc">'+(confirmTxt||"확인")+'</button>';if(cancelTxt)btns='<button class="modal-btn cancel" id="_mx">'+(cancelTxt||"취소")+'</button>'+btns;ov.innerHTML='<div class="modal-box"><div class="modal-emoji">'+emoji+'</div><div class="modal-title">'+title+'</div><div class="modal-body">'+body.replace(/\n/g,"<br>")+'</div><div class="modal-btns">'+btns+'</div></div>';document.body.appendChild(ov);var mc=ov.querySelector("#_mc"),mx=ov.querySelector("#_mx");if(mc)mc.onclick=function(){ov.remove();if(onConfirm)onConfirm();};if(mx)mx.onclick=function(){ov.remove();if(onCancel)onCancel();};}
 
 // ═══════════════════════ HOME UI ═══════════════════════
-function updateHomeUI(){document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;}
+function getTodaysCountry(){
+  var d=new Date();
+  var seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  var idx=((seed*1103515245+12345)&0x7fffffff)%COUNTRIES.length;
+  return COUNTRIES[idx];
+}
+function updateTodaysCountryCard(){
+  var el=document.getElementById("todays-country-card");
+  if(!el)return;
+  var c=getTodaysCountry();
+  document.getElementById("tc-flag").textContent=c.flag;
+  document.getElementById("tc-name").textContent=c.name;
+  document.getElementById("tc-capital").textContent="수도: "+c.capital;
+  document.getElementById("tc-hint").textContent=c.hint;
+}
+function updateHomeUI(){document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();}
 
 // ═══════════════════════ SCREEN ═══════════════════════
 function showScreen(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");window.scrollTo(0,0);}
@@ -899,7 +928,27 @@ function clearTimer(){clearInterval(timerInterval);timerInterval=null;}
 function onTimeout(){if(gAnswering)return;var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(시간초과)",ok:false,wrong:1});document.getElementById("feedback").textContent="⏱ 시간 초과! 정답: "+q.name;document.getElementById("feedback").className="feedback fail";sndWrong();gCombo=0;updateComboUI();gAnswering=true;setTimeout(nextQ,900);}
 
 // ─── 초성 ───
-function showHints(){var q=gQuestions[gIdx];var ha=document.getElementById("hint-area");if(ha.classList.contains("visible"))return;var hc=document.getElementById("hint-chips");hc.innerHTML="";var eq=getEquipped();var hints=[{label:"💡 수도",val:q.capital},{label:"🔤 글자",val:q.name.length+"글자"},{label:"🔑 첫 글자",val:'"'+q.name[0]+'"'}];if(eq.effectType==="hint_bonus"||eq.effectType==="ultimate")hints.push({label:"🌏 대륙",val:q.hint});hints.forEach(function(h){var btn=document.createElement("button");btn.className="hint-chip";btn.textContent=h.label;btn.onclick=function(){if(this.classList.contains("revealed"))return;this.classList.add("revealed");this.textContent=h.label+": "+h.val;};hc.appendChild(btn);});ha.classList.add("visible");document.getElementById("q-badge").textContent="💡 힌트 탭해서 열기";}
+function showHints(){
+  var q=gQuestions[gIdx];
+  var eq=getEquipped();
+  var maxH=1+(eq.effectType==="hint_bonus"?eq.effectValue:0)+(eq.effectType==="ultimate"?eq.effectValue.hint:0);
+  var chips=document.getElementById("hint-chips");
+  chips.innerHTML="";
+  var hints=[q.hint];
+  if(q.capital)hints.push("🏛 수도: "+q.capital);
+  var continent_labels={asia:"🌏 아시아",europe:"🌍 유럽",americas:"🌎 아메리카",africa:"🌍 아프리카",oceania:"🌏 오세아니아"};
+  if(q.continent)hints.push(continent_labels[q.continent]||q.continent);
+  hints.slice(0,maxH+2).forEach(function(h,i){
+    var chip=document.createElement("button");
+    chip.className="hint-chip"+(i===0?" revealed":"");
+    chip.textContent=i===0?h:"💡 힌트 "+(i+1);
+    chip.onclick=(function(text,btn){
+      return function(){btn.textContent=text;btn.classList.add("revealed");gHintsUsed++;};
+    })(h,chip);
+    chips.appendChild(chip);
+  });
+  document.getElementById("hint-area").classList.add("visible");
+}
 function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1){document.getElementById("feedback").textContent="❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className="feedback fail";showHints();gHintsUsed=1;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째)";document.getElementById("feedback").className="feedback fail";}triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
 
 // ─── 국기 ───
