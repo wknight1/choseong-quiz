@@ -755,7 +755,8 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="result-sub" id="r-sub"></div>
   <div class="result-coins-earned"><span>🪙</span><span id="r-coins-num">+0</span> 코인 획득!</div>
   <div id="r-xp-row" style="text-align:center;font-size:13px;color:var(--indigo);font-weight:700;margin-top:4px;min-height:18px;"></div>
-  <div id="r-new-record" style="display:none;text-align:center;font-size:15px;font-weight:900;color:var(--gold);background:rgba(251,191,36,0.15);border:1.5px solid var(--gold);border-radius:12px;padding:6px 20px;margin:6px auto;max-width:200px;animation:popIn .35s cubic-bezier(.34,1.56,.64,1);">🎉 신기록!</div>
+  <div id="r-challenge-beat" style="display:none;background:linear-gradient(135deg,#f59e0b,#ef4444);color:white;padding:8px 16px;border-radius:12px;font-weight:800;font-size:14px;margin:4px auto;text-align:center;"></div>
+    <div id="r-new-record" style="display:none;text-align:center;font-size:15px;font-weight:900;color:var(--gold);background:rgba(251,191,36,0.15);border:1.5px solid var(--gold);border-radius:12px;padding:6px 20px;margin:6px auto;max-width:200px;animation:popIn .35s cubic-bezier(.34,1.56,.64,1);">🎉 신기록!</div>
   <div class="result-tabs" id="result-tabs">
     <button class="rtab" id="rtab-all" onclick="filterResult('all')">전체 20</button>
     <button class="rtab" id="rtab-ok" onclick="filterResult('ok')">✓ 정답</button>
@@ -1003,12 +1004,8 @@ var MAP_COORDS={
   "몽골":{x:762,y:130},"캄보디아":{x:798,y:252},
   "파푸아뉴기니":{x:868,y:296},"루마니아":{x:516,y:128},
   "미얀마":{x:772,y:218},
-  "아이슬란드":{x:300,y:65},"네팔":{x:728,y:202},"볼리비아":{x:250,y:328},
   "짐바브웨":{x:520,y:358},"파나마":{x:205,y:265},
-  "조지아":{x:550,y:160},"우루과이":{x:262,y:368},"오만":{x:618,y:238},"코스타리카":{x:200,y:264},
   "세네갈":{x:388,y:248},"카메룬":{x:478,y:278},"앙골라":{x:490,y:330},
-  "피지":{x:880,y:330},"바누아투":{x:862,y:320},"파라과이":{x:290,y:380},"쿠웨이트":{x:605,y:225},"요르단":{x:580,y:222},"튀니지":{x:495,y:188},"도미니카공화국":{x:257,y:255},
-  "솔로몬제도":{x:878,y:310},"모잠비크":{x:548,y:360},"르완다":{x:530,y:318},"에콰도르":{x:240,y:310},"과테말라":{x:190,y:240},"코트디부아르":{x:400,y:270},"우간다":{x:540,y:305},"스리랑카":{x:700,y:275},"라오스":{x:770,y:248},"아이티":{x:215,y:248},"슬로바키아":{x:490,y:148},"크로아티아":{x:480,y:158},"예멘":{x:610,y:268},"투르크메니스탄":{x:660,y:168},"마다가스카르":{x:562,y:362},
   "리비아":{x:507,y:194},"차드":{x:510,y:228},"말리":{x:455,y:218},"부르키나파소":{x:448,y:245}
   ,"북마케도니아":{x:480,y:155}
   ,"몰도바":{x:510,y:130}
@@ -1018,10 +1015,8 @@ var MAP_COORDS={
   ,"키리바시":{x:128,y:222}
   ,"팔라우":{x:93,y:222}
   ,"마샬군도":{x:120,y:200},"자메이카":{x:205,y:220},"트리니다드토바고":{x:225,y:252},"우즈베키스탄":{x:600,y:148},"바하마":{x:210,y:215},"부탄":{x:697,y:210}
-  ,"몰타":{x:514,y:212},"키프로스":{x:540,y:210},"리히텐슈타인":{x:490,y:165},"모나코":{x:492,y:177},"산마리노":{x:505,y:180},"지부티":{x:565,y:255},"에리트레아":{x:558,y:248}
 
   "감비아":{x:424,y:234},"카타르":{x:597,y:218},
-"동티모르":{x:838,y:320},"수리남":{x:300,y:310},"적도기니":{x:495,y:315},"몬테네그로":{x:530,y:188},
   "수단":{x:590,y:251},
   "니카라과":{x:220,y:250},"온두라스":{x:215,y:242},"엘살바도르":{x:210,y:248},"벨리즈":{x:210,y:238},"니제르":{x:500,y:228}
 ,"브루나이":{x:785,y:275},"몰디브":{x:650,y:295},"에스와티니":{x:590,y:375},"레소토":{x:580,y:385},"동사모아":{x:110,y:330},"카보베르데":{x:418,y:232},"모리셔스":{x:630,y:355},"나우루":{x:925,y:275},"투발루":{x:940,y:300},"상투메프린시페":{x:488,y:278},"코모로":{x:592,y:325},"기니비사우":{x:428,y:248},
@@ -1039,8 +1034,40 @@ var MAP_COORDS={
   "볼리비아":{x:295,y:325},
   "예멘":{x:572,y:240},
   "오만":{x:590,y:228},
-  "키르기스스탄":{x:648,y:188},,
+  "키르기스스탄":{x:648,y:188}
 
+,
+  "과테말라":{"x":195,"y":267},
+  "네팔":{"x":694,"y":233},
+  "도미니카공화국":{"x":238,"y":268},
+  "동티모르":{"x":800,"y":332},
+  "라오스":{"x":745,"y":268},
+  "르완다":{"x":533,"y":335},
+  "리히텐슈타인":{"x":492,"y":168},
+  "마다가스카르":{"x":558,"y":382},
+  "모나코":{"x":484,"y":175},
+  "모잠비크":{"x":546,"y":375},
+  "몬테네그로":{"x":513,"y":178},
+  "몰타":{"x":506,"y":198},
+  "바누아투":{"x":882,"y":368},
+  "산마리노":{"x":504,"y":178},
+  "솔로몬제도":{"x":868,"y":348},
+  "스리랑카":{"x":706,"y":303},
+  "슬로바키아":{"x":519,"y":162},
+  "아이슬란드":{"x":434,"y":100},
+  "에리트레아":{"x":550,"y":278},
+  "에콰도르":{"x":218,"y":322},
+  "요르단":{"x":558,"y":228},
+  "우간다":{"x":537,"y":322},
+  "우루과이":{"x":258,"y":420},
+  "적도기니":{"x":496,"y":322},
+  "코스타리카":{"x":207,"y":278},
+  "코트디부아르":{"x":458,"y":310},
+  "쿠웨이트":{"x":580,"y":235},
+  "크로아티아":{"x":510,"y":172},
+  "키프로스":{"x":542,"y":210},
+  "튀니지":{"x":492,"y":208},
+  "피지":{"x":905,"y":378}
 };
 
 var CHARACTERS=[
@@ -2144,7 +2171,16 @@ function checkChallengeParam2(){
 }
 function acceptChallenge(){
   var popup=document.getElementById('challenge-popup');if(popup)popup.style.display='none';
-  startGame('choseong');
+  // Start the same mode as the challenge
+  var params=new URLSearchParams(location.search);
+  var codeStr=params.get('challenge');
+  var data=codeStr?decodeResult2(codeStr):null;
+  var mode='choseong';
+  if(data){
+    if(data.m==='f') mode='flag';
+    else if(data.m==='a') mode='map';
+  }
+  startGame(mode);
 }
 function copyShareText2(){
   var correct=gHistory.filter(function(h){return h.ok;}).length;
