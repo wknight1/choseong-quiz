@@ -50,7 +50,7 @@ body{
 .home-title{font-size:26px;font-weight:900;text-align:center;line-height:1.2}
 .home-title span{background:linear-gradient(135deg,var(--sky),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .home-sub{font-size:13px;color:var(--sub);text-align:center}
-.stat-row{display:flex;gap:10px;width:100%}
+.stat-row{display:flex;gap:8px;width:100%;flex-wrap:wrap}
 .stat-row .stat-card{flex:1;background:var(--card);border-radius:14px;padding:12px;text-align:center;border:1px solid var(--border)}.stat-val{font-size:20px;font-weight:800;color:var(--gold)}
 .daily-banner{width:100%;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1.5px solid var(--gold);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:opacity .15s}
 .daily-banner:active{opacity:.8}
@@ -1484,6 +1484,7 @@ function renderQuestion(){
   gWrong=0;gHintsUsed=0;gAnswering=false;gMapClicked=false;
   document.getElementById("q-num").textContent=(gIdx+1)+" / "+gQuestions.length;
   document.getElementById("feedback").textContent="";
+  var _ccEl=document.getElementById("q-char-count");if(_ccEl)_ccEl.textContent="";
   document.getElementById("feedback").className="feedback";
   document.getElementById("q-badge").textContent="나라 이름 맞추기";
   document.getElementById("g-prog").style.width=(gIdx/gQuestions.length*100)+"%";
