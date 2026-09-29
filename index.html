@@ -1566,7 +1566,7 @@ function checkLevelUp(prev,next){var a=getLevel(prev),b=getLevel(next);if(b.leve
 
 // ═══════════════════════ DAILY ═══════════════════════
 function updateDailyBanner(){var t=today();var td=document.getElementById("daily-sub"),tc=document.getElementById("daily-coins"),b=document.getElementById("daily-banner");if(ST.dailyBonusLastClaim===t){td.textContent="내일 또 방문하면 보너스!";tc.textContent="완료✓";b.style.opacity=".5";b.style.cursor="default";return;}var streak=ST.dailyStreakCount||0;var bonus=DAILY_BONUS[Math.min(streak,DAILY_BONUS.length-1)];td.textContent=streak>0?"연속 "+(streak+1)+"일째!":"오늘의 보너스!";tc.textContent="+"+bonus+"🪙";}
-function claimDaily(){var t=today();if(ST.dailyBonusLastClaim===t)return;var diff=daysBetween(ST.dailyBonusLastClaim,t);var newStreak=(ST.dailyBonusLastClaim&&diff===1)?(ST.dailyStreakCount||0)+1:1;var bonus=DAILY_BONUS[Math.min(newStreak-1,DAILY_BONUS.length-1)];var eq=getEquipped();if(eq.id==="galaxy"||eq.effectType==="ultimate")bonus*=2;ST.dailyBonusLastClaim=t;ST.dailyStreakCount=newStreak;ST.coins+=bonus;ST.streak=newStreak;save();updateHomeUI();showModal("🎁","데일리 보너스!","🪙 "+bonus+"코인 획득!\n"+newStreak+"일 연속 접속!",null,null,"확인",null);}
+function claimDaily(){var t=today();if(ST.dailyBonusLastClaim===t)return;var diff=daysBetween(ST.dailyBonusLastClaim,t);var newStreak=(ST.dailyBonusLastClaim&&diff===1)?(ST.dailyStreakCount||0)+1:1;var bonus=DAILY_BONUS[Math.min(newStreak-1,DAILY_BONUS.length-1)];var eq=getEquipped();if(eq.id==="galaxy"||eq.effectType==="ultimate")bonus*=2;ST.dailyBonusLastClaim=t;ST.dailyStreakCount=newStreak;ST.coins+=bonus*(hasItem("coinDouble")?2:1);ST.streak=newStreak;save();updateHomeUI();showModal("🎁","데일리 보너스!","🪙 "+bonus+"코인 획득!\n"+newStreak+"일 연속 접속!",null,null,"확인",null);}
 
 // ═══════════════════════ SHOP ═══════════════════════
 function getEquipped(){return CHARACTERS.find(function(c){return c.id===ST.equippedCharacter;})||CHARACTERS[0];}
@@ -1807,6 +1807,18 @@ function showItemSelectModal(mode){
   startGame(mode);
 }
 
+
+function useItemBeforeGame(itemId){
+  if(!ST.items||!ST.items[itemId]){showToast("아이템이 없어요!");return false;}
+  var item=ITEMS.find(function(i){return i.id===itemId;});
+  if(!item)return false;
+  ST.items[itemId]--;
+  if(ST.items[itemId]<=0)delete ST.items[itemId];
+  save();
+  activateItem(item);
+  showToast(item.emoji+" "+item.name+" 활성화!");
+  return true;
+}
 function startGame(mode){
   gMode=mode||"choseong";
   _sessionCorrect=0;_flagCorrectToday=0;_maxComboToday=0;
@@ -2049,7 +2061,7 @@ function showHints(){
     chip.className="hint-chip"+(i===0?" revealed":"");
     chip.textContent=i===0?h:"💡 힌트 "+(i+1);
     chip.onclick=(function(text,btn){
-      return function(){btn.textContent=text;btn.classList.add("revealed");gHintsUsed++;};
+      return function(){btn.textContent=text;btn.classList.add("revealed");if(!hasItem("hintFree"))gHintsUsed++;};
     })(h,chip);
     chips.appendChild(chip);
   });
@@ -2315,7 +2327,7 @@ function onMapClick(evt){
     coinEarned=Math.round(coinEarned*(DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].coinMult||1));
   }
   if(gMode==="speed"){pts=Math.max(10,pts+Math.floor(_gTimerSecs*2));}
-  gScore+=pts;gCoins+=coinEarned;
+  gScore+=pts*(hasItem("scoreBoost")?getItemValue("scoreBoost",1):1);gCoins+=coinEarned;
   if(ok)ST.noHintCorrect++;
   gHistory.push({name:q.name,userAns:gradeLabel,ok:ok,pts:pts,wrong:grade>1?1:0});
   document.getElementById("feedback").textContent=gradeLabel+" +"+pts+"점 🪙×"+coinEarned;
@@ -2496,7 +2508,7 @@ var _gTimerSecs = 0;
 function startSpeedQuiz() {
   startGame('choseong');
   gMode = 'speed';
-  _gTimerSecs = 30;
+  _gTimerSecs = hasItem("timeSlow")?Math.round(30*getItemValue("timeSlow",1)):30;
   var timerEl = document.getElementById('game-timer');
   if (timerEl) { timerEl.style.display = 'block'; timerEl.textContent = '⚡ 30'; timerEl.className = ''; }
   clearInterval(_gTimerInterval);
@@ -2539,7 +2551,7 @@ function buyHintWithCoins(){
     ST.coins-=10;save();updateGameUI();
     chips[0].click();
     showToast('💡 힌트 구매! -🪙10');
-    gHintsUsed++;
+    if(!hasItem("hintFree"))gHintsUsed++;
   } else {
     showToast('💡 모든 힌트를 이미 열었어요!');
   }
@@ -3196,6 +3208,13 @@ function renderLives2(){
   for(var i=0;i<3;i++){var s=document.createElement('span');s.className='heart-icon'+(i>=gLives2?' lost':'');s.id='heart-'+i;s.textContent='❤️';row.appendChild(s);}
 }
 function loseLife2(){
+  if(hasItem("tripleShield")&&getItemValue("tripleShield",0)>0){
+    _activeItems["tripleShield"]--;
+    if(_activeItems["tripleShield"]<=0)delete _activeItems["tripleShield"];
+    showToast("🛡️ 실드 발동! ("+(getItemValue("tripleShield",0))+"개 남음)");
+    anim(document.getElementById("q-lives"),"pop",300);
+    return;
+  }
   var cfg=DIFF_CFG[gDifficulty2];if(!cfg||!cfg.lives)return;
   if(gLives2<=0)return;gLives2--;
   var h=document.getElementById('heart-'+(gLives2));if(h){h.classList.add('flashing');setTimeout(function(){if(h){h.classList.remove('flashing');h.classList.add('lost');}},600);}
