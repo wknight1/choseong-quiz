@@ -685,6 +685,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <div id="choseong-mode">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
         <div class="choseong-display" id="q-choseong">ㄷㅎㅁㄱ</div>
+      <div id="q-char-count" style="text-align:center;font-size:11px;color:var(--sub);margin-top:-6px;letter-spacing:1px;"></div>
         <button id="choice-mode-toggle" onclick="toggleChoiceMode()" title="4버튼 모드 토글" style="background:var(--card2);border:1.5px solid var(--border);border-radius:8px;color:var(--sub);font-size:11px;font-weight:700;padding:6px 9px;cursor:pointer;-webkit-appearance:none;font-family:inherit;white-space:nowrap;flex-shrink:0;">⌨️ 입력</button>
       </div>
       <div class="hint-area" id="hint-area">
@@ -1486,6 +1487,7 @@ function renderQuestion(){
   if(_isChoseong){
     document.getElementById("choseong-mode").style.display="";
     document.getElementById("q-choseong").textContent=getCS(q.name);
+  var _cc=document.getElementById("q-char-count");if(_cc)_cc.textContent=q.name.length+"글자";
     var ha=document.getElementById("hint-area");ha.classList.remove("visible");document.getElementById("hint-chips").innerHTML="";
     var inp=document.getElementById("ans-input");inp.value="";inp.className="answer-input";
     document.getElementById("word-hint-row").style.display="none";
