@@ -621,9 +621,9 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   </div>
 
   <div class="mode-btns">
-    <button class="mode-btn primary" onclick="startGame('choseong')">🔤 초성 퀴즈 <span class="btn-badge">클래식</span></button>
-    <button class="mode-btn primary" onclick="startGame('flag')" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🚩 국기 퀴즈 <span class="btn-badge">4지선다</span></button>
-    <button class="mode-btn primary" onclick="startGame('map')" style="background:linear-gradient(135deg,#10b981,#0891b2)">🗺️ 지도 찾기 <span class="btn-badge">NEW</span></button>
+    <button class="mode-btn primary" onclick="startGameWithItems('choseong')">🔤 초성 퀴즈 <span class="btn-badge">클래식</span></button>
+    <button class="mode-btn primary" onclick="startGameWithItems('flag')" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🚩 국기 퀴즈 <span class="btn-badge">4지선다</span></button>
+    <button class="mode-btn primary" onclick="startGameWithItems('map')" style="background:linear-gradient(135deg,#10b981,#0891b2)">🗺️ 지도 찾기 <span class="btn-badge">NEW</span></button>
     <button class="mode-btn" onclick="startSpeedQuiz()" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">⚡ 스피드 <span class="btn-badge">30초</span></button>
     <button class="mode-btn primary" id="weak-mode-btn" onclick="startWeakSpotMode()" style="background:linear-gradient(135deg,#7c3aed,#c026d3);display:none;">🎯 약점 집중 <span class="btn-badge">맞춤</span></button>
     <button class="mode-btn primary" onclick="showContinentPicker()" style="background:linear-gradient(135deg,#0ea5e9,#6366f1)">🌍 대륙별 퀴즈 <span class="btn-badge">신규</span></button>
@@ -845,7 +845,9 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
       <div id="r-vs-fill" style="height:100%;border-radius:8px;background:linear-gradient(90deg,#22d3ee,#818cf8);transition:width 1s ease-out;width:0%"></div>
     </div>
   </div>
-  <div class="result-emoji" id="r-emoji">🎉</div>
+  <div class="result-emoji" id="r-char-react" style="text-align:center;padding:6px;margin-bottom:4px"></div>
+  <span id="r-correct" style="display:none"></span><span id="r-total" style="display:none"></span><span id="r-score-num" style="display:none"></span>
+  <div id="r-emoji">🎉</div
   <div class="result-title" id="r-title">퀴즈 완료!</div>
   <div class="star-row" id="star-row"></div>
   <div class="result-score-big" id="r-score">0</div>
@@ -1687,6 +1689,36 @@ function shuffle(a){var b=[].concat(a);for(var i=b.length-1;i>0;i--){var j=Math.
 function getCS(str){var s=0xAC00,J=["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];return Array.from(str).map(function(c){var code=c.charCodeAt(0);return(code>=0xAC00&&code<=0xD7A3)?J[Math.floor((code-s)/588)]:c;}).join("");}
 function norm(s){return s.replace(/\s/g,"").replace(/[·•\-]/g,"");}
 
+
+// ─── 게임 시작 전 아이템 선택 ───
+function startGameWithItems(mode){
+  var ownedItems=ITEMS.filter(function(it){
+    return (ST.items||{})[it.id]>0;
+  });
+  if(ownedItems.length===0){startGame(mode);return;}
+  // 보유 아이템 있으면 선택 팝업
+  var itemList=ownedItems.map(function(it){
+    return it.emoji+" "+it.name+" ("+((ST.items||{})[it.id]||0)+"개)";
+  }).join("\n");
+  var msg="보유 아이템:\n"+itemList+"\n\n이번 게임에 아이템을 사용하시겠어요?";
+  showModal("🎒","아이템 사용?",msg,
+    function(){
+      // 아이템 선택 모달
+      showItemSelectModal(mode);
+    },
+    function(){startGame(mode);},
+    "아이템 선택","그냥 시작"
+  );
+}
+function showItemSelectModal(mode){
+  var ownedItems=ITEMS.filter(function(it){return ((ST.items||{})[it.id]||0)>0;});
+  if(ownedItems.length===0){startGame(mode);return;}
+  var first=ownedItems[0];
+  useItemBefore(first.id);
+  showToast(first.emoji+" "+first.name+" 사용! 게임 시작!");
+  startGame(mode);
+}
+
 function startGame(mode){
   gMode=mode||"choseong";
   _sessionCorrect=0;_flagCorrectToday=0;_maxComboToday=0;
@@ -1705,7 +1737,7 @@ function startGame(mode){
   } else {
     gQuestions=shuffle(gMode==="map"?pool:COUNTRIES).slice(0,TOTAL_Q);
   }
-  gIdx=0;gScore=0;gCombo=0;gCoins=0;gHistory=[];gAnswering=false;gMapClicked=false;_sessionCorrect=0;_dangerActive=false;_lastAlertAt=-999;
+  gIdx=0;gScore=0;gCombo=0;clearActiveItems();gCoins=0;gHistory=[];gAnswering=false;clearActiveItems();gMapClicked=false;_sessionCorrect=0;_dangerActive=false;_lastAlertAt=-999;
   var eq=getEquipped();gShield=eq.effectType==="shield";
   showScreen("game");
   document.getElementById("g-mode-badge").textContent=gMode.startsWith("continent_")?"🌍 대륙":gMode==="flag"?"🚩 국기":gMode==="map"?"🗺️ 지도":gMode==="focus"?"🎯 집중":gMode==="daily"?"📅 데일리":"🔤 초성";
@@ -1899,6 +1931,7 @@ function renderDailyMissions() {
 // ═══════════════════════ END DAILY MISSIONS ═══════════════════════
 
 function startTimer(){
+  var _timeSlow=hasItem("time_slow")?getItemValue("time_slow",1):1;
   timerLeft=100;
   var fill=document.getElementById("g-timer");fill.style.width="100%";fill.style.background="var(--green)";
   var _dcfg=DIFF_CFG[gDifficulty2]||{timerMult:1};
@@ -2505,6 +2538,9 @@ function endGame(){
   document.getElementById("r-emoji").textContent=emoji;var _rcb=document.getElementById("r-char-react");if(_rcb&&charReact)_rcb.innerHTML="<span style='font-size:26px'>"+charReact+"</span>";
   document.getElementById("r-title").textContent=title;
   document.getElementById("r-score").textContent=gScore;
+  var _rScoreNum=document.getElementById("r-score-num");if(_rScoreNum)_rScoreNum.textContent=gScore;
+  var _rCorrect=document.getElementById("r-correct");if(_rCorrect)_rCorrect.textContent=correct;
+  var _rTotal=document.getElementById("r-total");if(_rTotal)_rTotal.textContent=gTotalQ||20;
   document.getElementById("r-label").textContent=correct+"/"+gQuestions.length+" 정답";
   var tabAll=document.getElementById("rtab-all");if(tabAll)tabAll.textContent="전체 "+gQuestions.length;
   document.getElementById("r-sub").textContent=sub;var _skipped=gHistory.filter(function(h){return h.skipped;}).length;if(_skipped>0)document.getElementById("r-sub").textContent+=(" | 건너뜀 "+_skipped+"회");
