@@ -505,6 +505,44 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   transition:opacity .15s,transform .1s;
 }
 .share-result-btn:active{opacity:.85;transform:scale(.98)}
+
+/* 화면 슬라이드 전환 */
+.screen { opacity: 0; transform: translateX(20px); transition: opacity .25s ease, transform .25s ease; pointer-events: none; }
+.screen.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+/* 레벨업 오버레이 */
+#levelup-overlay {
+  position: fixed; inset: 0; z-index: 9500;
+  background: linear-gradient(135deg, rgba(15,23,42,.92), rgba(30,41,59,.92));
+  display: none; align-items: center; justify-content: center; flex-direction: column; gap: 12px;
+  animation: fadeInOverlay .3s ease;
+}
+#levelup-overlay.show { display: flex; }
+@keyframes fadeInOverlay { from{opacity:0} to{opacity:1} }
+.levelup-badge {
+  font-size: 72px; animation: levelBounce .6s cubic-bezier(.22,1,.36,1) forwards;
+  filter: drop-shadow(0 8px 24px rgba(251,191,36,.6));
+}
+@keyframes levelBounce {
+  0%{transform:scale(0) rotate(-15deg);opacity:0}
+  60%{transform:scale(1.2) rotate(5deg)}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
+.levelup-title { font-size: 28px; font-weight: 900; color: #fbbf24; text-align: center; }
+.levelup-sub { font-size: 16px; color: #94a3b8; text-align: center; }
+.levelup-new { font-size: 20px; font-weight: 800; color: #f1f5f9; text-align: center; }
+.levelup-coin { font-size: 15px; color: #fbbf24; font-weight: 700; }
+/* 스트릭 마일스톤 토스트 */
+.streak-milestone-toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  color: #fff; font-weight: 800; font-size: 15px;
+  padding: 12px 24px; border-radius: 99px;
+  box-shadow: 0 4px 20px rgba(249,115,22,.5);
+  z-index: 9600; transition: transform .4s cubic-bezier(.22,1,.36,1);
+  white-space: nowrap;
+}
+.streak-milestone-toast.show { transform: translateX(-50%) translateY(0); }
+
 </style>
 </head>
 <body>
@@ -1609,7 +1647,7 @@ function checkLevelUp(prev,next){var a=getLevel(prev),b=getLevel(next);if(b.leve
 
 // ═══════════════════════ DAILY ═══════════════════════
 function updateDailyBanner(){var t=today();var td=document.getElementById("daily-sub"),tc=document.getElementById("daily-coins"),b=document.getElementById("daily-banner");if(ST.dailyBonusLastClaim===t){td.textContent="내일 또 방문하면 보너스!";tc.textContent="완료✓";b.style.opacity=".5";b.style.cursor="default";return;}var streak=ST.dailyStreakCount||0;var bonus=DAILY_BONUS[Math.min(streak,DAILY_BONUS.length-1)];td.textContent=streak>0?"연속 "+(streak+1)+"일째!":"오늘의 보너스!";tc.textContent="+"+bonus+"🪙";}
-function claimDaily(){var t=today();if(ST.dailyBonusLastClaim===t)return;var diff=daysBetween(ST.dailyBonusLastClaim,t);var newStreak=(ST.dailyBonusLastClaim&&diff===1)?(ST.dailyStreakCount||0)+1:1;var bonus=DAILY_BONUS[Math.min(newStreak-1,DAILY_BONUS.length-1)];var eq=getEquipped();if(eq.id==="galaxy"||eq.effectType==="ultimate")bonus*=2;ST.dailyBonusLastClaim=t;ST.dailyStreakCount=newStreak;ST.coins+=bonus*(hasItem("coinDouble")?2:1);ST.streak=newStreak;save();updateHomeUI();showModal("🎁","데일리 보너스!","🪙 "+bonus+"코인 획득!\n"+newStreak+"일 연속 접속!",null,null,"확인",null);}
+function claimDaily(){var t=today();if(ST.dailyBonusLastClaim===t)return;var diff=daysBetween(ST.dailyBonusLastClaim,t);var newStreak=(ST.dailyBonusLastClaim&&diff===1)?(ST.dailyStreakCount||0)+1:1;var bonus=DAILY_BONUS[Math.min(newStreak-1,DAILY_BONUS.length-1)];var eq=getEquipped();if(eq.id==="galaxy"||eq.effectType==="ultimate")bonus*=2;ST.dailyBonusLastClaim=t;ST.dailyStreakCount=newStreak;ST.coins+=bonus*(hasItem("coinDouble")?2:1);ST.streak=newStreak;save();updateHomeUI();checkStreakMilestone(newStreak);showModal("🎁","데일리 보너스!","🪙 "+bonus+"코인 획득!\n"+newStreak+"일 연속 접속!",null,null,"확인",null);}
 
 // ═══════════════════════ SHOP ═══════════════════════
 function getEquipped(){return CHARACTERS.find(function(c){return c.id===ST.equippedCharacter;})||CHARACTERS[0];}
@@ -1928,7 +1966,7 @@ function updateHomeUI(){
 }
 
 // ═══════════════════════ SCREEN ═══════════════════════
-function showScreen(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");});document.getElementById(id).classList.add("active");window.scrollTo(0,0);}
+function showScreen(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");setTimeout(function(){if(!s.classList.contains("active"))s.style.display="none";},250);});var t=document.getElementById(id);if(t){t.style.display="flex";void t.offsetWidth;setTimeout(function(){t.classList.add("active");},10);}window.scrollTo(0,0);}
 function goHome(){stopSpeedTimer();if(gPaused){gPaused=false;var po=document.getElementById("pause-overlay");if(po)po.classList.remove("open");}clearTimer();_dangerActive=false;clearResume();showScreen("home");updateHomeUI();updateWeakModeBtnVisibility();checkResumeBanner();}
 
 // ═══════════════════════ GAME ═══════════════════════
@@ -2781,6 +2819,51 @@ function shareResult(){
   }
 }
 
+
+// ─── 레벨업 시스템 ───
+function checkLevelUp(oldScore, newScore) {
+  var oldLv = getLevel(oldScore);
+  var newLv = getLevel(newScore);
+  if (newLv.level > oldLv.level) {
+    // 레벨업!
+    var bonus = newLv.level * 20; // 레벨 x 20코인 보너스
+    ST.coins += bonus;
+    saveState();
+    showLevelUpOverlay(newLv, bonus);
+  }
+}
+
+function showLevelUpOverlay(lv, bonus) {
+  var overlay = document.getElementById('levelup-overlay');
+  if (!overlay) return;
+  document.getElementById('lu-emoji').textContent = lv.emoji || '⬆️';
+  document.getElementById('lu-new-level').textContent = 'Lv.' + lv.level + ' ' + lv.name;
+  document.getElementById('lu-sub').textContent = '총 ' + ST.totalScore + 'pt 달성!';
+  document.getElementById('lu-coin').textContent = '🪙 +' + bonus + ' 레벨업 보너스!';
+  overlay.classList.add('show');
+  spawnParticles(30, lv.color || '#fbbf24');
+  setTimeout(function() { overlay.classList.remove('show'); }, 3500);
+}
+
+function checkStreakMilestone(streak) {
+  var milestones = {3:'🔥 3일 연속!', 7:'⚡ 7일 연속!', 14:'💪 2주 연속!', 30:'👑 한달 연속!'};
+  var bonuses    = {3:30, 7:70, 14:150, 30:300};
+  if (milestones[streak]) {
+    var bonus = bonuses[streak] || 0;
+    if (bonus > 0) { ST.coins += bonus; saveState(); }
+    var toast = document.createElement('div');
+    toast.className = 'streak-milestone-toast';
+    toast.textContent = milestones[streak] + (bonus > 0 ? ' 🪙+' + bonus : '');
+    document.body.appendChild(toast);
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    setTimeout(function() {
+      toast.style.transform = 'translateX(-50%) translateY(-80px)';
+      setTimeout(function() { toast.remove(); }, 400);
+    }, 2500);
+  }
+}
+
 function endGame(){
   clearInterval(_gTimerInterval); clearInterval(timerInterval);
   var timerEl2=document.getElementById("game-timer"); if(timerEl2) timerEl2.style.display="none";
@@ -2798,7 +2881,7 @@ function endGame(){
   else if(pct>=.3){emoji="😅";title="조금 더!";sub="세계 나라를 더 공부해봐요!";}
   var prevScore=ST.totalScore;
   var isNewRecord=gScore>0&&gScore>=ST.bestScore&&ST.gamesPlayed>0;
-  ST.totalScore+=gScore;if(gScore>ST.bestScore)ST.bestScore=gScore;
+  var _oldScore=ST.totalScore; ST.totalScore+=gScore; checkLevelUp(_oldScore, ST.totalScore);if(gScore>ST.bestScore)ST.bestScore=gScore;
   // Record today's score in daily history
   var _today=new Date().toISOString().slice(0,10);
   if(!ST.dailyScores)ST.dailyScores={};
@@ -4022,6 +4105,17 @@ if ('serviceWorker' in navigator) {
   <div id="purchase-char-name">병아리 획득!</div>
   <div id="purchase-char-sub">기본 능력치</div>
 </div>
+
+<!-- 레벨업 오버레이 -->
+<div id="levelup-overlay" onclick="this.classList.remove('show')">
+  <div class="levelup-badge" id="lu-emoji">⬆️</div>
+  <div class="levelup-title">레벨 업!</div>
+  <div class="levelup-new" id="lu-new-level">Lv.2 동네 탐험가</div>
+  <div class="levelup-sub" id="lu-sub">앞으로도 계속 도전해보세요!</div>
+  <div class="levelup-coin" id="lu-coin">🪙 +50 보너스 코인</div>
+  <div style="margin-top:16px;color:#475569;font-size:13px">탭하여 닫기</div>
+</div>
+
 </body>
 </html>
       
