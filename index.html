@@ -209,7 +209,50 @@ body{
 .shop-header{width:100%;display:flex;justify-content:space-between;align-items:center}
 .shop-title{font-size:19px;font-weight:900}
 .shop-coins{display:flex;align-items:center;gap:4px;font-size:15px;font-weight:800;color:var(--gold)}
-.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.char-grid{display:flex;flex-direction:column;gap:12px;width:100%}
+.char-card{position:relative;background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:2px solid var(--char-color,#334155);border-radius:20px;padding:16px;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;overflow:hidden}
+.char-card:active{transform:scale(0.97)}
+.char-card.equipped{border-color:var(--char-color);box-shadow:0 0 20px color-mix(in srgb,var(--char-color) 40%,transparent)}
+.char-card.locked{opacity:.85}
+.char-card-inner{display:flex;align-items:center;gap:14px}
+.char-big-emoji{font-size:52px;line-height:1;flex-shrink:0;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4))}
+.char-info-block{flex:1;min-width:0}
+.char-name-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.char-card .char-name{font-size:17px;font-weight:900}
+.char-ability-text{font-size:12px;color:#94a3b8;line-height:1.4;margin-bottom:8px}
+.char-stat-bars{display:flex;flex-direction:column;gap:3px}
+.char-stat-row{display:flex;align-items:center;gap:6px}
+.char-stat-label{font-size:10px;color:#64748b;width:28px;flex-shrink:0}
+.char-stat-track{flex:1;height:5px;background:#1e293b;border-radius:99px;overflow:hidden}
+.char-stat-fill{height:100%;border-radius:99px;transition:width .5s ease}
+.char-price-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.char-buy-btn{padding:7px 18px;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s}
+.char-buy-btn:active{opacity:.8;transform:scale(0.96)}
+/* 프리뷰 모달 */
+#char-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:none;align-items:flex-end;justify-content:center;padding-bottom:0}
+#char-modal-overlay.show{display:flex}
+#char-modal{background:linear-gradient(180deg,#1e293b 0%,#0f172a 100%);border-radius:28px 28px 0 0;padding:28px 24px 40px;width:100%;max-width:480px;position:relative;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,1,.36,1)}
+#char-modal.open{transform:translateY(0)}
+#char-modal-emoji{font-size:80px;text-align:center;margin-bottom:8px;filter:drop-shadow(0 8px 16px rgba(0,0,0,.5))}
+#char-modal-name{font-size:22px;font-weight:900;text-align:center;margin-bottom:4px}
+#char-modal-rarity{text-align:center;margin-bottom:12px}
+#char-modal-desc{font-size:14px;color:#94a3b8;text-align:center;line-height:1.6;margin-bottom:16px}
+#char-modal-stats{background:#0f172a;border-radius:16px;padding:14px;margin-bottom:18px}
+.modal-stat-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.modal-stat-row:last-child{margin-bottom:0}
+.modal-stat-name{font-size:12px;color:#64748b;width:52px;flex-shrink:0}
+.modal-stat-track{flex:1;height:8px;background:#1e293b;border-radius:99px;overflow:hidden}
+.modal-stat-fill{height:100%;border-radius:99px;transition:width .6s ease .1s}
+#char-modal-action{width:100%;padding:16px;border:none;border-radius:16px;font-size:17px;font-weight:900;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s}
+#char-modal-action:active{opacity:.8;transform:scale(0.98)}
+/* 구매 축하 오버레이 */
+#purchase-overlay{position:fixed;inset:0;z-index:10000;pointer-events:none;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+#purchase-overlay.show{display:flex}
+#purchase-char-big{font-size:96px;animation:purchasePop .6s cubic-bezier(.22,1,.36,1) forwards}
+#purchase-char-name{font-size:22px;font-weight:900;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+#purchase-char-sub{font-size:14px;color:#fbbf24;font-weight:700}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes purchasePop{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1) rotate(0);opacity:1}}
 .char-card{background:var(--card);border:2px solid var(--border);border-radius:20px;padding:16px 12px 12px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
 .char-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;background:radial-gradient(circle at 50% 0%,var(--char-color,#818cf8)22,transparent 70%)}
 .char-card:hover::before,.char-card.owned::before{opacity:.12}
@@ -1585,6 +1628,117 @@ function getSalePrice(ch){
   return ch.price;
 }
 
+
+function getCharStats(ch){
+  // [코인, 점수, 수비, 특수] 0-100
+  var stats={coin:20,score:20,defense:20,special:20};
+  if(ch.effectType==='coin_bonus'){stats.coin=min(100,(ch.effectValue||1)*40+40);stats.special=60;}
+  else if(ch.effectType==='combo_multiplier'){stats.score=min(100,(ch.effectValue||1)*50);stats.special=70;}
+  else if(ch.effectType==='hint_bonus'){stats.defense=70;stats.special=60;stats.coin=40;}
+  else if(ch.effectType==='score_multiplier'){stats.score=90;stats.special=80;}
+  else if(ch.effectType==='shield'){stats.defense=95;stats.special=85;}
+  else if(ch.effectType==='animation'){stats.special=50;stats.score=30;}
+  if(ch.rarity==='rare'){stats.coin+=15;stats.score+=15;stats.defense+=15;stats.special+=15;}
+  if(ch.rarity==='epic'){stats.coin+=25;stats.score+=30;stats.defense+=25;stats.special+=30;}
+  if(ch.rarity==='legendary'){stats.coin=Math.max(stats.coin,75);stats.score=Math.max(stats.score,80);stats.defense=Math.max(stats.defense,80);stats.special=95;}
+  Object.keys(stats).forEach(k=>{stats[k]=Math.min(100,stats[k]);});
+  return stats;
+}
+function min(a,b){return a<b?a:b;}
+
+function showCharModal(ch){
+  var overlay=document.getElementById('char-modal-overlay');
+  var modal=document.getElementById('char-modal');
+  if(!overlay||!modal)return;
+  var owned=ST.ownedCharacters.indexOf(ch.id)>=0;
+  var equipped=ST.equippedCharacter===ch.id;
+  var saleId=getTodaySaleCharId();
+  var price=saleId===ch.id?getSalePrice(ch):ch.price;
+  var rarityLabel={common:'일반',rare:'🔷 레어',epic:'💜 에픽',legendary:'🌟 전설'}[ch.rarity||'common'];
+  var rarityColor={common:'#94a3b8',rare:'#818cf8',epic:'#a855f7',legendary:'#fbbf24'}[ch.rarity||'common'];
+  var stats=getCharStats(ch);
+  document.getElementById('char-modal-emoji').textContent=ch.emoji;
+  document.getElementById('char-modal-name').style.color=ch.color||'#f1f5f9';
+  document.getElementById('char-modal-name').textContent=ch.name;
+  document.getElementById('char-modal-rarity').innerHTML='<span style="color:'+rarityColor+';font-weight:700;font-size:13px">'+rarityLabel+'</span>';
+  document.getElementById('char-modal-desc').textContent=ch.ability||ch.desc;
+  modal.style.borderTop='3px solid '+(ch.color||'#818cf8');
+  // stats
+  var statsHtml=[
+    {label:'🪙 코인',val:stats.coin,color:'#fbbf24'},
+    {label:'⚡ 점수',val:stats.score,color:'#34d399'},
+    {label:'🛡 수비',val:stats.defense,color:'#60a5fa'},
+    {label:'✨ 특수',val:stats.special,color:ch.color||'#818cf8'},
+  ].map(s=>'<div class="modal-stat-row"><span class="modal-stat-name">'+s.label+'</span><div class="modal-stat-track"><div class="modal-stat-fill" style="width:0%;background:'+s.color+'" data-w="'+s.val+'"></div></div></div>').join('');
+  document.getElementById('char-modal-stats').innerHTML=statsHtml;
+  // action button
+  var btn=document.getElementById('char-modal-action');
+  if(equipped){
+    btn.textContent='✓ 장착 중';btn.style.background='#1e293b';btn.style.color='#94a3b8';btn.onclick=null;
+  }else if(owned){
+    btn.textContent='장착하기';btn.style.background=ch.color||'#818cf8';btn.style.color='#fff';
+    btn.onclick=function(){equipCharacter(ch.id);closeCharModal();};
+  }else if(ch.price===0){
+    btn.textContent='무료 획득!';btn.style.background='#4ade80';btn.style.color='#052e16';
+    btn.onclick=function(){purchaseCharacter(ch);};
+  }else{
+    btn.textContent='🪙 '+price+' 구매';btn.style.background=ch.color||'#818cf8';btn.style.color='#fff';
+    btn.onclick=function(){purchaseCharacter(ch);};
+  }
+  overlay.classList.add('show');
+  setTimeout(function(){modal.classList.add('open');},10);
+  // animate stat bars
+  setTimeout(function(){
+    modal.querySelectorAll('.modal-stat-fill').forEach(function(el){
+      el.style.width=el.dataset.w+'%';
+    });
+  },200);
+}
+
+function closeCharModal(){
+  var overlay=document.getElementById('char-modal-overlay');
+  var modal=document.getElementById('char-modal');
+  if(!overlay||!modal)return;
+  modal.classList.remove('open');
+  setTimeout(function(){overlay.classList.remove('show');},300);
+}
+
+function purchaseCharacter(ch){
+  var saleId=getTodaySaleCharId();
+  var price=saleId===ch.id?getSalePrice(ch):ch.price;
+  if(ST.coins<price){showToast('🪙 코인 부족! (필요: '+price+')');return;}
+  if(ST.ownedCharacters.indexOf(ch.id)>=0){
+    equipCharacter(ch.id);closeCharModal();return;
+  }
+  ST.coins-=price;
+  ST.ownedCharacters.push(ch.id);
+  equipCharacter(ch.id);
+  saveState();
+  closeCharModal();
+  showPurchaseCelebration(ch);
+  renderShop();
+}
+
+function equipCharacter(id){
+  ST.equippedCharacter=id;
+  saveState();
+  updateHomeChar();
+  renderShop();
+  showToast(getEquipped().emoji+' '+getEquipped().name+' 장착!');
+}
+
+function showPurchaseCelebration(ch){
+  var overlay=document.getElementById('purchase-overlay');
+  if(!overlay)return;
+  document.getElementById('purchase-char-big').textContent=ch.emoji;
+  document.getElementById('purchase-char-name').textContent=ch.name+' 획득!';
+  document.getElementById('purchase-char-sub').textContent=ch.ability||ch.effect;
+  overlay.style.background='radial-gradient(circle,color-mix(in srgb,'+ch.color+' 30%,transparent) 0%,rgba(0,0,0,.85) 70%)';
+  overlay.classList.add('show');
+  spawnParticles(40,ch.color);
+  setTimeout(function(){overlay.classList.remove('show');},2200);
+}
+
 function renderShop(){document.getElementById("s-coins").textContent=ST.coins;
   // 장착 캐릭터 프리뷰 업데이트
   var _eqCh=getEquipped();
@@ -1595,9 +1749,20 @@ function renderShop(){document.getElementById("s-coins").textContent=ST.coins;
   if(_saleBanner&&_saleCh){
     var _sText=document.getElementById('shop-sale-text');
     if(_sText)_sText.innerHTML='오늘만! '+_saleCh.emoji+' <b>'+_saleCh.name+'</b> 30% 할인 &rarr; 🪙'+getSalePrice(_saleCh);
-  }var grid=document.getElementById("char-grid");grid.innerHTML="";CHARACTERS.forEach(function(ch){var owned=ST.ownedCharacters.indexOf(ch.id)>=0;var equipped=ST.equippedCharacter===ch.id;var div=document.createElement("div");div.className="char-card"+(owned?" owned":"")+(equipped?" equipped":"")+((!owned)?" locked":"");div.style.setProperty('--char-color',ch.color||'#818cf8');var rarityLabel={common:'일반',rare:'레어',epic:'에픽',legendary:'전설'}[ch.rarity||'common'];var rarityClass='rarity-'+(ch.rarity||'common');var statusBadge=equipped?'<div class="char-status eq-badge">✓ 장착중</div>':owned?'<div class="char-status owned-badge">보유</div>':'';var lockIcon=(!owned)?'<div class="char-status lock-badge" style="position:absolute;top:6px;left:8px;font-size:13px">🔒</div>':'';var equippedGlow=equipped?'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,'+ch.color+',transparent);border-radius:0 0 18px 18px"></div>':'';div.innerHTML=lockIcon+'<div class="char-rarity '+rarityClass+'">'+rarityLabel+'</div>'+statusBadge+'<div class="char-emoji" style="margin-top:18px">'+ch.emoji+'</div><div class="char-name" style="font-size:14px;font-weight:800;margin:4px 0 2px;color:'+ch.color+'">'+ch.name+'</div><div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.3">'+ch.desc+'</div><div style="font-size:10px;font-weight:700;color:'+ch.color+';background:'+ch.color+'18;border-radius:8px;padding:3px 8px;display:inline-block">'+ch.ability+'</div><div class="char-price '+(ch.price===0?"free":"")+'">'+( ch.price===0?"✨ 무료":getSalePrice(ch)<ch.price?"<s style='color:var(--muted);font-size:11px'>🪙"+ch.price+"</s> <span style='color:#4ade80;font-weight:900'>🪙"+getSalePrice(ch)+" 🔥30%↓</span>":"🪙 "+ch.price)+'</div>'+equippedGlow;div.onmouseenter=function(){renderCharPreview(ch);};
-    div.ontouchstart=function(){renderCharPreview(ch);};
-    div.onclick=function(){onCharTap(ch,owned,equipped);};grid.appendChild(div);});}
+  }var grid=document.getElementById("char-grid");grid.innerHTML="";CHARACTERS.forEach(function(ch){var owned=ST.ownedCharacters.indexOf(ch.id)>=0;var equipped=ST.equippedCharacter===ch.id;var div=document.createElement("div");div.className="char-card"+(owned?" owned":"")+(equipped?" equipped":"")+((!owned)?" locked":"");div.style.setProperty('--char-color',ch.color||'#818cf8');var rarityLabel={common:'일반',rare:'레어',epic:'에픽',legendary:'전설'}[ch.rarity||'common'];var rarityClass='rarity-'+(ch.rarity||'common');var statusBadge=equipped?'<div class="char-status eq-badge">✓ 장착중</div>':owned?'<div class="char-status owned-badge">보유</div>':'';var lockIcon=(!owned)?'<div class="char-status lock-badge" style="position:absolute;top:6px;left:8px;font-size:13px">🔒</div>':'';var equippedGlow=equipped?'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,'+ch.color+',transparent);border-radius:0 0 18px 18px"></div>':'';var stats=getCharStats(ch);
+    var statBars=['🪙','⚡','🛡️','✨'].map(function(ic,i){
+      var vals=[stats.coin,stats.score,stats.defense,stats.special];
+      var colors=['#fbbf24','#34d399','#60a5fa',ch.color||'#818cf8'];
+      return '<div class="char-stat-row"><span class="char-stat-label">'+ic+'</span><div class="char-stat-track"><div class="char-stat-fill" style="width:'+vals[i]+'%;background:'+colors[i]+'"></div></div></div>';
+    }).join('');
+    var saleId2=getTodaySaleCharId();
+    var price2=saleId2===ch.id?getSalePrice(ch):ch.price;
+    var priceHtml=owned?'':(ch.price===0?'<span style="color:#4ade80;font-weight:700;font-size:13px">무료</span>':'<span style="color:#fbbf24;font-weight:700;font-size:13px">🪙'+price2+'</span>');
+    var actionHtml=equipped?'<button class="char-buy-btn" style="background:#1e293b;color:#64748b" disabled>✓ 장착중</button>':owned?'<button class="char-buy-btn" style="background:'+ch.color+';color:#fff" onclick="equipCharacter(\''+ch.id+'\')">장착</button>':'<button class="char-buy-btn" style="background:'+ch.color+';color:#fff" onclick="showCharModal(CHARACTERS.find(function(x){return x.id===\''+ch.id+'\';}))">'+(ch.price===0?'무료 획득':'구매')+'</button>';
+    var legendaryShine=ch.rarity==='legendary'?'<div style="position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(transparent 0deg,'+ch.color+'22 60deg,transparent 120deg);animation:spin 4s linear infinite;pointer-events:none"></div>':'';
+    div.innerHTML=legendaryShine+lockIcon+'<div class="char-card-inner"><div class="char-big-emoji">'+ch.emoji+'</div><div class="char-info-block"><div class="char-name-row"><span class="char-name" style="color:'+ch.color+'">'+ch.name+'</span><span class="char-rarity '+rarityClass+'" style="font-size:10px;padding:2px 7px">'+rarityLabel+'</span></div><div class="char-ability-text">'+(ch.ability||ch.desc)+'</div><div class="char-stat-bars">'+statBars+'</div></div></div><div class="char-price-row">'+priceHtml+statusBadge+actionHtml+'</div>'+equippedGlow;
+    div.addEventListener('click',function(e){if(e.target.tagName==='BUTTON')return;showCharModal(ch);});grid.appendChild(div);});
+}
 
 // ─── 캐릭터 구매 축하 연출 ───
 function celebrateCharPurchase(ch){
@@ -3839,6 +4004,24 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<!-- 캐릭터 프리뷰 모달 -->
+<div id="char-modal-overlay" onclick="if(event.target===this)closeCharModal()">
+  <div id="char-modal">
+    <div id="char-modal-emoji">🐣</div>
+    <div id="char-modal-name">병아리</div>
+    <div id="char-modal-rarity"></div>
+    <div id="char-modal-desc"></div>
+    <div id="char-modal-stats"></div>
+    <button id="char-modal-action">장착하기</button>
+  </div>
+</div>
+<!-- 구매 축하 오버레이 -->
+<div id="purchase-overlay">
+  <div id="purchase-char-big">🐣</div>
+  <div id="purchase-char-name">병아리 획득!</div>
+  <div id="purchase-char-sub">기본 능력치</div>
+</div>
 </body>
 </html>
       
