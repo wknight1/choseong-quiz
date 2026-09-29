@@ -152,6 +152,25 @@ body{
 .feedback.ok{color:var(--green)}.feedback.fail{color:var(--red)}.feedback.info{color:var(--sub)}
 
 .action-row{width:100%;display:flex;gap:7px;margin-bottom:6px}
+
+.equipped-char-display{
+  text-align:center;font-size:20px;
+  padding:2px 0 0;margin-bottom:-4px;
+  opacity:.85;cursor:pointer;
+  transition:transform .15s;
+}
+.equipped-char-display:active{transform:scale(1.3)}
+
+.coin-hint-btn,.coin-reveal-btn{
+  background:var(--card);border:1.5px solid var(--border);
+  color:var(--fg);font-size:13px;font-weight:700;
+  padding:9px 11px;border-radius:12px;cursor:pointer;
+  font-family:inherit;transition:all .2s;flex-shrink:0;
+}
+.coin-hint-btn:active,.coin-reveal-btn:active{opacity:.7;transform:scale(.96)}
+.coin-hint-btn:hover{border-color:#fbbf24;color:#fbbf24}
+.coin-reveal-btn:hover{border-color:#818cf8;color:#818cf8}
+
 .skip-btn{flex:1;background:transparent;border:1.5px solid var(--card2);color:var(--muted);font-size:12px;font-weight:500;padding:10px;border-radius:11px;cursor:pointer;-webkit-appearance:none;font-family:inherit}
 
 /* ══ RESULT ══ */
@@ -184,10 +203,20 @@ body{
 .shop-title{font-size:19px;font-weight:900}
 .shop-coins{display:flex;align-items:center;gap:4px;font-size:15px;font-weight:800;color:var(--gold)}
 .char-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
-.char-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:14px 10px;text-align:center;cursor:pointer;transition:border-color .2s,transform .1s;position:relative}
-.char-card:active{transform:scale(.97)}
-.char-card.owned{border-color:#166534}.char-card.equipped{border-color:var(--gold);background:#1c1000}.char-card.locked{opacity:.7}
-.char-emoji{font-size:32px;margin-bottom:5px;display:block}
+.char-card{background:var(--card);border:2px solid var(--border);border-radius:20px;padding:16px 12px 12px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.char-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;background:radial-gradient(circle at 50% 0%,var(--char-color,#818cf8)22,transparent 70%)}
+.char-card:hover::before,.char-card.owned::before{opacity:.12}
+.char-card:active{transform:scale(.96)}
+.char-card.owned{border-color:var(--char-color,#818cf8)}
+.char-card.equipped{border-color:var(--gold);background:linear-gradient(135deg,#1c120022,#1c1000);box-shadow:0 0 20px var(--gold)44}
+.char-card.locked{opacity:.65}
+.char-rarity{position:absolute;top:6px;right:8px;font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 7px;border-radius:99px;text-transform:uppercase}
+.rarity-common{background:#334155;color:#94a3b8}
+.rarity-rare{background:#1e3a5f;color:#60a5fa}
+.rarity-epic{background:#2d1b69;color:#a78bfa}
+.rarity-legendary{background:#431407;color:#fb923c;animation:legendaryGlow 2s infinite alternate}
+@keyframes legendaryGlow{0%{text-shadow:0 0 4px #fb923c}100%{text-shadow:0 0 10px #fb923c,0 0 20px #f97316}}
+.char-emoji{font-size:36px;margin-bottom:5px;display:block}
 .char-name{font-size:12px;font-weight:700;margin-bottom:3px}
 .char-price{font-size:11px;color:var(--gold);font-weight:700}.char-price.free{color:var(--green)}
 .char-effect{font-size:9px;color:var(--sub);margin-top:2px;line-height:1.3}
@@ -663,6 +692,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <div class="score-display"><span>✦</span><span id="g-score">0</span></div>
   </div>
 
+  <div class="equipped-char-display" id="equipped-char-display" title="장착 캐릭터">🐣</div>
   <div id="lives-row"></div>
   <div id="streak-fire-wrap" class="streak-fire-wrap"></div>
 
@@ -772,6 +802,9 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="action-row">
     <button class="skip-btn" onclick="skipQuestion()">⏭ 건너뛰기</button>
     <button class="skip-btn" onclick="goHome()" style="max-width:75px">🏠</button>
+  
+    <button class="coin-hint-btn" onclick="buyHintWithCoins()" title="10코인으로 힌트 구매">&#x1F4A1; <span style="font-size:10px">&#x1FA99;10</span></button>
+    <button class="coin-reveal-btn" onclick="buyRevealWithCoins()" title="20코인으로 정답 공개">&#x1F441; <span style="font-size:10px">&#x1FA99;20</span></button>
   </div>
 </div>
 
@@ -1257,14 +1290,30 @@ var MAP_COORDS={
 };
 
 var CHARACTERS=[
-  {id:"basic",name:"병아리",emoji:"🐣",price:0,desc:"기본 캐릭터",effect:"없음",effectType:"none"},
-  {id:"rocket",name:"로켓맨",emoji:"🚀",price:100,desc:"정답 시 🚀 파티클",effect:"파티클 업그레이드",effectType:"animation"},
-  {id:"wizard",name:"마법사",emoji:"🧙",price:300,desc:"힌트 1개 추가",effect:"hint_bonus +1",effectType:"hint_bonus",effectValue:1},
-  {id:"fire",name:"불꽃전사",emoji:"🔥",price:500,desc:"콤보 3부터 1.5배",effect:"combo_boost",effectType:"combo_multiplier",effectValue:1.5,comboThreshold:3},
-  {id:"star",name:"별빛요정",emoji:"⭐",price:800,desc:"정답 시 코인 +2",effect:"coin_bonus +2",effectType:"coin_bonus",effectValue:2},
-  {id:"diamond",name:"다이아",emoji:"💎",price:1200,desc:"오답 방어막 1회",effect:"shield x1",effectType:"shield",effectValue:1},
-  {id:"dragon",name:"드래곤",emoji:"🐉",price:1600,desc:"콤보 5부터 2배",effect:"combo_boost x2",effectType:"combo_multiplier",effectValue:2.0,comboThreshold:5},
-  {id:"galaxy",name:"갤럭시신",emoji:"🌌",price:2000,desc:"힌트+2, 코인+3, 콤보x2",effect:"ultimate",effectType:"ultimate",effectValue:{hint:2,coin:3,multiplier:2.0}}
+  {id:"basic",name:"병아리",emoji:"🐣",price:0,rarity:"common",color:"#94a3b8",
+   desc:"귀여운 기본 캐릭터",effect:"없음",effectType:"none",
+   ability:"기본 능력치"},
+  {id:"rocket",name:"로켓맨",emoji:"🚀",price:100,rarity:"common",color:"#38bdf8",
+   desc:"정답마다 로켓 폭발 파티클!",effect:"파티클 업그레이드",effectType:"animation",
+   ability:"✨ 정답 시 화려한 파티클 연출"},
+  {id:"wizard",name:"마법사",emoji:"🧙",price:300,rarity:"rare",color:"#818cf8",
+   desc:"마법으로 힌트를 1개 더!",effect:"hint_bonus +1",effectType:"hint_bonus",effectValue:1,
+   ability:"💡 힌트 1개 보너스 (매 문제)"},
+  {id:"fire",name:"불꽃전사",emoji:"🔥",price:500,rarity:"rare",color:"#f97316",
+   desc:"3콤보부터 점수 1.5배!",effect:"combo_boost",effectType:"combo_multiplier",effectValue:1.5,comboThreshold:3,
+   ability:"🔥 3콤보~ 점수 ×1.5"},
+  {id:"star",name:"별빛요정",emoji:"⭐",price:800,rarity:"epic",color:"#fbbf24",
+   desc:"정답마다 코인 2개 추가!",effect:"coin_bonus +2",effectType:"coin_bonus",effectValue:2,
+   ability:"🪙 정답당 코인 +2"},
+  {id:"diamond",name:"다이아",emoji:"💎",price:1200,rarity:"epic",color:"#67e8f9",
+   desc:"오답을 1번 막아주는 방어막!",effect:"shield x1",effectType:"shield",effectValue:1,
+   ability:"🛡️ 오답 방어막 1회"},
+  {id:"dragon",name:"드래곤",emoji:"🐉",price:1600,rarity:"legendary",color:"#a78bfa",
+   desc:"5콤보부터 점수 2배 폭발!",effect:"combo_boost x2",effectType:"combo_multiplier",effectValue:2.0,comboThreshold:5,
+   ability:"🐉 5콤보~ 점수 ×2.0"},
+  {id:"galaxy",name:"갤럭시신",emoji:"🌌",price:2000,rarity:"legendary",color:"#f472b6",
+   desc:"힌트+2·코인+3·콤보×2 올인원!",effect:"ultimate",effectType:"ultimate",effectValue:{hint:2,coin:3,multiplier:2.0},
+   ability:"👑 힌트+2 / 코인+3 / 점수×2"}
 ];
 
 var ACHIEVEMENTS=[
@@ -1379,7 +1428,7 @@ function claimDaily(){var t=today();if(ST.dailyBonusLastClaim===t)return;var dif
 
 // ═══════════════════════ SHOP ═══════════════════════
 function getEquipped(){return CHARACTERS.find(function(c){return c.id===ST.equippedCharacter;})||CHARACTERS[0];}
-function renderShop(){document.getElementById("s-coins").textContent=ST.coins;var grid=document.getElementById("char-grid");grid.innerHTML="";CHARACTERS.forEach(function(c){var owned=ST.ownedCharacters.indexOf(c.id)>=0;var equipped=ST.equippedCharacter===c.id;var div=document.createElement("div");div.className="char-card"+(owned?" owned":"")+(equipped?" equipped":"")+((!owned)?" locked":"");var badge=equipped?'<div class="char-status eq-badge">장착중</div>':owned?'<div class="char-status owned-badge">보유</div>':'<div class="char-status lock-badge">🔒</div>';div.innerHTML=badge+'<div class="char-emoji">'+c.emoji+'</div><div class="char-name">'+c.name+'</div><div class="char-price '+(c.price===0?"free":"")+'">'+( c.price===0?"무료":"🪙 "+c.price)+'</div><div class="char-effect">'+c.desc+'</div>';div.onclick=function(){onCharTap(c,owned,equipped);};grid.appendChild(div);});}
+function renderShop(){document.getElementById("s-coins").textContent=ST.coins;var grid=document.getElementById("char-grid");grid.innerHTML="";CHARACTERS.forEach(function(ch){var owned=ST.ownedCharacters.indexOf(ch.id)>=0;var equipped=ST.equippedCharacter===ch.id;var div=document.createElement("div");div.className="char-card"+(owned?" owned":"")+(equipped?" equipped":"")+((!owned)?" locked":"");div.style.setProperty('--char-color',ch.color||'#818cf8');var rarityLabel={common:'일반',rare:'레어',epic:'에픽',legendary:'전설'}[ch.rarity||'common'];var rarityClass='rarity-'+(ch.rarity||'common');var statusBadge=equipped?'<div class="char-status eq-badge">✓ 장착중</div>':owned?'<div class="char-status owned-badge">보유</div>':'';var lockIcon=(!owned)?'<div class="char-status lock-badge" style="position:absolute;top:6px;left:8px;font-size:13px">🔒</div>':'';var equippedGlow=equipped?'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,'+ch.color+',transparent);border-radius:0 0 18px 18px"></div>':'';div.innerHTML=lockIcon+'<div class="char-rarity '+rarityClass+'">'+rarityLabel+'</div>'+statusBadge+'<div class="char-emoji" style="margin-top:18px">'+ch.emoji+'</div><div class="char-name" style="font-size:14px;font-weight:800;margin:4px 0 2px;color:'+ch.color+'">'+ch.name+'</div><div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.3">'+ch.desc+'</div><div style="font-size:10px;font-weight:700;color:'+ch.color+';background:'+ch.color+'18;border-radius:8px;padding:3px 8px;display:inline-block">'+ch.ability+'</div><div class="char-price '+(ch.price===0?"free":"")+'">'+( ch.price===0?"✨ 무료":"🪙 "+ch.price)+'</div>'+equippedGlow;div.onclick=function(){onCharTap(ch,owned,equipped);};grid.appendChild(div);});}
 function onCharTap(c,owned,equipped){if(equipped)return;if(owned){ST.equippedCharacter=c.id;save();renderShop();document.getElementById("shop-char-preview").textContent=c.emoji;return;}if(ST.coins<c.price){anim(document.getElementById("s-coins").parentElement,"shake",400);showModal("💸","코인 부족!","필요: 🪙"+c.price+"\n보유: 🪙"+ST.coins,null,null,"확인",null);return;}showModal(c.emoji,"\""+c.name+"\" 구매?","🪙 "+c.price+"코인\n효과: "+c.desc,function(){ST.coins-=c.price;ST.ownedCharacters.push(c.id);ST.equippedCharacter=c.id;save();sndCoin();renderShop();updateHomeUI();},null,"구매!","취소");}
 function showShop(){showScreen("shop");renderShop();}
 function closeShop(){showScreen("home");}
@@ -1992,7 +2041,11 @@ function onCorrect(el,cls,e){
   gScore+=pts;gCoins+=coinEarned;
   if(gHintsUsed===0)ST.noHintCorrect++;
   gHistory.push({name:q.name,userAns:q.name,ok:true,wrong:gWrong,pts:pts,coins:coinEarned});
-  document.getElementById("feedback").textContent="🎉 정답! +"+pts+"점 🪙×"+coinEarned;
+  var _effectMsg="";
+  if(eq.effectType==="combo_multiplier"&&gCombo>=eq.comboThreshold)_effectMsg=" "+eq.emoji+"콤보×"+eq.effectValue+"!";
+  else if(eq.effectType==="coin_bonus"&&eq.effectValue>0)_effectMsg=" "+eq.emoji+"코인+"+eq.effectValue+"!";
+  else if(eq.effectType==="ultimate")_effectMsg=" "+eq.emoji+"↑";
+  document.getElementById("feedback").textContent="🎉 정답! +"+pts+"점 🪙×"+coinEarned+_effectMsg;
   document.getElementById("feedback").className="feedback ok";showLearnCard(q);
   if(cls)el.className=cls+" correct";
   ST.totalCorrect++;if(ST.maxCombo<gCombo)ST.maxCombo=gCombo;
@@ -2015,6 +2068,8 @@ function nextQ(){gWrong=0;gIdx++;if(gIdx>=gQuestions.length){endGame();return;}a
 function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0,skipped:true});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);showLearnCard(q);gAnswering=true;setTimeout(nextQ,1100);}
 
 function updateGameUI(){
+  var _ecd=document.getElementById('equipped-char-display');
+  if(_ecd){var _eq=getEquipped();_ecd.textContent=_eq.emoji;_ecd.title=_eq.name+': '+_eq.ability;}
   document.getElementById("g-coins").textContent=ST.coins+gCoins;
   var scoreEl=document.getElementById("g-score");
   var prevScore=parseInt(scoreEl.textContent)||0;
@@ -2110,6 +2165,46 @@ function stopSpeedTimer() {
   clearInterval(_gTimerInterval);
   var timerEl = document.getElementById('game-timer');
   if (timerEl) timerEl.style.display = 'none';
+}
+
+
+// ─── 코인 사용처: 힌트 구매 / 정답 공개 ───
+function buyHintWithCoins(){
+  if(gAnswering)return;
+  if(ST.coins<10){showToast('🪙 코인이 10개 필요해요!');return;}
+  var q=gQuestions[gIdx];
+  var hints=getHintList(q);
+  // 아직 안 열린 힌트 있으면 열기
+  var chips=document.querySelectorAll('.hint-chip:not(.revealed)');
+  if(chips.length>0){
+    ST.coins-=10;save();updateGameUI();
+    chips[0].click();
+    showToast('💡 힌트 구매! -🪙10');
+    gHintsUsed++;
+  } else {
+    showToast('💡 모든 힌트를 이미 열었어요!');
+  }
+}
+function buyRevealWithCoins(){
+  if(gAnswering)return;
+  if(ST.coins<20){showToast('🪙 코인이 20개 필요해요!');return;}
+  var q=gQuestions[gIdx];
+  ST.coins-=20;save();updateGameUI();
+  // 정답 입력창에 정답 표시 (실제 제출은 안 함 - 점수 없음)
+  var inp=document.getElementById('ans-input');
+  if(inp){inp.value=q.name;inp.style.color='#94a3b8';}
+  showToast('👁️ 정답 공개! -🪙20 (점수 없음)');
+  document.getElementById('feedback').textContent='👁️ 정답: '+q.name+' (무점 처리됩니다)';
+  document.getElementById('feedback').className='feedback info';
+}
+
+// getHintList 헬퍼 (없으면 추가)
+function getHintList(q){
+  return [
+    {label:'💡 수도',value:q.capital||'?'},
+    {label:'🔤 글자수',value:q.name.length+'글자'},
+    {label:'🔑 첫글자',value:'"'+q.name[0]+'"'}
+  ];
 }
 
 function endGame(){
