@@ -1876,7 +1876,11 @@ var CONFUSION_PAIRS = {
   "카타르": ["바레인","쿠웨이트","아랍에미리트"],
 };
 
-function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.innerHTML="";
+function renderFlagChoices(q){
+  // 문제 국기 업데이트 (항상 대한민국만 나오던 버그 수정)
+  var qflag=document.getElementById('q-flag');
+  if(qflag)qflag.textContent=q.flag;
+  var fc=document.getElementById("flag-choices");fc.innerHTML="";
   // 혼동 페어링: 같은 대륙 우선, 그 중 confusion pairs 앞에 배치
   var confusePeers=(CONFUSION_PAIRS[q.name]||[]).map(function(n){return COUNTRIES.find(function(c){return c.name===n;});}).filter(Boolean);
   var same=COUNTRIES.filter(function(c){return c.continent===q.continent&&c.name!==q.name&&confusePeers.indexOf(c)<0;});
@@ -1884,7 +1888,7 @@ function renderFlagChoices(q){var fc=document.getElementById("flag-choices");fc.
   var pool=shuffle(confusePeers).concat(shuffle(same)).concat(shuffle(others));
   var choices=shuffle([q].concat(pool.slice(0,3)));
   var numLabels=['①','②','③','④'];
-  choices.forEach(function(c,i){var btn=document.createElement("button");btn.className="choice-btn";btn.style.position='relative';btn.innerHTML='<span style="position:absolute;top:4px;left:7px;font-size:10px;opacity:0.45;font-weight:400;line-height:1">'+numLabels[i]+'</span><span style="font-size:1.6em;display:block;margin-bottom:3px">'+c.flag+'</span><span style="font-size:13px">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
+  choices.forEach(function(c,i){var btn=document.createElement("button");btn.className="choice-btn";btn.style.position='relative';btn.innerHTML='<span style="position:absolute;top:4px;left:7px;font-size:10px;opacity:0.45;font-weight:400;line-height:1">'+numLabels[i]+'</span><span style="font-size:15px;font-weight:700">'+c.name+'</span>';btn.onclick=function(e){onFlagChoice(c,q,btn,e);};fc.appendChild(btn);});}
 function onFlagChoice(chosen,correct,btn,e){if(gAnswering)return;var ok=chosen.name===correct.name;if(ok){_flagCorrectToday++;updateMissionProgress('flagCorrect',1);btn.classList.add("correct-choice");onCorrect(btn,"",e);}else{btn.classList.add("wrong-choice");anim(btn,"shake",400);var btns=document.querySelectorAll(".choice-btn");btns.forEach(function(b){if(b.innerHTML.includes(correct.name)||b.textContent===correct.name)b.classList.add("reveal-choice");});gWrong++;if(gWrong===1)document.getElementById("q-badge").textContent="💡 힌트: "+correct.hint;if(gShield&&gWrong===1){gShield=false;document.getElementById("feedback").textContent="🛡 방어막! 콤보 유지!";document.getElementById("feedback").className="feedback info";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);setTimeout(function(){document.getElementById("flag-choices").innerHTML="";renderFlagChoices(correct);document.getElementById("feedback").textContent="";},800);return;}gHistory.push({name:correct.name,userAns:chosen.name,ok:false,wrong:gWrong});document.getElementById("feedback").textContent="❌ 오답! 정답: "+correct.name;document.getElementById("feedback").className="feedback fail";triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),e);gCombo=0;updateComboUI();loseLife2();gAnswering=true;btns.forEach(function(b){b.disabled=true;});setTimeout(nextQ,1000);}}
 
 // ─── 지도 ───
