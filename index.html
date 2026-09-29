@@ -511,6 +511,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="stat-row">
     <div class="stat-card"><div class="stat-val" id="h-coins">0</div><div class="stat-lbl">🪙 코인</div></div>
     <div class="stat-card"><div class="stat-val" id="h-best">0</div><div class="stat-lbl">🏆 최고점</div></div>
+    <div class="stat-card" style="min-width:60px"><div class="stat-val" id="h-score-milestone" style="display:none;font-size:13px;font-weight:700;"></div><div class="stat-lbl">🏅 등급</div></div>
     <div class="stat-card"><div class="stat-val" id="h-streak">0</div><div class="stat-lbl">🔥 스트릭</div></div>
     <div class="stat-card"><div class="stat-val" id="h-ach-count">0</div><div class="stat-lbl">🏅 업적</div></div>
   </div>
@@ -1402,6 +1403,15 @@ function updateHomeUI(){
   var _st2=loadStats2();if(_st2&&_st2.bestScores){var _mb=_st2.bestScores;if(!ST.modeScores)ST.modeScores={};ST.modeScores.choseong=_mb.choseong||0;ST.modeScores.flag=_mb.flag||0;ST.modeScores.map=_mb.map||0;}document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();var subEl=document.getElementById("home-sub-text");if(subEl)subEl.textContent=COUNTRIES.length+"개 나라 · 초성 · 국기 · 지도로 세계 정복!";
   renderDailyMissions();
   updateMissionBadge();
+  // Score milestone badge
+  var _milestoneEl = document.getElementById('h-score-milestone');
+  if (_milestoneEl) {
+    var _ms=[{s:100000,l:'🌟 전설',c:'#f59e0b'},{s:50000,l:'🏆 마스터',c:'#8b5cf6'},{s:20000,l:'💎 다이아',c:'#0ea5e9'},{s:10000,l:'🥇 골드',c:'#22c55e'},{s:5000,l:'🥈 실버',c:'#64748b'},{s:1000,l:'🥉 브론즈',c:'#a16207'}];
+    var _ts=ST.totalScore||0;
+    var _r=_ms.filter(function(m){return _ts>=m.s;});
+    if(_r.length>0){_milestoneEl.textContent=_r[0].l;_milestoneEl.style.color=_r[0].c;_milestoneEl.style.display='inline';}
+    else{_milestoneEl.style.display='none';}
+  }
 }
 
 // ═══════════════════════ SCREEN ═══════════════════════
