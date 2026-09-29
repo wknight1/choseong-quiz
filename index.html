@@ -1039,10 +1039,12 @@ var COUNTRIES=[
 
 {name:"벨라루스",flag:"🇧🇾",continent:"europe",capital:"민스크",hint:"수도 민스크, 유럽의 마지막 독재 국가. 러시아와 밀접한 관계. 체르노빌 피해국. 구소련 스타일 유지."},
 {name:"불가리아",flag:"🇧🇬",continent:"europe",capital:"소피아",hint:"수도 소피아, 발칸반도 동부. 장미 오일 세계 최대 생산국(70%). 키릴 문자 발원지. 마라톤 달리기의 실제 전투터."},
-  {name:"탄자니아",flag:"🇹🇿",continent:"africa",hint:"수도 도도마. 킬리만자로(아프리카 최고봉)의 나라. 세렝게티 대이동으로 유명."},
-,];
+  {name:"탄자니아",flag:"🇹🇿",continent:"africa",hint:"수도 도도마. 킬리만자로(아프리카 최고봉)의 나라. 세렝게티 대이동으로 유명."},,
+  {name:"통가",flag:"🇹🇴",capital:"누쿠알로파",continent:"oceania",hint:"수도 누쿠알로파. 태평양 유일 군주제 섬나라. 럭비 강국"},
+  {name:"마셜제도",flag:"🇲🇭",capital:"마주로",continent:"oceania",hint:"수도 마주로. 핵실험 피해지(비키니 환초). 기후변화로 수몰 위기"},
+  {name:"투르크메니스탄",flag:"🇹🇲",capital:"아시가바트",continent:"asia",hint:"수도 아시가바트. 중앙아시아 천연가스 부국. 다르바자 가스 분화구(지옥의 문)"}
+];
 
-// 지도 좌표 (1000x500 SVG 기준
 var MAP_COORDS={
 "대한민국":{x:820,y:155},
 "일본":{x:858,y:152},
@@ -1153,6 +1155,7 @@ var MAP_COORDS={
 "모리셔스":{x:630,y:355},
 "나우루":{x:925,y:275},
 "투발루":{x:940,y:300},
+"마셜제도":{x:945,y:235},
 "상투메프린시페":{x:488,y:278},
 "코모로":{x:592,y:325},
 "기니비사우":{x:428,y:248},
@@ -1244,7 +1247,7 @@ var CHARACTERS=[
   {id:"star",name:"별빛요정",emoji:"⭐",price:800,desc:"정답 시 코인 +2",effect:"coin_bonus +2",effectType:"coin_bonus",effectValue:2},
   {id:"diamond",name:"다이아",emoji:"💎",price:1200,desc:"오답 방어막 1회",effect:"shield x1",effectType:"shield",effectValue:1},
   {id:"dragon",name:"드래곤",emoji:"🐉",price:1600,desc:"콤보 5부터 2배",effect:"combo_boost x2",effectType:"combo_multiplier",effectValue:2.0,comboThreshold:5},
-  {id:"galaxy",name:"갤럭시신",emoji:"🌌",price:2000,desc:"힌트+2, 코인+3, 콤보x2",effect:"ultimate",effectType:"ultimate",effectValue:{hint:2,coin:3,multiplier:2.0}},
+  {id:"galaxy",name:"갤럭시신",emoji:"🌌",price:2000,desc:"힌트+2, 코인+3, 콤보x2",effect:"ultimate",effectType:"ultimate",effectValue:{hint:2,coin:3,multiplier:2.0}}
 ];
 
 var ACHIEVEMENTS=[
@@ -3276,3 +3279,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+  {name:"통가",flag:"🇹🇴",capital:"누쿠알로파",continent:"oceania",hint:"수도 누쿠알로파. 태평양 유일 군주제 섬나라. 럭비 강국"},
+  {name:"마셜제도",flag:"🇲🇭",capital:"마주로",continent:"oceania",hint:"수도 마주로. 핵실험 피해지(비키니 환초). 기후변화로 수몰 위기"},
+  {name:"투르크메니스탄",flag:"🇹🇲",capital:"아시가바트",continent:"asia",hint:"수도 아시가바트. 중앙아시아 천연가스 부국. 다르바자 가스 분화구(지옥의 문)"},
+
