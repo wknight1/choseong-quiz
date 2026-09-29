@@ -445,6 +445,16 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 
 @keyframes charCelIn{from{opacity:0;transform:scale(.3) translateY(40px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes charCelOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.8) translateY(-20px)}}
+
+.share-result-btn{
+  width:100%;padding:13px;border-radius:14px;
+  background:linear-gradient(135deg,#0ea5e9,#6366f1);
+  color:#fff;font-size:15px;font-weight:800;border:none;cursor:pointer;
+  font-family:inherit;
+  box-shadow:0 4px 16px rgba(99,102,241,.35);
+  transition:opacity .15s,transform .1s;
+}
+.share-result-btn:active{opacity:.85;transform:scale(.98)}
 </style>
 </head>
 <body>
@@ -545,7 +555,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="stat-row">
     <div class="stat-card"><div class="stat-val" id="h-coins">0</div><div class="stat-lbl">🪙 코인</div></div>
     <div class="stat-card"><div class="stat-val" id="h-best">0</div><div class="stat-lbl">🏆 최고점</div></div>
-    <div class="stat-card" style="min-width:60px"><div class="stat-val" id="h-score-milestone" style="display:none;font-size:13px;font-weight:700;"></div><div class="stat-lbl">🏅 등급</div></div>
+    <div class="stat-card" style="min-width:60px"><div class="stat-val" id="h-score-milestone" style="font-size:12px;font-weight:800;"></div><div class="stat-lbl">🏅 티어</div></div>
     <div class="stat-card"><div class="stat-val" id="h-streak">0</div><div class="stat-lbl">🔥 스트릭</div></div>
     <div class="stat-card"><div class="stat-val" id="h-today-count" style="font-size:13px;min-height:28px;"></div><div class="stat-lbl">📅 오늘</div></div>
     <div class="stat-card"><div class="stat-val" id="h-ach-count">0</div><div class="stat-lbl">🏅 업적</div></div>
@@ -850,7 +860,8 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   </div>
   <button id="btn-revive" onclick="reviveGame()" style="display:none;flex:1;min-width:120px;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">💊 부활</button>
   </div>
-  <button class="restart-btn" id="restart-btn-main" onclick="restartSameMode()">🔄 다시 하기</button>
+  <button class="share-result-btn" onclick="shareResult()">📤 결과 공유하기</button>
+    <button class="restart-btn" id="restart-btn-main" onclick="restartSameMode()">🔄 다시 하기</button>
   <button class="restart-btn" id="btn-continent-pick" onclick="showContinentPicker()" style="display:none;background:linear-gradient(135deg,#0ea5e9,#6366f1)">🌍 대륙 선택하기</button>
     <button class="mode-btn secondary" onclick="startSpeedQuiz()" style="background:linear-gradient(135deg,#dc2626,#f97316);color:#fff">⚡ 스피드 퀴즈 <span class="btn-badge">30초</span></button>
   <button class="home-btn2" onclick="goHome()">🏠 홈으로</button>
@@ -1342,6 +1353,26 @@ var ACHIEVEMENTS=[
   {id:"focus10",name:"집중력의 달인 🎯",check:function(s){return (s.focusCompleted||0)>=10},coins:100},
 ];
 
+
+// ─── 티어 시스템 ───
+var TIERS=[
+  {name:"브론즈",emoji:"🥉",color:"#cd7f32",min:0},
+  {name:"실버",emoji:"🥈",color:"#94a3b8",min:500},
+  {name:"골드",emoji:"🥇",color:"#fbbf24",min:2000},
+  {name:"플래티넘",emoji:"💠",color:"#67e8f9",min:5000},
+  {name:"다이아",emoji:"💎",color:"#a78bfa",min:10000},
+  {name:"마스터",emoji:"👑",color:"#f472b6",min:25000},
+];
+function getTier(totalScore){
+  var t=TIERS[0];
+  for(var i=0;i<TIERS.length;i++){if(totalScore>=TIERS[i].min)t=TIERS[i];}
+  return t;
+}
+function getNextTier(totalScore){
+  for(var i=0;i<TIERS.length;i++){if(TIERS[i].min>totalScore)return TIERS[i];}
+  return null;
+}
+
 var LEVELS=[
   {level:1,min:0,name:"지도 초보",emoji:"🗺️"},{level:2,min:100,name:"동네 탐험가",emoji:"🚶"},
   {level:3,min:250,name:"길잡이",emoji:"🧭"},{level:4,min:450,name:"지역 전문가",emoji:"📍"},
@@ -1512,6 +1543,17 @@ function updateTodaysCountryCard(){
   el.title="탭하면 "+c.name+" 집중 퀴즈 시작!";
 }
 function updateHomeUI(){
+  // 티어 업데이트
+  var _tier=getTier(ST.totalScore||0);
+  var _milestone=document.getElementById("h-score-milestone");
+  if(_milestone){
+    _milestone.style.display="";
+    _milestone.textContent=_tier.emoji+" "+_tier.name;
+    _milestone.style.color=_tier.color;
+    _milestone.style.fontSize="12px";
+  }
+  var _nextTier=getNextTier(ST.totalScore||0);
+  var _tierLbl=document.querySelector("#h-score-milestone~.stat-lbl, #h-score-milestone+.stat-lbl");
   var _achEl=document.getElementById("h-ach-count");
   if(_achEl){var _achDone=Object.keys(ST.achievements||{}).filter(function(k){return ST.achievements[k];}).length;_achEl.textContent=_achDone+"/"+ACHIEVEMENTS.length;}
   // Streak badge on daily button
@@ -1666,6 +1708,18 @@ function updateMissionProgress(trackKey, amount) {
         save();
         showStreakBanner('📋 미션 완료! +' + def.reward + '🪙', '#f59e0b');
         checkAch();
+  // 티어 승급 체크
+  (function(){
+    var prevScore=(ST.totalScore||0)-gScore;
+    var prevTier=getTier(Math.max(0,prevScore));
+    var newTier=getTier(ST.totalScore||0);
+    if(newTier.min>prevTier.min){
+      setTimeout(function(){
+        showToast(newTier.emoji+' '+newTier.name+' 티어 달성! 🎊');
+        burst(window.innerWidth/2,window.innerHeight*.5,25);
+      },1500);
+    }
+  })();
         changed = true;
       }
     }
@@ -2261,6 +2315,44 @@ function getHintList(q){
     {label:'🔤 글자수',value:q.name.length+'글자'},
     {label:'🔑 첫글자',value:'"'+q.name[0]+'"'}
   ];
+}
+
+
+// ─── 결과 공유 카드 ───
+function buildShareCard(correct,total,score,modeName){
+  var pct=correct/total;
+  var stars=pct>=.9?"⭐⭐⭐":pct>=.7?"⭐⭐☆":pct>=.5?"⭐☆☆":"☆☆☆";
+  var _tier=getTier(ST.totalScore||0);
+  var bar="";for(var i=0;i<20;i++){bar+=i<Math.round(pct*20)?"🟩":"⬜";}
+  return "🌍 나라 퀴즈마스터\n"
+    +modeName+" "+stars+"\n"
+    +bar+"\n"
+    +correct+"/"+total+"문제 "+score+"점\n"
+    +"티어: "+_tier.emoji+" "+_tier.name+"\n"
+    +"play: wknight1.github.io/choseong-quiz";
+}
+function shareResult(){
+  var correct=parseInt(document.getElementById("r-correct")||0);
+  var total=parseInt(document.getElementById("r-total")||0);
+  var score=parseInt(document.getElementById("r-score-num")||0);
+  // DOM에서 읽기
+  var rcEl=document.getElementById("r-correct");
+  var rtEl=document.getElementById("r-total");
+  var rsEl=document.getElementById("r-score");
+  var rmEl=document.getElementById("r-mode-badge");
+  if(rcEl)correct=parseInt(rcEl.textContent)||gHistory.filter(function(h){return h.ok;}).length;
+  if(rsEl)score=parseInt(rsEl.textContent)||gScore;
+  if(!total)total=gTotalQ||20;
+  var modeName=rmEl?rmEl.textContent:"퀴즈";
+  var card=buildShareCard(correct,total,score,modeName);
+  if(navigator.share){
+    navigator.share({title:"나라 퀴즈마스터",text:card,url:"https://wknight1.github.io/choseong-quiz"})
+      .catch(function(){});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(card).then(function(){showToast("📋 클립보드에 복사됐어요!");});
+  } else {
+    showToast("📋 공유: "+card.substring(0,30)+"...");
+  }
 }
 
 function endGame(){
