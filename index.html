@@ -555,7 +555,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 
 <!-- ══ HOME ══ -->
 <div class="screen active" id="home">
-  <div class="home-logo">🌍</div>
+  <div class="home-logo" id="home-char-logo" onclick="showShop()" style="cursor:pointer;transition:transform .2s" title="캐릭터 변경">🌍</div>
   <div class="home-title">나라 <span>퀴즈마스터</span></div>
   <div class="home-sub" id="home-sub-text">초성 · 국기 · 지도로 세계를 정복하라!</div>
 
@@ -1529,7 +1529,18 @@ function flyCoins(x,y,n){for(var i=0;i<(n||3);i++){(function(i){setTimeout(funct
 function anim(el,cls,ms){if(!el)return;el.classList.remove("shake","bounce-anim","combo-bump","pop-anim","glow-anim","card-rumble","card-golden","card-electric","danger-card","timer-pulse");void el.offsetWidth;el.classList.add(cls);setTimeout(function(){el.classList.remove(cls);},(ms||500));}
 
 // ═══════════════════════ HIT EFFECTS ═══════════════════════
-function showScreenFlash(ok){var el=document.createElement("div");el.className=ok?"screen-flash":"screen-flash-red";document.body.appendChild(el);setTimeout(function(){el.remove();},500);}
+function showScreenFlash(ok){
+  var el=document.createElement("div");
+  if(ok){
+    var eq=getEquipped();
+    var color=(eq&&eq.color)||'#4ade80';
+    el.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:999;background:"+color+";opacity:0;animation:charFlash .4s ease forwards";
+  } else {
+    el.className="screen-flash-red";
+  }
+  document.body.appendChild(el);
+  setTimeout(function(){el.remove();},500);
+}
 function showComboSplash(combo){if(combo<2)return;var el=document.createElement("div");el.className="combo-splash";var labels={2:"x1.2! 🔥",3:"x1.5! ⚡",4:"x2! 🌟",5:"MAX x3! 💥",6:"GODLIKE! 👑",7:"GODLIKE! 👑",8:"전설! 🌌",9:"전설! 🌌"};var colors={2:"#4ade80",3:"#f59e0b",4:"#ef4444",5:"#a855f7",6:"#fbbf24",7:"#fbbf24",8:"#e879f9",9:"#e879f9"};el.textContent=labels[Math.min(combo,8)]||"MAX!";el.style.color=colors[Math.min(combo,8)]||"#a855f7";document.body.appendChild(el);setTimeout(function(){el.remove();},900);}
 function showScoreFloat(pts,x,y,isSpeed){var el=document.createElement("div");el.className="score-float";el.style.left=x+"px";el.style.top=y+"px";el.textContent="+"+pts+(isSpeed?" ⚡":"");document.body.appendChild(el);setTimeout(function(){el.remove();},1100);}
 function triggerHitEffect(ok,combo,pts,cardEl,e){var x=e?e.clientX:window.innerWidth/2;var y=e?e.clientY:window.innerHeight*.42;if(ok){showScreenFlash(true);showScoreFloat(pts,x-20,y-40,pts>120);if(combo>=2){showComboSplash(combo);sndComboElectric(combo);}var grade=combo>=5?5:combo>=3?4:combo>=2?3:pts>130?3:pts>80?2:1;sndHitGrade(grade);if(cardEl){cardEl.classList.remove("card-golden","card-electric");void cardEl.offsetWidth;if(combo>=5)cardEl.classList.add("card-electric");else cardEl.classList.add("card-golden");setTimeout(function(){if(cardEl)cardEl.classList.remove("card-golden","card-electric");},800);}if(combo>=5)sndPerfectChord();}else{showScreenFlash(false);sndWrong();if(cardEl)anim(cardEl,"card-rumble",500);}}
@@ -1707,6 +1718,9 @@ function updateTodaysCountryCard(){
   el.title="탭하면 "+c.name+" 집중 퀴즈 시작!";
 }
 function updateHomeUI(){
+  var _hcl=document.getElementById('home-char-logo');
+  if(_hcl){var _heq=getEquipped();_hcl.textContent=_heq.emoji;_hcl.title=_heq.name+' 장착 중 - 탭해서 변경';}
+  var _hcb=document.getElementById('combo-badge');if(_hcb){var _hceq=getEquipped();_hcb.style.setProperty('--char-theme',_hceq.color||'#818cf8');}
   // 티어 업데이트
   var _tier=getTier(ST.totalScore||0);
   var _milestone=document.getElementById("h-score-milestone");
@@ -1811,7 +1825,7 @@ function startGame(mode){
   } else {
     gQuestions=shuffle(gMode==="map"?pool:COUNTRIES).slice(0,TOTAL_Q);
   }
-  gIdx=0;gScore=0;gCombo=0;clearActiveItems();gCoins=0;gHistory=[];gAnswering=false;clearActiveItems();gMapClicked=false;_sessionCorrect=0;_dangerActive=false;_lastAlertAt=-999;
+  gIdx=0;gScore=0;gCombo=0;clearActiveItems();applyCharTheme();gCoins=0;gHistory=[];gAnswering=false;clearActiveItems();gMapClicked=false;_sessionCorrect=0;_dangerActive=false;_lastAlertAt=-999;
   var eq=getEquipped();gShield=eq.effectType==="shield";
   showScreen("game");
   document.getElementById("g-mode-badge").textContent=gMode.startsWith("continent_")?"🌍 대륙":gMode==="flag"?"🚩 국기":gMode==="map"?"🗺️ 지도":gMode==="focus"?"🎯 집중":gMode==="daily"?"📅 데일리":"🔤 초성";
@@ -2372,6 +2386,24 @@ function nextQ(){gWrong=0;gIdx++;if(gIdx>=gQuestions.length){endGame();return;}a
 
 function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0,skipped:true});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);showLearnCard(q);gAnswering=true;setTimeout(nextQ,1100);}
 
+
+// ─── 캐릭터 테마 적용 ───
+function applyCharTheme(){
+  var eq=getEquipped();
+  var color=eq.color||'#818cf8';
+  document.documentElement.style.setProperty('--char-theme',color);
+  document.documentElement.style.setProperty('--char-theme-dim',color+'22');
+  // 게임 카드 테두리 캐릭터 색상
+  var qcard=document.getElementById('q-card');
+  if(qcard)qcard.style.borderColor=color+'44';
+  // 콤보 배지 색상
+  var cbadge=document.getElementById('combo-badge');
+  if(cbadge)cbadge.style.setProperty('--char-theme',color);
+  // 점수 표시
+  var gscore=document.getElementById('g-score');
+  if(gscore)gscore.style.color=color;
+}
+
 function updateGameUI(){
   // 아이템 활성 표시
   var _ibadge=document.getElementById('g-item-badge');
@@ -2404,7 +2436,14 @@ function checkComboMilestone(combo) {
   else if(combo===10)showToast('💥 10콤보!! 전설!');
   else if(combo===20)showToast('⚡ 20콤보!!! 신의 경지!!!');
 }
-function updateComboUI(){var c=gCombo;var d=COMBO_DATA[Math.min(c,9)];var b=document.getElementById("combo-badge");b.className="combo-badge "+(d?d.cls:"c1");document.getElementById("combo-emoji").textContent=d?d.emoji:"▶️";document.getElementById("combo-num").textContent=c>0?c:"";document.getElementById("combo-label").textContent=d&&c>0?d.lbl:"콤보";if(c>0)anim(b,"combo-bump",400);}
+function updateComboUI(){
+  // 콤보에 따른 점수 색상
+  var _scoreEl=document.getElementById("g-score");
+  if(_scoreEl){
+    var _sc=gCombo>=10?"#f472b6":gCombo>=5?"#a78bfa":gCombo>=3?"#fb923c":gCombo>=2?"#fbbf24":null;
+    if(_sc)_scoreEl.style.color=_sc;
+    else {var _eq=getEquipped();_scoreEl.style.color=(_eq&&_eq.color)||"var(--fg)";}
+  }var c=gCombo;var d=COMBO_DATA[Math.min(c,9)];var b=document.getElementById("combo-badge");b.className="combo-badge "+(d?d.cls:"c1");document.getElementById("combo-emoji").textContent=d?d.emoji:"▶️";document.getElementById("combo-num").textContent=c>0?c:"";document.getElementById("combo-label").textContent=d&&c>0?d.lbl:"콤보";if(c>0)anim(b,"combo-bump",400);}
 
 // ─── RESULT ───
 function renderStarResult(correct,total){var stars=Math.ceil((correct/total)*5);var container=document.getElementById("star-row");if(!container)return;container.innerHTML="";for(var i=1;i<=5;i++){var span=document.createElement("span");span.className="star-item"+(i<=stars?"":" dim");span.textContent="⭐";container.appendChild(span);(function(el,delay){setTimeout(function(){if(!el.classList.contains("dim"))el.classList.add("lit");else el.style.opacity=".18";},delay);})(span,280+i*170);}if(stars===5)setTimeout(function(){sndPerfectChord();},280+5*170+200);}
