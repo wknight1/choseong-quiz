@@ -442,6 +442,9 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 .learn-card .lc-flag{font-size:1.5rem;}
 .learn-card .lc-name{font-weight:700;margin:2px 0;}
 .learn-card .lc-info{color:var(--muted);font-size:0.78rem;}
+
+@keyframes charCelIn{from{opacity:0;transform:scale(.3) translateY(40px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes charCelOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.8) translateY(-20px)}}
 </style>
 </head>
 <body>
@@ -692,7 +695,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <div class="score-display"><span>✦</span><span id="g-score">0</span></div>
   </div>
 
-  <div class="equipped-char-display" id="equipped-char-display" title="장착 캐릭터">🐣</div>
+  <div class="equipped-char-display" id="equipped-char-display" title="캐릭터 변경하기" onclick="showShop()" style="cursor:pointer">🐣</div>
   <div id="lives-row"></div>
   <div id="streak-fire-wrap" class="streak-fire-wrap"></div>
 
@@ -862,6 +865,10 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   <div class="shop-header">
     <div class="shop-title">🏪 캐릭터 상점</div>
     <div class="shop-coins"><span>🪙</span><span id="s-coins">0</span></div>
+  </div>
+  <div id="shop-sale-banner" style="width:100%;background:linear-gradient(135deg,#065f46,#0f4c32);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:#4ade80;display:flex;align-items:center;gap:8px;margin-bottom:4px">
+    <span style="font-size:18px">🔥</span>
+    <span id="shop-sale-text">오늘의 할인 로딩 중...</span>
   </div>
   <div class="char-grid" id="char-grid"></div>
   <button class="close-btn" onclick="closeShop()">← 돌아가기</button>
@@ -1428,8 +1435,57 @@ function claimDaily(){var t=today();if(ST.dailyBonusLastClaim===t)return;var dif
 
 // ═══════════════════════ SHOP ═══════════════════════
 function getEquipped(){return CHARACTERS.find(function(c){return c.id===ST.equippedCharacter;})||CHARACTERS[0];}
-function renderShop(){document.getElementById("s-coins").textContent=ST.coins;var grid=document.getElementById("char-grid");grid.innerHTML="";CHARACTERS.forEach(function(ch){var owned=ST.ownedCharacters.indexOf(ch.id)>=0;var equipped=ST.equippedCharacter===ch.id;var div=document.createElement("div");div.className="char-card"+(owned?" owned":"")+(equipped?" equipped":"")+((!owned)?" locked":"");div.style.setProperty('--char-color',ch.color||'#818cf8');var rarityLabel={common:'일반',rare:'레어',epic:'에픽',legendary:'전설'}[ch.rarity||'common'];var rarityClass='rarity-'+(ch.rarity||'common');var statusBadge=equipped?'<div class="char-status eq-badge">✓ 장착중</div>':owned?'<div class="char-status owned-badge">보유</div>':'';var lockIcon=(!owned)?'<div class="char-status lock-badge" style="position:absolute;top:6px;left:8px;font-size:13px">🔒</div>':'';var equippedGlow=equipped?'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,'+ch.color+',transparent);border-radius:0 0 18px 18px"></div>':'';div.innerHTML=lockIcon+'<div class="char-rarity '+rarityClass+'">'+rarityLabel+'</div>'+statusBadge+'<div class="char-emoji" style="margin-top:18px">'+ch.emoji+'</div><div class="char-name" style="font-size:14px;font-weight:800;margin:4px 0 2px;color:'+ch.color+'">'+ch.name+'</div><div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.3">'+ch.desc+'</div><div style="font-size:10px;font-weight:700;color:'+ch.color+';background:'+ch.color+'18;border-radius:8px;padding:3px 8px;display:inline-block">'+ch.ability+'</div><div class="char-price '+(ch.price===0?"free":"")+'">'+( ch.price===0?"✨ 무료":"🪙 "+ch.price)+'</div>'+equippedGlow;div.onclick=function(){onCharTap(ch,owned,equipped);};grid.appendChild(div);});}
-function onCharTap(c,owned,equipped){if(equipped)return;if(owned){ST.equippedCharacter=c.id;save();renderShop();document.getElementById("shop-char-preview").textContent=c.emoji;return;}if(ST.coins<c.price){anim(document.getElementById("s-coins").parentElement,"shake",400);showModal("💸","코인 부족!","필요: 🪙"+c.price+"\n보유: 🪙"+ST.coins,null,null,"확인",null);return;}showModal(c.emoji,"\""+c.name+"\" 구매?","🪙 "+c.price+"코인\n효과: "+c.desc,function(){ST.coins-=c.price;ST.ownedCharacters.push(c.id);ST.equippedCharacter=c.id;save();sndCoin();renderShop();updateHomeUI();},null,"구매!","취소");}
+
+// ─── 오늘의 할인 캐릭터 ───
+function getTodaySaleCharId(){
+  var d=new Date();
+  var seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  // basic(무료) 제외한 캐릭터 중에서
+  var saleChars=CHARACTERS.filter(function(ch){return ch.price>0;});
+  return saleChars[((seed*1103515245+12345)&0x7fffffff)%saleChars.length].id;
+}
+function getSalePrice(ch){
+  var saleId=getTodaySaleCharId();
+  if(ch.id===saleId) return Math.floor(ch.price*0.7); // 30% 할인
+  return ch.price;
+}
+
+function renderShop(){document.getElementById("s-coins").textContent=ST.coins;
+  var _saleId=getTodaySaleCharId();
+  var _saleCh=CHARACTERS.find(function(ch){return ch.id===_saleId;});
+  var _saleBanner=document.getElementById('shop-sale-banner');
+  if(_saleBanner&&_saleCh){
+    var _sText=document.getElementById('shop-sale-text');
+    if(_sText)_sText.innerHTML='오늘만! '+_saleCh.emoji+' <b>'+_saleCh.name+'</b> 30% 할인 &rarr; 🪙'+getSalePrice(_saleCh);
+  }var grid=document.getElementById("char-grid");grid.innerHTML="";CHARACTERS.forEach(function(ch){var owned=ST.ownedCharacters.indexOf(ch.id)>=0;var equipped=ST.equippedCharacter===ch.id;var div=document.createElement("div");div.className="char-card"+(owned?" owned":"")+(equipped?" equipped":"")+((!owned)?" locked":"");div.style.setProperty('--char-color',ch.color||'#818cf8');var rarityLabel={common:'일반',rare:'레어',epic:'에픽',legendary:'전설'}[ch.rarity||'common'];var rarityClass='rarity-'+(ch.rarity||'common');var statusBadge=equipped?'<div class="char-status eq-badge">✓ 장착중</div>':owned?'<div class="char-status owned-badge">보유</div>':'';var lockIcon=(!owned)?'<div class="char-status lock-badge" style="position:absolute;top:6px;left:8px;font-size:13px">🔒</div>':'';var equippedGlow=equipped?'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,'+ch.color+',transparent);border-radius:0 0 18px 18px"></div>':'';div.innerHTML=lockIcon+'<div class="char-rarity '+rarityClass+'">'+rarityLabel+'</div>'+statusBadge+'<div class="char-emoji" style="margin-top:18px">'+ch.emoji+'</div><div class="char-name" style="font-size:14px;font-weight:800;margin:4px 0 2px;color:'+ch.color+'">'+ch.name+'</div><div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.3">'+ch.desc+'</div><div style="font-size:10px;font-weight:700;color:'+ch.color+';background:'+ch.color+'18;border-radius:8px;padding:3px 8px;display:inline-block">'+ch.ability+'</div><div class="char-price '+(ch.price===0?"free":"")+'">'+( ch.price===0?"✨ 무료":getSalePrice(ch)<ch.price?"<s style='color:var(--muted);font-size:11px'>🪙"+ch.price+"</s> <span style='color:#4ade80;font-weight:900'>🪙"+getSalePrice(ch)+" 🔥30%↓</span>":"🪙 "+ch.price)+'</div>'+equippedGlow;div.onclick=function(){onCharTap(ch,owned,equipped);};grid.appendChild(div);});}
+
+// ─── 캐릭터 구매 축하 연출 ───
+function celebrateCharPurchase(ch){
+  // 풀스크린 오버레이에 캐릭터 대형 등장
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;pointer-events:none';
+  ov.innerHTML='<div id="_char_cel_box" style="text-align:center;animation:charCelIn .5s cubic-bezier(.34,1.56,.64,1) forwards">'
+    +'<div style="font-size:88px;line-height:1;filter:drop-shadow(0 0 24px '+ch.color+')">' +ch.emoji+'</div>'
+    +'<div style="font-size:22px;font-weight:900;color:'+ch.color+';margin-top:12px">'+ch.name+' 획득!</div>'
+    +'<div style="font-size:14px;color:#94a3b8;margin-top:6px">'+ch.ability+'</div>'
+    +'<div style="font-size:12px;color:#64748b;margin-top:4px;background:'+ch.color+'18;padding:4px 14px;border-radius:99px;display:inline-block">장착 완료 ✓</div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  // 파티클 폭발
+  var cx=window.innerWidth/2, cy=window.innerHeight*.4;
+  for(var i=0;i<30;i++){
+    (function(i){setTimeout(function(){
+      burst(cx+Math.random()*100-50, cy+Math.random()*100-50, 6);
+    }, i*40);})(i);
+  }
+  setTimeout(function(){
+    var box=document.getElementById('_char_cel_box');
+    if(box)box.style.animation='charCelOut .3s ease forwards';
+    setTimeout(function(){ov.remove();},350);
+  }, 1800);
+}
+
+function onCharTap(c,owned,equipped){if(equipped)return;if(owned){ST.equippedCharacter=c.id;save();renderShop();document.getElementById("shop-char-preview").textContent=c.emoji;return;}if(ST.coins<c.price){anim(document.getElementById("s-coins").parentElement,"shake",400);showModal("💸","코인 부족!","필요: 🪙"+c.price+"\n보유: 🪙"+ST.coins,null,null,"확인",null);return;}showModal(c.emoji,"\""+c.name+"\" 구매?","🪙 "+c.price+"코인\n"+c.ability,function(){ST.coins-=getSalePrice(c);ST.ownedCharacters.push(c.id);ST.equippedCharacter=c.id;save();sndCoin();renderShop();updateHomeUI();celebrateCharPurchase(c);},null,"구매! 🎉","취소");}
 function showShop(){showScreen("shop");renderShop();}
 function closeShop(){showScreen("home");}
 
@@ -2217,6 +2273,7 @@ function endGame(){
   var isPerfect=correct===gQuestions.length;if(isPerfect)ST.perfectGames++;
   var pct=correct/gQuestions.length;
   var emoji="😢",title="아쉬워요!",sub="다시 한번 도전해보세요!";
+  var _eq2=getEquipped();var charReact=(_eq2&&_eq2.emoji)?(pct>=.9?_eq2.emoji+"👑":pct>=.7?_eq2.emoji+"🎉":pct>=.5?_eq2.emoji+"👍":_eq2.emoji+"💪"):"";
   if(pct>=.9){emoji="🏆";title="완벽해요!";sub="나라 박사 인증! 대단해요 🌍";}
   else if(pct>=.7){emoji="🥳";title="잘하셨어요!";sub="훌륭한 실력이에요!";}
   else if(pct>=.5){emoji="😊";title="절반 이상!";sub="계속 도전하세요!";}
@@ -2250,7 +2307,7 @@ function endGame(){
   // Session bonus: 2nd+ game gets +10% coins
   if(ST.gamesPlayed>=2&&gCoins>0){var bonus=Math.floor(gCoins*0.1);if(bonus>0){gCoins+=bonus;ST.coins+=bonus;}}
   save();checkLevelUp(prevScore,ST.totalScore);checkAch();showNextSuggestion();
-  document.getElementById("r-emoji").textContent=emoji;
+  document.getElementById("r-emoji").textContent=emoji;var _rcb=document.getElementById("r-char-react");if(_rcb&&charReact)_rcb.innerHTML="<span style='font-size:26px'>"+charReact+"</span>";
   document.getElementById("r-title").textContent=title;
   document.getElementById("r-score").textContent=gScore;
   document.getElementById("r-label").textContent=correct+"/"+gQuestions.length+" 정답";
