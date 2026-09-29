@@ -513,6 +513,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     <div class="stat-card"><div class="stat-val" id="h-best">0</div><div class="stat-lbl">🏆 최고점</div></div>
     <div class="stat-card" style="min-width:60px"><div class="stat-val" id="h-score-milestone" style="display:none;font-size:13px;font-weight:700;"></div><div class="stat-lbl">🏅 등급</div></div>
     <div class="stat-card"><div class="stat-val" id="h-streak">0</div><div class="stat-lbl">🔥 스트릭</div></div>
+    <div class="stat-card"><div class="stat-val" id="h-today-count" style="font-size:13px;min-height:28px;"></div><div class="stat-lbl">📅 오늘</div></div>
     <div class="stat-card"><div class="stat-val" id="h-ach-count">0</div><div class="stat-lbl">🏅 업적</div></div>
   </div>
 
@@ -1416,6 +1417,13 @@ function updateHomeUI(){
   var _st2=loadStats2();if(_st2&&_st2.bestScores){var _mb=_st2.bestScores;if(!ST.modeScores)ST.modeScores={};ST.modeScores.choseong=_mb.choseong||0;ST.modeScores.flag=_mb.flag||0;ST.modeScores.map=_mb.map||0;}document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();var subEl=document.getElementById("home-sub-text");if(subEl)subEl.textContent=COUNTRIES.length+"개 나라 · 초성 · 국기 · 지도로 세계 정복!";
   renderDailyMissions();
   updateMissionBadge();
+  // Today's play count
+  var _todayCntEl = document.getElementById('h-today-count');
+  if (_todayCntEl) {
+    var _td = new Date().toISOString().slice(0,10);
+    var _tc = ST.dailyScores && ST.dailyScores[_td] ? ST.dailyScores[_td].length : 0;
+    _todayCntEl.textContent = _tc > 0 ? '오늘 ' + _tc + '게임' : '';
+  }
   // Score milestone badge
   var _milestoneEl = document.getElementById('h-score-milestone');
   if (_milestoneEl) {
@@ -2113,7 +2121,15 @@ function endGame(){
   else if(pct>=.3){emoji="😅";title="조금 더!";sub="세계 나라를 더 공부해봐요!";}
   var prevScore=ST.totalScore;
   var isNewRecord=gScore>0&&gScore>=ST.bestScore&&ST.gamesPlayed>0;
-  ST.totalScore+=gScore;if(gScore>ST.bestScore)ST.bestScore=gScore;ST.coins+=gCoins;ST.gamesPlayed++;updateMissionProgress('gamesPlayed',1);
+  ST.totalScore+=gScore;if(gScore>ST.bestScore)ST.bestScore=gScore;
+  // Record today's score in daily history
+  var _today=new Date().toISOString().slice(0,10);
+  if(!ST.dailyScores)ST.dailyScores={};
+  if(!ST.dailyScores[_today])ST.dailyScores[_today]=[];
+  ST.dailyScores[_today].push({s:gScore,m:gMode,t:Date.now()});
+  // Keep only last 7 days
+  var _7dAgo=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
+  Object.keys(ST.dailyScores).forEach(function(d){if(d<_7dAgo)delete ST.dailyScores[d];});ST.coins+=gCoins;ST.gamesPlayed++;updateMissionProgress('gamesPlayed',1);
   // Track per-country stats for wrong answers
   if (!ST.perCountry) ST.perCountry = {};
   gHistory.forEach(function(h) {
