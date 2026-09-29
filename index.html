@@ -610,6 +610,16 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
     </div>
   </div>
 
+  
+  <!-- 아이템 상점 -->
+  <div id="item-shop-section" style="width:100%;margin-top:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:14px;font-weight:800;color:var(--fg)">🎒 아이템 상점</div>
+      <div style="font-size:11px;color:var(--muted)">코인으로 부스터 구매</div>
+    </div>
+    <div id="item-shop-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+  </div>
+
   <div class="mode-btns">
     <button class="mode-btn primary" onclick="startGame('choseong')">🔤 초성 퀴즈 <span class="btn-badge">클래식</span></button>
     <button class="mode-btn primary" onclick="startGame('flag')" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🚩 국기 퀴즈 <span class="btn-badge">4지선다</span></button>
@@ -706,6 +716,7 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
   </div>
 
   <div class="equipped-char-display" id="equipped-char-display" title="캐릭터 변경하기" onclick="showShop()" style="cursor:pointer">🐣</div>
+  <div id="g-item-badge" style="display:none;text-align:center;font-size:11px;font-weight:700;color:#fbbf24;padding:2px 0;background:#1c120044;border-radius:8px;margin-bottom:2px"></div>
   <div id="lives-row"></div>
   <div id="streak-fire-wrap" class="streak-fire-wrap"></div>
 
@@ -1373,6 +1384,62 @@ function getNextTier(totalScore){
   return null;
 }
 
+
+// ─── 소모품 아이템 시스템 ───
+var ITEMS=[
+  {id:"score2x",name:"2배 점수",emoji:"⚡",price:30,desc:"한 게임 동안 점수 2배!",
+   color:"#fbbf24",effect:"score_multiplier",effectValue:2,duration:"game"},
+  {id:"shield3",name:"트리플 실드",emoji:"🛡️",price:50,desc:"오답 3번 막아줘요",
+   color:"#67e8f9",effect:"shield",effectValue:3,duration:"game"},
+  {id:"timeboost",name:"시간 연장",emoji:"⏰",price:40,desc:"타이머 1.5배 느리게",
+   color:"#4ade80",effect:"time_slow",effectValue:1.5,duration:"game"},
+  {id:"hintpack",name:"힌트 팩",emoji:"💡",price:25,desc:"이번 게임 무제한 힌트!",
+   color:"#818cf8",effect:"hint_unlimited",effectValue:0,duration:"game"},
+  {id:"coin2x",name:"코인 2배",emoji:"🪙",price:35,desc:"이번 게임 코인 2배!",
+   color:"#fb923c",effect:"coin_multiplier",effectValue:2,duration:"game"},
+];
+
+// 활성 아이템 상태
+var _activeItems={};  // {effectType: effectValue}
+
+function activateItem(item){
+  _activeItems[item.effect]=item.effectValue;
+}
+function hasItem(effect){
+  return _activeItems[effect]!==undefined;
+}
+function getItemValue(effect,def){
+  return _activeItems[effect]!==undefined?_activeItems[effect]:def;
+}
+function clearActiveItems(){
+  _activeItems={};
+}
+
+function getOwnedItemCount(itemId){
+  if(!ST.items)ST.items={};
+  return ST.items[itemId]||0;
+}
+function buyItem(item){
+  if(!ST.items)ST.items={};
+  if(ST.coins<item.price){showToast("🪙 코인이 부족해요! (필요: "+item.price+")");return;}
+  ST.coins-=item.price;
+  ST.items[item.id]=(ST.items[item.id]||0)+1;
+  save();updateHomeUI();
+  showToast(item.emoji+" "+item.name+" 구매 완료! (보유: "+ST.items[item.id]+"개)");
+  renderItemShop();
+}
+function useItemBefore(itemId){
+  if(!ST.items||!ST.items[itemId]){showToast("아이템이 없어요!");return false;}
+  var item=ITEMS.find(function(i){return i.id===itemId;});
+  if(!item)return false;
+  ST.items[itemId]--;
+  if(ST.items[itemId]<=0)delete ST.items[itemId];
+  save();
+  activateItem(item);
+  showToast(item.emoji+" "+item.name+" 활성화!");
+  return true;
+}
+
 var LEVELS=[
   {level:1,min:0,name:"지도 초보",emoji:"🗺️"},{level:2,min:100,name:"동네 탐험가",emoji:"🚶"},
   {level:3,min:250,name:"길잡이",emoji:"🧭"},{level:4,min:450,name:"지역 전문가",emoji:"📍"},
@@ -1408,7 +1475,7 @@ var TOTAL_Q=20;
 
 // ═══════════════════════ STATE ═══════════════════════
 var SK="quizmaster_v3";var ST;
-function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,realModesSet:{},mapCorrect:0,perCountry:{},dailyScores:{},bestScores:{choseong:0,flag:0,map:0,focus:0,daily:0,weakspot:0,continent:0,speed:0},encViewed:{},focusCompleted:0,dailyCompleted:0};}
+function defaultState(){return{coins:0,totalScore:0,bestScore:0,streak:0,lastPlayedDate:null,dailyBonusLastClaim:null,dailyStreakCount:0,ownedCharacters:["basic"],equippedCharacter:"basic",achievements:{},gamesPlayed:0,totalCorrect:0,noHintCorrect:0,maxCombo:0,perfectGames:0,modesSet:{},modesPlayed:0,realModesSet:{},mapCorrect:0,perCountry:{},dailyScores:{},bestScores:{choseong:0,flag:0,map:0,focus:0,daily:0,weakspot:0,continent:0,speed:0},encViewed:{},focusCompleted:0,dailyCompleted:0,items:{}};}
 function save(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
 function load(){try{var r=localStorage.getItem(SK);if(!r)return defaultState();var s=JSON.parse(r);var m=Object.assign({},defaultState(),s);if(!Array.isArray(m.ownedCharacters))m.ownedCharacters=["basic"];if(m.ownedCharacters.indexOf("basic")<0)m.ownedCharacters.unshift("basic");return m;}catch(e){return defaultState();}}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -1517,6 +1584,27 @@ function celebrateCharPurchase(ch){
 }
 
 function onCharTap(c,owned,equipped){if(equipped)return;if(owned){ST.equippedCharacter=c.id;save();renderShop();document.getElementById("shop-char-preview").textContent=c.emoji;return;}if(ST.coins<c.price){anim(document.getElementById("s-coins").parentElement,"shake",400);showModal("💸","코인 부족!","필요: 🪙"+c.price+"\n보유: 🪙"+ST.coins,null,null,"확인",null);return;}showModal(c.emoji,"\""+c.name+"\" 구매?","🪙 "+c.price+"코인\n"+c.ability,function(){ST.coins-=getSalePrice(c);ST.ownedCharacters.push(c.id);ST.equippedCharacter=c.id;save();sndCoin();renderShop();updateHomeUI();celebrateCharPurchase(c);},null,"구매! 🎉","취소");}
+
+function renderItemShop(){
+  var grid=document.getElementById("item-shop-grid");
+  if(!grid)return;
+  grid.innerHTML="";
+  ITEMS.forEach(function(item){
+    var owned=getOwnedItemCount(item.id);
+    var active=hasItem(item.effect);
+    var div=document.createElement("div");
+    div.style.cssText="background:var(--card);border:1.5px solid "+(active?item.color:"var(--border)")+";border-radius:14px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;position:relative";
+    div.innerHTML=(owned>0?"<div style='position:absolute;top:4px;right:6px;font-size:10px;font-weight:800;color:"+item.color+";background:"+item.color+"22;border-radius:99px;padding:1px 6px'>×"+owned+"</div>":"")
+      +"<div style='font-size:24px'>"+item.emoji+"</div>"
+      +"<div style='font-size:11px;font-weight:800;color:"+item.color+";margin:3px 0 1px'>"+item.name+"</div>"
+      +"<div style='font-size:9px;color:var(--muted);line-height:1.3;margin-bottom:6px'>"+item.desc+"</div>"
+      +"<div style='font-size:11px;font-weight:700;color:var(--gold)'>🪙 "+item.price+"</div>";
+    div.onclick=function(){showItemMenu(item);};
+    grid.appendChild(div);
+  });
+}
+
+function showItemMenu(item){var owned=getOwnedItemCount(item.id);var bodyTxt="효과: "+item.desc+" / 보유: "+owned+"개 / 구매(코인 "+item.price+"개)?";showModal(item.emoji,item.name,bodyTxt,function(){buyItem(item);},null,"구매","취소");}
 function showShop(){showScreen("shop");renderShop();}
 function closeShop(){showScreen("home");}
 
@@ -1563,7 +1651,7 @@ function updateHomeUI(){
     else { sb.style.display='none'; }
   }document.getElementById("h-coins").textContent=ST.coins;document.getElementById("h-best").textContent=ST.bestScore;
   // sync per-mode best to ST for leaderboard
-  var _st2=loadStats2();if(_st2&&_st2.bestScores){var _mb=_st2.bestScores;if(!ST.modeScores)ST.modeScores={};ST.modeScores.choseong=_mb.choseong||0;ST.modeScores.flag=_mb.flag||0;ST.modeScores.map=_mb.map||0;}document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();var subEl=document.getElementById("home-sub-text");if(subEl)subEl.textContent=COUNTRIES.length+"개 나라 · 초성 · 국기 · 지도로 세계 정복!";
+  var _st2=loadStats2();if(_st2&&_st2.bestScores){var _mb=_st2.bestScores;if(!ST.modeScores)ST.modeScores={};ST.modeScores.choseong=_mb.choseong||0;ST.modeScores.flag=_mb.flag||0;ST.modeScores.map=_mb.map||0;}document.getElementById("h-streak").textContent=ST.streak;updateLevelHUD("h");updateDailyBanner();renderItemShop();document.getElementById("shop-char-preview").textContent=getEquipped().emoji;updateTodaysCountryCard();var subEl=document.getElementById("home-sub-text");if(subEl)subEl.textContent=COUNTRIES.length+"개 나라 · 초성 · 국기 · 지도로 세계 정복!";
   renderDailyMissions();
   updateMissionBadge();
   // Today's play count
@@ -2142,14 +2230,14 @@ function onCorrect(el,cls,e){
   if(gCombo>=5)mult=Math.max(mult,3);else if(gCombo>=4)mult=Math.max(mult,2);else if(gCombo>=3)mult=Math.max(mult,1.5);else if(gCombo>=2)mult=Math.max(mult,1.2);
   var _sm=DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].scoreMult||1;
   var _cm=DIFF_CFG[gDifficulty2]&&DIFF_CFG[gDifficulty2].coinMult||1;
-  var pts=Math.round(basePts*mult*_sm);
-  var coinEarned=Math.round((gHintsUsed===0?2:1)*_cm);
+  var _itemMult=hasItem("score_multiplier")?getItemValue("score_multiplier",1):1;var pts=Math.round(basePts*mult*_sm*_itemMult);
+  var _coinItemMult=hasItem("coin_multiplier")?getItemValue("coin_multiplier",1):1;var coinEarned=Math.round((gHintsUsed===0?2:1)*_cm*_coinItemMult);
   if(eq.effectType==="coin_bonus")coinEarned+=eq.effectValue;
   if(eq.effectType==="ultimate")coinEarned+=eq.effectValue.coin;
   if(gCombo>=5)coinEarned+=5;
   if(gMode==="speed"){pts=Math.max(10,pts+Math.floor(_gTimerSecs*2));}
   gScore+=pts;gCoins+=coinEarned;
-  if(gHintsUsed===0)ST.noHintCorrect++;
+  if(!hasItem("hint_unlimited")&&gHintsUsed===0)ST.noHintCorrect++;
   gHistory.push({name:q.name,userAns:q.name,ok:true,wrong:gWrong,pts:pts,coins:coinEarned});
   var _effectMsg="";
   if(eq.effectType==="combo_multiplier"&&gCombo>=eq.comboThreshold)_effectMsg=" "+eq.emoji+"콤보×"+eq.effectValue+"!";
@@ -2178,6 +2266,21 @@ function nextQ(){gWrong=0;gIdx++;if(gIdx>=gQuestions.length){endGame();return;}a
 function skipQuestion(){if(gAnswering)return;clearTimer();var q=gQuestions[gIdx];gHistory.push({name:q.name,userAns:"(건너뜀)",ok:false,wrong:0,skipped:true});document.getElementById("feedback").textContent="⏭ 정답: "+q.name;document.getElementById("feedback").className="feedback info";gCombo=0;updateComboUI();updateStreakFire(0);showLearnCard(q);gAnswering=true;setTimeout(nextQ,1100);}
 
 function updateGameUI(){
+  // 아이템 활성 표시
+  var _ibadge=document.getElementById('g-item-badge');
+  if(_ibadge){
+    var _activeList=Object.keys(_activeItems);
+    if(_activeList.length>0){
+      var _itemEmojis=_activeList.map(function(eff){
+        var it=ITEMS.find(function(i){return i.effect===eff;});
+        return it?it.emoji:"⚡";
+      }).join("");
+      _ibadge.textContent="아이템: "+_itemEmojis;
+      _ibadge.style.display="";
+    } else {
+      _ibadge.style.display="none";
+    }
+  }
   var _ecd=document.getElementById('equipped-char-display');
   if(_ecd){var _eq=getEquipped();_ecd.textContent=_eq.emoji;_ecd.title=_eq.name+': '+_eq.ability;}
   document.getElementById("g-coins").textContent=ST.coins+gCoins;
