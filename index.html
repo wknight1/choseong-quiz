@@ -1649,7 +1649,26 @@ function showHints(){
   });
   document.getElementById("hint-area").classList.add("visible");
 }
-function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var ok=val===norm(q.name);if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1&&gShield){gShield=false;var _inp=document.getElementById("ans-input");_inp.value="";_inp.className="answer-input";document.getElementById("feedback").textContent="🛡 방어막! 한 번 더!";document.getElementById("feedback").className="feedback info";setTimeout(function(){document.getElementById("feedback").textContent="";if(!gAnswering)_inp.focus();},800);gWrong=0;return;}if(gWrong===1){var _ac=DIFF_CFG[gDifficulty2];document.getElementById("feedback").textContent=_ac&&_ac.autoHint?"💡 쉬움 모드: 힌트 자동 표시!":"❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className=_ac&&_ac.autoHint?"feedback info":"feedback fail";showHints();gHintsUsed=1;}else if(gWrong>=3){document.getElementById("feedback").textContent="💡 정답: "+q.name;document.getElementById("feedback").className="feedback info";gHistory.push({name:q.name,userAns:inp.value,ok:false,wrong:gWrong});clearTimer();loseLife2();gCombo=0;updateComboUI();gAnswering=true;exitCardAnim(false,function(){nextQ();});return;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째) — 한 번 더!";document.getElementById("feedback").className="feedback fail";}renderWordHints(q);triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
+function submitChoseong(){if(gAnswering)return;var inp=document.getElementById("ans-input");var val=norm(inp.value.trim());if(!val)return;var q=gQuestions[gIdx];var _aliases={
+  '코트디부아르':['아이보리코스트','코트디부와르'],
+  '남아프리카공화국':['남아공','남아프리카'],
+  '중앙아프리카공화국':['중앙아프리카'],
+  '상투메프린시페':['상토메프린시페','상투메'],
+  '세인트루시아':['세인트루시아'],
+  '세인트키츠네비스':['세인트키츠'],
+  '세인트빈센트그레나딘':['세인트빈센트'],
+  '앤티가바부다':['앤티가','안티구아'],
+  '트리니다드토바고':['트리니다드'],
+  '보스니아헤르체고비나':['보스니아'],
+  '북마케도니아':['마케도니아'],
+  '아랍에미리트':['UAE','에미리트'],
+  '미크로네시아':['미크로네시아연방'],
+  '파푸아뉴기니':['파푸아'],
+  '동티모르':['티모르레스테','티모르'],
+  '에스와티니':['스와질란드'],
+  '카보베르데':['카보베르디','카보베르데'],
+};
+var _norm_name=norm(q.name);var ok=val===_norm_name||((_aliases[q.name]||[]).some(function(a){return val===norm(a);}));if(ok){onCorrect(inp,"ans-input",null);}else{gWrong++;inp.className="answer-input wrong";anim(inp,"shake",400);if(gWrong===1&&gShield){gShield=false;var _inp=document.getElementById("ans-input");_inp.value="";_inp.className="answer-input";document.getElementById("feedback").textContent="🛡 방어막! 한 번 더!";document.getElementById("feedback").className="feedback info";setTimeout(function(){document.getElementById("feedback").textContent="";if(!gAnswering)_inp.focus();},800);gWrong=0;return;}if(gWrong===1){var _ac=DIFF_CFG[gDifficulty2];document.getElementById("feedback").textContent=_ac&&_ac.autoHint?"💡 쉬움 모드: 힌트 자동 표시!":"❌ 틀렸어요! 힌트를 확인해보세요.";document.getElementById("feedback").className=_ac&&_ac.autoHint?"feedback info":"feedback fail";showHints();gHintsUsed=1;}else if(gWrong>=3){document.getElementById("feedback").textContent="💡 정답: "+q.name;document.getElementById("feedback").className="feedback info";gHistory.push({name:q.name,userAns:inp.value,ok:false,wrong:gWrong});clearTimer();loseLife2();gCombo=0;updateComboUI();gAnswering=true;exitCardAnim(false,function(){nextQ();});return;}else{document.getElementById("feedback").textContent="❌ 오답 ("+gWrong+"번째) — 한 번 더!";document.getElementById("feedback").className="feedback fail";}renderWordHints(q);triggerHitEffect(false,gCombo,0,document.getElementById("q-card"),null);setTimeout(function(){inp.classList.remove("shake");inp.value="";inp.className="answer-input";if(!gAnswering)inp.focus();},500);}}
 
 // ─── 국기 ───
 
