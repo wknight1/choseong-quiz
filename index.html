@@ -198,11 +198,18 @@ body{
 .share-btn:active{opacity:.75}
 
 /* ══ SHOP ══ */
-#shop{padding:14px;gap:12px}
+#shop{padding:14px;gap:10px;overflow-y:auto}
+.close-btn-inline{background:none;border:none;color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:8px;font-family:inherit}
+.close-btn-inline:active{opacity:.6}
+@keyframes epFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.05)}}
+.ep-stat-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ep-stat-label{font-size:10px;color:var(--muted);width:52px;flex-shrink:0}
+.ep-stat-bar{flex:1;height:5px;background:#1e293b;border-radius:99px;overflow:hidden}
+.ep-stat-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
 .shop-header{width:100%;display:flex;justify-content:space-between;align-items:center}
 .shop-title{font-size:19px;font-weight:900}
 .shop-coins{display:flex;align-items:center;gap:4px;font-size:15px;font-weight:800;color:var(--gold)}
-.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
 .char-card{background:var(--card);border:2px solid var(--border);border-radius:20px;padding:16px 12px 12px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
 .char-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;background:radial-gradient(circle at 50% 0%,var(--char-color,#818cf8)22,transparent 70%)}
 .char-card:hover::before,.char-card.owned::before{opacity:.12}
@@ -886,16 +893,33 @@ body.bg-level-3{background:linear-gradient(180deg,#0d1a3a 0%,#1a1040 60%,#201030
 
 <!-- ══ SHOP ══ -->
 <div class="screen" id="shop">
+  <!-- 상점 헤더 -->
   <div class="shop-header">
+    <button class="close-btn-inline" onclick="closeShop()">← 돌아가기</button>
     <div class="shop-title">🏪 캐릭터 상점</div>
-    <div class="shop-coins"><span>🪙</span><span id="s-coins">0</span></div>
+    <div class="shop-coins">🪙 <span id="s-coins">0</span></div>
   </div>
-  <div id="shop-sale-banner" style="width:100%;background:linear-gradient(135deg,#065f46,#0f4c32);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:#4ade80;display:flex;align-items:center;gap:8px;margin-bottom:4px">
+
+  <!-- 할인 배너 -->
+  <div id="shop-sale-banner" style="width:100%;background:linear-gradient(135deg,#065f46,#0f4c32);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:#4ade80;display:flex;align-items:center;gap:8px">
     <span style="font-size:18px">🔥</span>
     <span id="shop-sale-text">오늘의 할인 로딩 중...</span>
   </div>
+
+  <!-- 현재 장착 캐릭터 프리뷰 -->
+  <div id="equipped-preview" style="width:100%;background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:20px;padding:20px;text-align:center;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,var(--eq-color,#818cf8)18,transparent 65%);opacity:.15"></div>
+    <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">현재 장착</div>
+    <div id="ep-emoji" style="font-size:72px;line-height:1;filter:drop-shadow(0 0 20px var(--eq-color,#818cf8));animation:epFloat 3s ease-in-out infinite">🐣</div>
+    <div id="ep-name" style="font-size:20px;font-weight:900;margin:10px 0 4px;color:var(--eq-color,#818cf8)">병아리</div>
+    <div id="ep-ability" style="font-size:12px;color:var(--muted);margin-bottom:12px">기본 캐릭터</div>
+    <!-- 스탯 게이지 -->
+    <div id="ep-stats" style="width:100%;max-width:260px;margin:0 auto;text-align:left"></div>
+  </div>
+
+  <!-- 캐릭터 그리드 -->
+  <div id="char-section-title" style="width:100%;font-size:13px;font-weight:800;color:var(--muted);margin-top:4px">캐릭터 선택</div>
   <div class="char-grid" id="char-grid"></div>
-  <button class="close-btn" onclick="closeShop()">← 돌아가기</button>
 </div>
 
 <!-- Achievement popup -->
@@ -1551,13 +1575,18 @@ function getSalePrice(ch){
 }
 
 function renderShop(){document.getElementById("s-coins").textContent=ST.coins;
+  // 장착 캐릭터 프리뷰 업데이트
+  var _eqCh=getEquipped();
+  renderCharPreview(_eqCh);
   var _saleId=getTodaySaleCharId();
   var _saleCh=CHARACTERS.find(function(ch){return ch.id===_saleId;});
   var _saleBanner=document.getElementById('shop-sale-banner');
   if(_saleBanner&&_saleCh){
     var _sText=document.getElementById('shop-sale-text');
     if(_sText)_sText.innerHTML='오늘만! '+_saleCh.emoji+' <b>'+_saleCh.name+'</b> 30% 할인 &rarr; 🪙'+getSalePrice(_saleCh);
-  }var grid=document.getElementById("char-grid");grid.innerHTML="";CHARACTERS.forEach(function(ch){var owned=ST.ownedCharacters.indexOf(ch.id)>=0;var equipped=ST.equippedCharacter===ch.id;var div=document.createElement("div");div.className="char-card"+(owned?" owned":"")+(equipped?" equipped":"")+((!owned)?" locked":"");div.style.setProperty('--char-color',ch.color||'#818cf8');var rarityLabel={common:'일반',rare:'레어',epic:'에픽',legendary:'전설'}[ch.rarity||'common'];var rarityClass='rarity-'+(ch.rarity||'common');var statusBadge=equipped?'<div class="char-status eq-badge">✓ 장착중</div>':owned?'<div class="char-status owned-badge">보유</div>':'';var lockIcon=(!owned)?'<div class="char-status lock-badge" style="position:absolute;top:6px;left:8px;font-size:13px">🔒</div>':'';var equippedGlow=equipped?'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,'+ch.color+',transparent);border-radius:0 0 18px 18px"></div>':'';div.innerHTML=lockIcon+'<div class="char-rarity '+rarityClass+'">'+rarityLabel+'</div>'+statusBadge+'<div class="char-emoji" style="margin-top:18px">'+ch.emoji+'</div><div class="char-name" style="font-size:14px;font-weight:800;margin:4px 0 2px;color:'+ch.color+'">'+ch.name+'</div><div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.3">'+ch.desc+'</div><div style="font-size:10px;font-weight:700;color:'+ch.color+';background:'+ch.color+'18;border-radius:8px;padding:3px 8px;display:inline-block">'+ch.ability+'</div><div class="char-price '+(ch.price===0?"free":"")+'">'+( ch.price===0?"✨ 무료":getSalePrice(ch)<ch.price?"<s style='color:var(--muted);font-size:11px'>🪙"+ch.price+"</s> <span style='color:#4ade80;font-weight:900'>🪙"+getSalePrice(ch)+" 🔥30%↓</span>":"🪙 "+ch.price)+'</div>'+equippedGlow;div.onclick=function(){onCharTap(ch,owned,equipped);};grid.appendChild(div);});}
+  }var grid=document.getElementById("char-grid");grid.innerHTML="";CHARACTERS.forEach(function(ch){var owned=ST.ownedCharacters.indexOf(ch.id)>=0;var equipped=ST.equippedCharacter===ch.id;var div=document.createElement("div");div.className="char-card"+(owned?" owned":"")+(equipped?" equipped":"")+((!owned)?" locked":"");div.style.setProperty('--char-color',ch.color||'#818cf8');var rarityLabel={common:'일반',rare:'레어',epic:'에픽',legendary:'전설'}[ch.rarity||'common'];var rarityClass='rarity-'+(ch.rarity||'common');var statusBadge=equipped?'<div class="char-status eq-badge">✓ 장착중</div>':owned?'<div class="char-status owned-badge">보유</div>':'';var lockIcon=(!owned)?'<div class="char-status lock-badge" style="position:absolute;top:6px;left:8px;font-size:13px">🔒</div>':'';var equippedGlow=equipped?'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,'+ch.color+',transparent);border-radius:0 0 18px 18px"></div>':'';div.innerHTML=lockIcon+'<div class="char-rarity '+rarityClass+'">'+rarityLabel+'</div>'+statusBadge+'<div class="char-emoji" style="margin-top:18px">'+ch.emoji+'</div><div class="char-name" style="font-size:14px;font-weight:800;margin:4px 0 2px;color:'+ch.color+'">'+ch.name+'</div><div style="font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.3">'+ch.desc+'</div><div style="font-size:10px;font-weight:700;color:'+ch.color+';background:'+ch.color+'18;border-radius:8px;padding:3px 8px;display:inline-block">'+ch.ability+'</div><div class="char-price '+(ch.price===0?"free":"")+'">'+( ch.price===0?"✨ 무료":getSalePrice(ch)<ch.price?"<s style='color:var(--muted);font-size:11px'>🪙"+ch.price+"</s> <span style='color:#4ade80;font-weight:900'>🪙"+getSalePrice(ch)+" 🔥30%↓</span>":"🪙 "+ch.price)+'</div>'+equippedGlow;div.onmouseenter=function(){renderCharPreview(ch);};
+    div.ontouchstart=function(){renderCharPreview(ch);};
+    div.onclick=function(){onCharTap(ch,owned,equipped);};grid.appendChild(div);});}
 
 // ─── 캐릭터 구매 축하 연출 ───
 function celebrateCharPurchase(ch){
@@ -1585,7 +1614,52 @@ function celebrateCharPurchase(ch){
   }, 1800);
 }
 
-function onCharTap(c,owned,equipped){if(equipped)return;if(owned){ST.equippedCharacter=c.id;save();renderShop();document.getElementById("shop-char-preview").textContent=c.emoji;return;}if(ST.coins<c.price){anim(document.getElementById("s-coins").parentElement,"shake",400);showModal("💸","코인 부족!","필요: 🪙"+c.price+"\n보유: 🪙"+ST.coins,null,null,"확인",null);return;}showModal(c.emoji,"\""+c.name+"\" 구매?","🪙 "+c.price+"코인\n"+c.ability,function(){ST.coins-=getSalePrice(c);ST.ownedCharacters.push(c.id);ST.equippedCharacter=c.id;save();sndCoin();renderShop();updateHomeUI();celebrateCharPurchase(c);},null,"구매! 🎉","취소");}
+
+// ─── 캐릭터 스탯 게이지 ───
+function getCharStats(ch){
+  // [코인력, 점수력, 수비력, 특수력] 0-100
+  var stats={
+    basic:     {coin:20,score:20,shield:0,special:0},
+    rocket:    {coin:30,score:30,shield:0,special:60},
+    wizard:    {coin:30,score:40,shield:0,special:70},
+    fire:      {coin:30,score:75,shield:0,special:50},
+    star:      {coin:80,score:40,shield:0,special:40},
+    diamond:   {coin:30,score:40,shield:100,special:50},
+    dragon:    {coin:30,score:100,shield:0,special:80},
+    galaxy:    {coin:90,score:100,shield:50,special:100},
+  };
+  return stats[ch.id]||{coin:20,score:20,shield:0,special:0};
+}
+function renderCharPreview(ch){
+  var ep=document.getElementById('equipped-preview');
+  if(!ep)return;
+  ep.style.setProperty('--eq-color',ch.color||'#818cf8');
+  var epEmoji=document.getElementById('ep-emoji');
+  var epName=document.getElementById('ep-name');
+  var epAbility=document.getElementById('ep-ability');
+  var epStats=document.getElementById('ep-stats');
+  if(epEmoji){epEmoji.textContent=ch.emoji;epEmoji.style.filter='drop-shadow(0 0 20px '+(ch.color||'#818cf8')+')';}
+  if(epName){epName.textContent=ch.name;epName.style.color=ch.color||'#818cf8';}
+  if(epAbility)epAbility.textContent=ch.ability||ch.desc;
+  if(epStats){
+    var st=getCharStats(ch);
+    var rows=[
+      {label:'🪙 코인력',val:st.coin,color:'#fbbf24'},
+      {label:'⚡ 점수력',val:st.score,color:'#f97316'},
+      {label:'🛡️ 수비력',val:st.shield,color:'#67e8f9'},
+      {label:'✨ 특수력',val:st.special,color:ch.color||'#818cf8'},
+    ];
+    epStats.innerHTML=rows.map(function(r){
+      return '<div class="ep-stat-row">'
+        +'<div class="ep-stat-label">'+r.label+'</div>'
+        +'<div class="ep-stat-bar"><div class="ep-stat-fill" style="width:'+r.val+'%;background:'+r.color+'"></div></div>'
+        +'<div style="font-size:10px;font-weight:700;color:'+r.color+';width:28px;text-align:right">'+r.val+'</div>'
+        +'</div>';
+    }).join('');
+  }
+}
+
+function onCharTap(c,owned,equipped){if(equipped)return;if(owned){ST.equippedCharacter=c.id;save();renderShop();var _prevEl=document.getElementById("shop-char-preview");if(_prevEl)_prevEl.textContent=c.emoji;return;}if(ST.coins<c.price){anim(document.getElementById("s-coins").parentElement,"shake",400);showModal("💸","코인 부족!","필요: 🪙"+c.price+"\n보유: 🪙"+ST.coins,null,null,"확인",null);return;}showModal(c.emoji,"\""+c.name+"\" 구매?","🪙 "+c.price+"코인\n"+c.ability,function(){ST.coins-=getSalePrice(c);ST.ownedCharacters.push(c.id);ST.equippedCharacter=c.id;save();sndCoin();renderShop();updateHomeUI();celebrateCharPurchase(c);},null,"구매! 🎉","취소");}
 
 function renderItemShop(){
   var grid=document.getElementById("item-shop-grid");
