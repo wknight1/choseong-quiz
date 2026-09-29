@@ -1511,7 +1511,15 @@ var CHARACTERS=[
    ability:"🐉 5콤보~ 점수 ×2.0"},
   {id:"galaxy",name:"갤럭시신",emoji:"🌌",price:2000,rarity:"legendary",color:"#f472b6",
    desc:"힌트+2·코인+3·콤보×2 올인원!",effect:"ultimate",effectType:"ultimate",effectValue:{hint:2,coin:3,multiplier:2.0},
-   ability:"👑 힌트+2 / 코인+3 / 점수×2"}
+   ability:"👑 힌트+2 / 코인+3 / 점수×2"},
+
+  {id:"phoenix",name:"불사조",emoji:"🦅",price:1200,rarity:"epic",color:"#f97316",
+   desc:"죽음에서 되살아나는 전설의 새!",effect:"auto_revive",effectType:"shield",effectValue:2,
+   ability:"🛡 오답 2회 자동 차단 (방어막 2겹)"},
+  {id:"dragon",name:"황금드래곤",emoji:"🐲",price:2500,rarity:"legendary",color:"#fbbf24",
+   desc:"황금 비늘의 드래곤! 모든 능력치 최강!",effect:"ultimate",effectType:"ultimate",
+   effectValue:{multiplier:2,coin:5,shield:1},
+   ability:"👑 점수 ×2 + 코인 +5/문제 + 방어막 1겹"},
 ];
 
 var ACHIEVEMENTS=[
@@ -1623,9 +1631,9 @@ var LEVELS=[
 ];
 
 var DAILY_BONUS=[10,15,25,35,50,75,120,
-  {name:"세인트루시아",flag:"🇱🇨",hint:"수도 캐스트리스. 카리브해 피통 쌍봉 유네스코 세계유산.",continent:"americas"},
-  {name:"세인트키츠네비스",flag:"🇰🇳",hint:"수도 바스테르. 카리브해 최소 국가 중 하나. 설탕 산업으로 유명.",continent:"americas"},
-  {name:"도미니카",flag:"🇩🇲",hint:"수도 로조. 카리브해 화산섬. 세계 두 번째로 큰 담수호 보유.",continent:"americas"}
+  {name:"세인트루시아",flag:"🇱🇨",hint:"수도 캐스트리스. 카리브해 피통 쌍봉 유네스코 세계유산.",capital:"캐스트리스",continent:"americas"},
+  {name:"세인트키츠네비스",flag:"🇰🇳",hint:"수도 바스테르. 카리브해 최소 국가 중 하나. 설탕 산업으로 유명.",capital:"바스테르",continent:"americas"},
+  {name:"도미니카",flag:"🇩🇲",hint:"수도 로조. 카리브해 화산섬. 세계 두 번째로 큰 담수호 보유.",capital:"로조",continent:"americas"}
 ,
   {name:"키르기스스탄",flag:"🇰🇬",hint:"수도 비슈케크, 텐산 산맥과 이식쿨 호수. 중앙아시아 유목 문화의 나라",capital:"비슈케크",continent:"asia"},
   {name:"룩셈부르크",flag:"🇱🇺",hint:"수도 룩셈부르크, 서유럽 내륙 소국. 세계 최고 수준의 1인당 GDP 보유",capital:"룩셈부르크",continent:"europe"},
