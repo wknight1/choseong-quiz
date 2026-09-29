@@ -2273,6 +2273,7 @@ function endGame(){
   var isPerfect=correct===gQuestions.length;if(isPerfect)ST.perfectGames++;
   var pct=correct/gQuestions.length;
   var emoji="😢",title="아쉬워요!",sub="다시 한번 도전해보세요!";
+  var _eq2=getEquipped();var charReact=(_eq2&&_eq2.emoji)?(pct>=.9?_eq2.emoji+"👑":pct>=.7?_eq2.emoji+"🎉":pct>=.5?_eq2.emoji+"👍":_eq2.emoji+"💪"):"";
   if(pct>=.9){emoji="🏆";title="완벽해요!";sub="나라 박사 인증! 대단해요 🌍";}
   else if(pct>=.7){emoji="🥳";title="잘하셨어요!";sub="훌륭한 실력이에요!";}
   else if(pct>=.5){emoji="😊";title="절반 이상!";sub="계속 도전하세요!";}
@@ -2306,7 +2307,7 @@ function endGame(){
   // Session bonus: 2nd+ game gets +10% coins
   if(ST.gamesPlayed>=2&&gCoins>0){var bonus=Math.floor(gCoins*0.1);if(bonus>0){gCoins+=bonus;ST.coins+=bonus;}}
   save();checkLevelUp(prevScore,ST.totalScore);checkAch();showNextSuggestion();
-  document.getElementById("r-emoji").textContent=emoji;
+  document.getElementById("r-emoji").textContent=emoji;var _rcb=document.getElementById("r-char-react");if(_rcb&&charReact)_rcb.innerHTML="<span style='font-size:26px'>"+charReact+"</span>";
   document.getElementById("r-title").textContent=title;
   document.getElementById("r-score").textContent=gScore;
   document.getElementById("r-label").textContent=correct+"/"+gQuestions.length+" 정답";
